@@ -5,3 +5,6 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.7")
 
 // web plugins
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.0.0")
+
+// code coverage
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.1")
