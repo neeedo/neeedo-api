@@ -12,3 +12,4 @@ deploy:
   provider: heroku
   api_key:
     secure: SlhotCW8l/Q7bvTZ6ubR2N6OfRaw4lPnL9cshyER4CnWUY2s7ZlZopEkVUZv5GC9RBdq16iOUC9JXLa+1lZieJ30RVN/EtwH/jHUtUadRB2yBAY27iVRyL1G4QzsHSkXZmNSP+CtACO9cLjR/MY1CugwOddijyUQ0aYqTdDsPmA=
+  app: dry-depths-2035
