@@ -3,8 +3,8 @@ package model
 import common.domain._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.mvc.PathBindable
 
-case class OfferId(value: String)
 case class Offer(
   id: OfferId,
   uid: UserId,
@@ -40,5 +40,19 @@ object Offer {
       ),
       "price" -> o.price.value
     )
+  }
+}
+
+case class OfferId(value: String)
+object OfferId {
+  implicit def pathBinder: PathBindable[OfferId] = new PathBindable[OfferId] {
+    override def bind(key: String, value: String): Either[String, OfferId] = {
+      OfferId.apply(value) match {
+        case x: OfferId => Right(x)
+        //TODO id validation here!
+        case _	=> Left("Bla")
+      }
+    }
+    override def unbind(key: String, offerId: OfferId): String = offerId.value
   }
 }

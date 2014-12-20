@@ -3,8 +3,8 @@ package model
 import common.domain._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.mvc.PathBindable
 
-case class DemandId(value: String)
 case class Demand(
 	id: DemandId,
 	uid: UserId,
@@ -45,5 +45,19 @@ object Demand {
 			  "max" -> d.priceMax.value
 			)
 		)
+	}
+}
+
+case class DemandId(value: String)
+object DemandId {
+	implicit def pathBinder: PathBindable[DemandId] = new PathBindable[DemandId] {
+		override def bind(key: String, value: String): Either[String, DemandId] = {
+			DemandId.apply(value) match {
+				case x: DemandId => Right(x)
+				//TODO id validation here!
+				case _	=> Left("Bla")
+			}
+		}
+		override def unbind(key: String, demandId: DemandId): String = demandId.value
 	}
 }

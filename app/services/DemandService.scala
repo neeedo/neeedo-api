@@ -6,6 +6,7 @@ import model.{Demand, DemandId}
 import org.elasticsearch.index.query.QueryBuilders
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.PathBindable
 
 import scala.concurrent.Future
 
@@ -22,6 +23,8 @@ class DemandService(elasticsearch: ElasticsearchClient) {
   def getDemandsFromEs = {
     elasticsearch.search(demandIndex, demandType, QueryBuilders.matchAllQuery()).map(result => result.getHits.getHits)
   }
+
+  def getDemandById(id: DemandId): Option[Demand] = ???
 
   def addDemand(demand: Demand): Future[AddDemandResult] = {
     for {
