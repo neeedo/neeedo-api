@@ -3,23 +3,23 @@
 # ~~~~
 
 # Home page
-GET     /                           @controllers.Static.documentation()
+GET     /                           @controllers.Documentation.showDocumentation()
 
-# Demand
-GET     /demand                     @controllers.Demand.listDemands()
-GET     /demand/:id                 @controllers.Demand.getDemand(id: model.DemandId)
-POST    /demand                     @controllers.Demand.createDemand()
-PUT     /demand/:id                 @controllers.Demand.updateDemand(id: model.DemandId)
-DELETE  /demand/:id                 @controllers.Demand.deleteDemand(id: model.DemandId)
-OPTIONS /demand                     @controllers.Static.documentation()
+# Demands
+GET     /demands                     @controllers.Demands.listDemands()
+GET     /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
+POST    /demands                     @controllers.Demands.createDemand()
+PUT     /demands/:id                 @controllers.Demands.updateDemand(id: model.DemandId)
+DELETE  /demands/:id                 @controllers.Demands.deleteDemand(id: model.DemandId)
+OPTIONS /demands                     @controllers.Documentation.showDocumentation()
 
-# Offer
-GET     /offer                     @controllers.Offer.listOffers()
-GET     /offer/:id                 @controllers.Offer.getOffer(id: model.OfferId)
-POST    /offer                     @controllers.Offer.createOffer()
-PUT     /offer/:id                 @controllers.Offer.updateOffer(id: model.OfferId)
-DELETE  /offer/:id                 @controllers.Offer.deleteOffer(id: model.OfferId)
-OPTIONS /offer                     @controllers.Static.documentation()
+# Offers
+GET     /offers                     @controllers.Offers.listOffers()
+GET     /offers/:id                 @controllers.Offers.getOffer(id: model.OfferId)
+POST    /offers                     @controllers.Offers.createOffer()
+PUT     /offers/:id                 @controllers.Offers.updateOffer(id: model.OfferId)
+DELETE  /offers/:id                 @controllers.Offers.deleteOffer(id: model.OfferId)
+OPTIONS /offers                     @controllers.Documentation.showDocumentation()
 
 
 # Map static resources from the /public folder to the /assets URL path

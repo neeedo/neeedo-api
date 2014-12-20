@@ -4,7 +4,7 @@ import model.DemandId
 import play.api.mvc.Controller
 import services.DemandService
 
-class Demand(demandService: DemandService) extends Controller {
+class Demands(demandService: DemandService) extends Controller {
   def listDemands = TODO
   def getDemand(id: DemandId) = TODO
   def createDemand = TODO
