@@ -3,23 +3,23 @@
 # ~~~~
 
 # Home page
-GET     /                           @controllers.StaticController.documentation()
+GET     /                           @controllers.Static.documentation()
 
 # Demand
-GET     /demand                     @controllers.DemandController.listDemands()
-GET     /demand/:id                 @controllers.DemandController.getDemand(id: model.DemandId)
-POST    /demand/:id                 @controllers.DemandController.createDemand(id: model.DemandId)
-PUT     /demand/:id                 @controllers.DemandController.updateDemand(id: model.DemandId)
-DELETE  /demand/:id                 @controllers.DemandController.deleteDemand(id: model.DemandId)
-OPTIONS /demand                     @controllers.StaticController.documentation()
+GET     /demand                     @controllers.Demand.listDemands()
+GET     /demand/:id                 @controllers.Demand.getDemand(id: model.DemandId)
+POST    /demand                     @controllers.Demand.createDemand()
+PUT     /demand/:id                 @controllers.Demand.updateDemand(id: model.DemandId)
+DELETE  /demand/:id                 @controllers.Demand.deleteDemand(id: model.DemandId)
+OPTIONS /demand                     @controllers.Static.documentation()
 
 # Offer
-GET     /offer                     @controllers.OfferController.listOffers()
-GET     /offer/:id                 @controllers.OfferController.getOffer(id: model.OfferId)
-POST    /offer/:id                 @controllers.OfferController.createOffer(id: model.OfferId)
-PUT     /offer/:id                 @controllers.OfferController.updateOffer(id: model.OfferId)
-DELETE  /offer/:id                 @controllers.OfferController.deleteOffer(id: model.OfferId)
-OPTIONS /offer                     @controllers.StaticController.documentation()
+GET     /offer                     @controllers.Offer.listOffers()
+GET     /offer/:id                 @controllers.Offer.getOffer(id: model.OfferId)
+POST    /offer                     @controllers.Offer.createOffer()
+PUT     /offer/:id                 @controllers.Offer.updateOffer(id: model.OfferId)
+DELETE  /offer/:id                 @controllers.Offer.deleteOffer(id: model.OfferId)
+OPTIONS /offer                     @controllers.Static.documentation()
 
 
 # Map static resources from the /public folder to the /assets URL path
