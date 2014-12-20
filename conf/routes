@@ -3,7 +3,24 @@
 # ~~~~
 
 # Home page
-# GET     /                           controllers.Application.index
+GET     /                           @controllers.Documentation.showDocumentation()
+
+# Demands
+GET     /demands                     @controllers.Demands.listDemands()
+GET     /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
+POST    /demands                     @controllers.Demands.createDemand()
+PUT     /demands/:id                 @controllers.Demands.updateDemand(id: model.DemandId)
+DELETE  /demands/:id                 @controllers.Demands.deleteDemand(id: model.DemandId)
+OPTIONS /demands                     @controllers.Documentation.showDocumentation()
+
+# Offers
+GET     /offers                     @controllers.Offers.listOffers()
+GET     /offers/:id                 @controllers.Offers.getOffer(id: model.OfferId)
+POST    /offers                     @controllers.Offers.createOffer()
+PUT     /offers/:id                 @controllers.Offers.updateOffer(id: model.OfferId)
+DELETE  /offers/:id                 @controllers.Offers.deleteOffer(id: model.OfferId)
+OPTIONS /offers                     @controllers.Documentation.showDocumentation()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
