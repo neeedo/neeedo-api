@@ -19,8 +19,6 @@ class Demands(demandService: DemandService) extends Controller {
     Ok(Json.obj("demands" -> Json.toJson(demands)))
   }
 
-  def getDemand(id: DemandId) = TODO
-
   def createDemand = Action {
     implicit request =>
       request.body.asJson match {
@@ -33,6 +31,17 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
+  def fetchDemand(id: DemandId) = id.value != "10"
+
+  def getDemand(id: DemandId) = Action {
+    if ( !fetchDemand(id) ) NotFound
+    else {
+      val demand = Demand(id, UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+
+      Ok(Json.obj("demand" -> Json.toJson(demand)))
+    }
+  }
+  
   def updateDemand(id: DemandId) = TODO
   def deleteDemand(id: DemandId) = TODO
 }
