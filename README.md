@@ -117,7 +117,7 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
     
 404 - Not Found
 
-## Demand erstellen
+## Create Demand
 ### Ressource:
 POST `http://dry-depths-2035.herokuapp.com/demands`
 
