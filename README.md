@@ -92,3 +92,50 @@ The request body must contain a valid demand json object
 ###Example:
 
     curl -XPOST -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
+
+## Demand aktualisieren
+###Ressource:
+PUT `http://dry-depths-2035.herokuapp.com/demands/{id}`
+
+###URL - Parameter:
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| id | Mandatory | numeric |
+
+
+###Body:
+The request body must contain a valid demand json object
+
+    {
+        "id":"1",
+        "userId":"1",
+        "tags":"socken bekleidung wolle",
+        "location":{
+            "lat":13.534212,
+            "lon":52.468562
+        },
+        "distance":30,
+        "price":{
+            "min":25.0,
+            "max":77.0
+        }
+    }
+	
+*Note: The field ID will be removed later, but is actually required for our intern JSON mapping.*
+*Also note: Later, we will change the API to only update the given fields, we don't expect the complete entity.*
+
+###Response:
+200 Ok
+
+400 Bad Request - Missing body
+
+400 Bad Request - Cannot parse json
+
+404 Not Found - Entity was not found
+
+###Example:
+
+*Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
+
+curl -XPUT -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1 -v
