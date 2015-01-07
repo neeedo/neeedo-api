@@ -6,6 +6,22 @@
 
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
 
+- [Demands](#)
+	- [Alle Demands abrufen](#)
+		- [Ressource:](#)
+		- [Response:](#)
+	- [Demand erstellen](#)
+		- [Ressource:](#)
+		- [Body:](#)
+		- [Response:](#)
+		- [Example:](#)
+	- [Demand aktualisieren](#)
+		- [Ressource:](#)
+		- [URL - Parameter:](#)
+		- [Body:](#)
+		- [Response:](#)
+		- [Example:](#)
+
 # Demands
 
 ## Alle Demands abrufen
