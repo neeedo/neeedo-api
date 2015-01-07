@@ -6,9 +6,61 @@
 
 # Demands
 
+## Alle Demands abrufen
+###Ressource:
+GET `http://dry-depths-2035.herokuapp.com/demands`
+
+###Response:
+    {  
+       "demands":[  
+          {  
+             "id":"1",
+             "userId":"1",
+             "tags":"socken bekleidung wolle",
+             "location":{  
+                "lat":13.534212,
+                "lon":52.468562
+             },
+             "distance":30,
+             "price":{  
+                "min":25.0,
+                "max":77.0
+             }
+          },
+          {  
+             "id":"2",
+             "userId":"2",
+             "tags":"auto lack blau",
+             "location":{  
+                "lat":13.534212,
+                "lon":52.468562
+             },
+             "distance":40,
+             "price":{  
+                "min":150.0,
+                "max":300.0
+             }
+          },
+          {  
+             "id":"3",
+             "userId":"3",
+             "tags":"notebook kein apple scheiss",
+             "location":{  
+                "lat":10.0,
+                "lon":20.0
+             },
+             "distance":25,
+             "price":{  
+                "min":500.0,
+                "max":1000.0
+             }
+          }
+       ]
+    }
+
 ## Demand erstellen
 ###Ressource:
-`http://dry-depths-2035.herokuapp.com/demands/{id}`
+POST `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
 ###URL - Parameter:
 
