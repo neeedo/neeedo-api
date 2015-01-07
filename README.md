@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/HTW-Projekt-2014-Commercetools/api.svg?branch=master)](https://travis-ci.org/HTW-Projekt-2014-Commercetools/api)
 
+[![Dependency Status](https://www.versioneye.com/java/io.sphere.sdk.jvm:models/1.0.0-M7/badge.svg)](https://www.versioneye.com/java/io.sphere.sdk.jvm:models/1.0.0-M7)
+
 [![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/coverage.svg?branch=master)](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api?branch=master)
 
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
