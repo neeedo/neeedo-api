@@ -11,6 +11,7 @@ case class Demand(
 	tags: String,
 	location: Location,
 	distance: Distance,
+	//TODO pricerange case class?
 	priceMin: Price,
 	priceMax: Price)
 
