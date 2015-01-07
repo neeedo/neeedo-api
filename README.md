@@ -7,37 +7,37 @@
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
 
 - [Demands](#demands)
-	- [Alle Demands abrufen](#alle-demands-abrufen)
+	- [Query all Demands](#query-all-demands)
 		- [Ressource:](#ressource)
 		- [Response:](#response)
-	- [Eine Demand abrufen](#eine-demand-abrufen)
+	- [Query single Demand](#query-single-demand)
 		- [Ressource:](#ressource-1)
-		- [URL - Parameter:](#url---parameter)
+		- [URL Parameters:](#url-parameters)
 		- [Response](#response-1)
-	- [Demand erstellen](#demand-erstellen)
+	- [Create Demand](#create-demand)
 		- [Ressource:](#ressource-2)
 		- [Body:](#body)
 		- [Response:](#response-2)
 		- [Example:](#example)
-	- [Demand aktualisieren](#demand-aktualisieren)
+	- [Update Demand](#update-demand)
 		- [Ressource:](#ressource-3)
-		- [URL - Parameter:](#url---parameter-1)
+		- [URL Parameters:](#url-parameters-1)
 		- [Body:](#body-1)
 		- [Response:](#response-3)
 		- [Example:](#example-1)
-	- [Demand loeschen](#demand-loeschen)
+	- [Delete Demand](#delete-demand)
 		- [Ressource:](#ressource-4)
-		- [URL - Parameter:](#url---parameter-2)
+		- [URL Parameters:](#url-parameters-2)
 		- [Response:](#response-4)
 		- [Example:](#example-2)
 
 # Demands
 
-## Alle Demands abrufen
-###Ressource:
+## Query all Demands
+### Ressource:
 GET `http://dry-depths-2035.herokuapp.com/demands`
 
-###Response:
+### Response:
     {  
        "demands":[  
           {  
@@ -85,11 +85,11 @@ GET `http://dry-depths-2035.herokuapp.com/demands`
        ]
     }
 
-## Eine Demand abrufen
-###Ressource:
+## Query single Demand
+### Ressource:
 GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
-###URL - Parameter:
+### URL Parameters:
 
 | Name | Mandatory | Value Type |
 | ---- | --------- | ---------- |
@@ -118,10 +118,10 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 404 - Not Found
 
 ## Demand erstellen
-###Ressource:
+### Ressource:
 POST `http://dry-depths-2035.herokuapp.com/demands`
 
-###Body:
+### Body:
 The request body must contain a valid demand json object
 
     {
@@ -139,30 +139,30 @@ The request body must contain a valid demand json object
         }
     }
 
-###Response:
+### Response:
 200 Ok
 
 400 Bad Request - Empty Body
 
 400 Bad Request - Invalid Json
 
-###Example:
+### Example:
 *Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
 
     curl -XPOST -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
 
-## Demand aktualisieren
-###Ressource:
+## Update Demand
+### Ressource:
 PUT `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
-###URL - Parameter:
+### URL Parameters:
 
 | Name | Mandatory | Value Type |
 | ---- | --------- | ---------- |
 | id | Mandatory | numeric |
 
 
-###Body:
+### Body:
 The request body must contain a valid demand json object
 
     {
@@ -183,7 +183,7 @@ The request body must contain a valid demand json object
 *Note: The field ID will be removed later, but is actually required for our intern JSON mapping.*
 *Also note: Later, we will change the API to only update the given fields, we don't expect the complete entity.*
 
-###Response:
+### Response:
 200 Ok
 
 400 Bad Request - Missing body
@@ -192,30 +192,30 @@ The request body must contain a valid demand json object
 
 404 Not Found - Entity was not found
 
-###Example:
+### Example:
 
 *Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
 
     curl -XPUT -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1 -v 
 
-## Demand loeschen
-###Ressource:
+## Delete Demand
+### Ressource:
 DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
-###URL - Parameter:
+### URL Parameters:
 
 | Name | Mandatory | Value Type |
 | ---- | --------- | ---------- |
 | id | Mandatory | numeric |
 
 
-###Response:
+### Response:
 
 200 Ok
 
 404 Not Found - Entity was not found
 
-###Example:
+### Example:
 
 *Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
 
