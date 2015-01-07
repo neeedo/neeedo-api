@@ -25,7 +25,7 @@
 		- [Body:](#body-1)
 		- [Response:](#response-3)
 		- [Example:](#example-1)
-	- [Demand löschen](#demand-l%C3%B6schen)
+	- [Demand loeschen](#demand-loeschen)
 		- [Ressource:](#ressource-4)
 		- [URL - Parameter:](#url---parameter-2)
 		- [Response:](#response-4)
@@ -198,7 +198,7 @@ The request body must contain a valid demand json object
 
     curl -XPUT -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1 -v 
 
-## Demand löschen
+## Demand loeschen
 ###Ressource:
 DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
