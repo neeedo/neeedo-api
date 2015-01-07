@@ -25,21 +25,41 @@ class Demands(demandService: DemandService) extends Controller {
       case Some(js) =>
         js.asOpt[Demand] match {
           case Some(demand) => Ok
-          case None => BadRequest("Cannot parse json")
+          case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
-      case None => BadRequest("Missing body")
+      case None => BadRequest(Json.obj("error" -> "Missing body"))
     }
   }
 
-  def getDemand(id: DemandId) = Action {
-    def fetchDemand(id: DemandId): Option[Demand] = if (id.value == "1") Some(demand1) else None
+  def fetchDemand(id: DemandId): Option[Demand] = if (id.value == "1") Some(demand1) else None
 
+  def getDemand(id: DemandId) = Action {
     fetchDemand(id) match {
       case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
       case None => NotFound
     }
   }
 
-  def updateDemand(id: DemandId) = TODO
-  def deleteDemand(id: DemandId) = TODO
+  def updateDemand(id: DemandId) = Action {
+    implicit request =>
+      fetchDemand(id) match {
+      case Some(demand) =>
+        request.body.asJson match {
+          case Some(js) =>
+            js.asOpt[Demand] match {
+              case Some(x) => Ok
+              case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
+            }
+          case None => BadRequest(Json.obj("error" -> "Missing body"))
+        }
+      case None => NotFound
+    }
+  }
+
+  def deleteDemand(id: DemandId) = Action {
+    fetchDemand(id) match {
+      case Some(demand) => Ok
+      case None => NotFound
+    }
+  }
 }
