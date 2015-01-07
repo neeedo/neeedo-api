@@ -36,7 +36,7 @@ class Demands(demandService: DemandService) extends Controller {
   def getDemand(id: DemandId) = Action {
     fetchDemand(id) match {
       case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
-      case None => NotFound
+      case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
 
@@ -52,14 +52,14 @@ class Demands(demandService: DemandService) extends Controller {
             }
           case None => BadRequest(Json.obj("error" -> "Missing body"))
         }
-      case None => NotFound
+      case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
 
   def deleteDemand(id: DemandId) = Action {
     fetchDemand(id) match {
       case Some(demand) => Ok
-      case None => NotFound
+      case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
 }
