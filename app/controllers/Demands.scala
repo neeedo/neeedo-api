@@ -14,14 +14,25 @@ class Demands(demandService: DemandService) extends Controller {
     val demand2 = Demand(DemandId("2"), UserId("2"), "auto lack blau", Location(Longitude(52.468562), Latitude(13.534212)), Distance(40), Price(150.0), Price(300.0))
     val demand3 = Demand(DemandId("3"), UserId("3"), "notebook kein apple scheiss", Location(Longitude(20.0), Latitude(10.0)), Distance(25), Price(500.0), Price(1000.0))
 
-
     val demands = demand1 :: demand2 :: demand3 :: Nil
 
     Ok(Json.obj("demands" -> Json.toJson(demands)))
   }
 
   def getDemand(id: DemandId) = TODO
-  def createDemand = TODO
+
+  def createDemand = Action {
+    implicit request =>
+      request.body.asJson match {
+      case Some(js) =>
+        js.asOpt[Demand] match {
+          case Some(demand) => Ok
+          case None => BadRequest("Cannot parse json")
+        }
+      case None => BadRequest("Missing body")
+    }
+  }
+
   def updateDemand(id: DemandId) = TODO
   def deleteDemand(id: DemandId) = TODO
 }
