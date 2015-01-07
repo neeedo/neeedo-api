@@ -60,14 +60,7 @@ GET `http://dry-depths-2035.herokuapp.com/demands`
 
 ## Demand erstellen
 ###Ressource:
-POST `http://dry-depths-2035.herokuapp.com/demands/{id}`
-
-###URL - Parameter:
-
-| Name | Mandatory | Value Type |
-| ---- | --------- | ---------- |
-| id | Mandatory | numeric |
-
+POST `http://dry-depths-2035.herokuapp.com/demands`
 
 ###Body:
 The request body must contain a valid demand json object
