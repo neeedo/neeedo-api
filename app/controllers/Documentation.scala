@@ -1,8 +1,10 @@
 package controllers
 
-import play.api.mvc.Controller
+import play.api.mvc._
 
 class Documentation extends Controller {
 
-  def showDocumentation = TODO
+  def showDocumentation = Action {
+    Ok(views.html.documentation())
+  }
 }
