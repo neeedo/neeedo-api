@@ -6,22 +6,6 @@
 
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
 
-- [Demands](#)
-	- [Alle Demands abrufen](#)
-		- [Ressource:](#)
-		- [Response:](#)
-	- [Demand erstellen](#)
-		- [Ressource:](#)
-		- [Body:](#)
-		- [Response:](#)
-		- [Example:](#)
-	- [Demand aktualisieren](#)
-		- [Ressource:](#)
-		- [URL - Parameter:](#)
-		- [Body:](#)
-		- [Response:](#)
-		- [Example:](#)
-
 # Demands
 
 ## Alle Demands abrufen
@@ -75,6 +59,38 @@ GET `http://dry-depths-2035.herokuapp.com/demands`
           }
        ]
     }
+
+## Eine Demand abrufen
+###Ressource:
+GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
+
+###URL - Parameter:
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| id | Mandatory | numeric |
+
+###Response
+200 Ok
+    
+    {
+        "demand":{
+            "id":"1",
+            "userId":"1",
+            "tags":"socken bekleidung wolle",
+            "location":{
+                "lat":13.534212,
+                "lon":52.468562
+            },
+            "distance":30,
+            "price":{
+                "min":25.0,
+                "max":77.0
+            }
+        }
+    }
+    
+404 - Not Found
 
 ## Demand erstellen
 ###Ressource:
