@@ -5,8 +5,9 @@ import model.{Demand, DemandId}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.DemandService
-
 import scala.collection.immutable.Nil
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 class Demands(demandService: DemandService) extends Controller {
   val demand1 = Demand(DemandId("1"), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
@@ -61,5 +62,9 @@ class Demands(demandService: DemandService) extends Controller {
       case Some(demand) => Ok
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
+  }
+
+  def test = Action.async {
+    demandService.writeDemandToSphere(demand1).map(x => Ok(x))
   }
 }

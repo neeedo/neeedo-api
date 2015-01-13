@@ -2,15 +2,18 @@ package services
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
+import common.sphere.SphereClient
+import io.sphere.sdk.products.commands.ProductCreateCommand
+import io.sphere.sdk.producttypes.commands.ProductTypeCreateCommand
+import model.sphere.{DemandProductDraftSupplier, CardProductTypeDraft}
 import model.{Demand, DemandId}
 import org.elasticsearch.index.query.QueryBuilders
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.PathBindable
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-class DemandService(elasticsearch: ElasticsearchClient) {
+class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient) {
   val demandIndex = IndexName("demands")
   val demandType = TypeName("demands")
 
@@ -39,5 +42,17 @@ class DemandService(elasticsearch: ElasticsearchClient) {
     ).recover {
       case _ => DemandCouldNotBeSaved
     }
+  }
+
+  def writeDemandToSphere(demand: Demand): Future[String] = {
+    val productTypeCommand: ProductTypeCreateCommand = ProductTypeCreateCommand.of(new CardProductTypeDraft().get())
+
+    for {
+      prodType <- sphereClient.execute(productTypeCommand)
+      product <- {
+        val productTemplate = new DemandProductDraftSupplier(prodType, "test123").get()
+        sphereClient.execute(ProductCreateCommand.of(productTemplate))
+      }
+    } yield "Bla"
   }
 }
