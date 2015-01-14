@@ -12,15 +12,16 @@ import scala.collection.JavaConversions._
 
 
 object CardType {
-    val demand = PlainEnumValue.of("Demand", "Demand")
+  val demand = PlainEnumValue.of("Demand", "Demand")
+  val offer = PlainEnumValue.of("Offer", "Offer")
 
-    val values = PlainEnumValue.of("Demand", "Demand") :: PlainEnumValue.of("Offer", "Offer") :: Nil
-    val attribute = AttributeAccess.ofPlainEnumValue().getterSetter("cardType");
+  val values = demand :: offer :: Nil
+  val attribute = AttributeAccess.ofPlainEnumValue().getterSetter("cardType")
 }
 
 class CardProductTypeDraft extends Supplier[ProductTypeDraft] {
 
-  override def get = ProductTypeDraft.of("card", "desc", createAttributes())
+  override def get = ProductTypeDraft.of("card1", "desc", createAttributes())
 
   def createAttributes(): java.util.List[AttributeDefinition] = createCardTypeAttribute :: Nil
 
@@ -31,13 +32,13 @@ class CardProductTypeDraft extends Supplier[ProductTypeDraft] {
   }
 }
 
-class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String) extends Supplier[ProductDraft] {
-  val productType = productTypeRef.toReference
+class DemandProductDraftSupplier(productType: Referenceable[ProductType], name: String) extends Supplier[ProductDraft] {
   override def get(): ProductDraft = {
     val masterVariant: ProductVariantDraft = ProductVariantDraftBuilder.of()
-    .plusAttribute(CardType.attribute.valueOf(CardType.demand))
-    .build()
+      .plusAttribute(CardType.attribute.valueOf(CardType.demand))
+      .build()
     val slug: LocalizedStrings = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
+
     ProductDraftBuilder.of(productType, LocalizedStrings.of(Locale.ENGLISH, name), slug, masterVariant).build()
   }
 }
