@@ -6,6 +6,27 @@
 
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
 
+How to run (Windows)
+----------
+
+Please use the GIT Bash. It appeared to work better than using the Windows Bash.
+
+```bash
+git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
+cd api
+activator run
+```
+
+How to run (Linux)
+----------
+
+```bash
+git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
+cd api
+./sbt run
+```
+
+
 - [Demands](#demands)
 	- [Query all Demands](#query-all-demands)
 		- [Ressource:](#ressource)
