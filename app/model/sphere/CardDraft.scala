@@ -8,31 +8,33 @@ import io.sphere.sdk.attributes.{AttributeAccess, EnumAttributeDefinitionBuilder
 import io.sphere.sdk.models.{Referenceable, PlainEnumValue, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraft, ProductVariantDraftBuilder, ProductDraftBuilder, ProductDraft}
 import io.sphere.sdk.producttypes.{ProductType, ProductTypeDraft}
+import io.sphere.sdk.attributes.BooleanAttributeDefinitionBuilder
 import scala.collection.JavaConversions._
 
-
 object CardType {
-  val demand = PlainEnumValue.of("Demand", "Demand")
-  val offer = PlainEnumValue.of("Offer", "Offer")
+    val demand = PlainEnumValue.of("Demand", "Demand")
 
-  val values = demand :: offer :: Nil
-  val attribute = AttributeAccess.ofPlainEnumValue().getterSetter("cardType")
+    val values = PlainEnumValue.of("Demand", "Demand") :: PlainEnumValue.of("Offer", "Offer") :: Nil
+    val attribute = AttributeAccess.ofPlainEnumValue().getterSetter("cardType");
 }
 
-class CardProductTypeDraft extends Supplier[ProductTypeDraft] {
+class DemandProductTypeDraftSupplier extends Supplier[ProductTypeDraft] {
 
-  override def get = ProductTypeDraft.of("card1", "desc", createAttributes())
+  override def get = ProductTypeDraft.of("demand", "desc", createAttributes())
 
-  def createAttributes(): java.util.List[AttributeDefinition] = createCardTypeAttribute :: Nil
+  def createAttributes(): java.util.List[AttributeDefinition] = createSampleAttribute :: Nil
 
-  def createCardTypeAttribute = {
-    val cardTypeAttributeLabel: LocalizedStrings = LocalizedStrings.of(Locale.ENGLISH, "cardType").plus(Locale.GERMAN, "Kartentyp")
-
-    EnumAttributeDefinitionBuilder.of("cardType", cardTypeAttributeLabel, CardType.values).required(true).build()
-  }
+  def createSampleAttribute = BooleanAttributeDefinitionBuilder
+    .of("sample_name", LocalizedStrings.of(Locale.ENGLISH, "bla"))
+    .build()
 }
 
-class DemandProductDraftSupplier(productType: Referenceable[ProductType], name: String) extends Supplier[ProductDraft] {
+//class DemandProductDraftSupplier(productType: Referenceable[ProductType], name: String) extends Supplier[ProductDraft] {}
+
+class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String)
+  extends Supplier[ProductDraft] {
+  val productType = productTypeRef.toReference
+
   override def get(): ProductDraft = {
     val masterVariant: ProductVariantDraft = ProductVariantDraftBuilder.of()
       .plusAttribute(CardType.attribute.valueOf(CardType.demand))
@@ -42,3 +44,28 @@ class DemandProductDraftSupplier(productType: Referenceable[ProductType], name: 
     ProductDraftBuilder.of(productType, LocalizedStrings.of(Locale.ENGLISH, name), slug, masterVariant).build()
   }
 }
+
+
+//class CardProductTypeDraftSupplier extends Supplier[ProductTypeDraft] {
+//
+//  override def get = ProductTypeDraft.of("card", "desc", createAttributes())
+//
+//  def createAttributes(): java.util.List[AttributeDefinition] = createCardTypeAttribute :: Nil
+//
+//  def createCardTypeAttribute = {
+//    val cardTypeAttributeLabel: LocalizedStrings = LocalizedStrings.of(Locale.ENGLISH, "cardType").plus(Locale.GERMAN, "Kartentyp")
+//
+//    EnumAttributeDefinitionBuilder.of("cardType", cardTypeAttributeLabel, CardType.values).required(true).build()
+//  }
+//}
+
+//class OfferProductTypeDraftSupplier extends Supplier[ProductTypeDraft] {
+//
+//  override def get = ProductTypeDraft.of("offer", "desc", createAttributes())
+//
+//  def createAttributes(): java.util.List[AttributeDefinition] = createSampleAttribute :: Nil
+//
+//  def createSampleAttribute = BooleanAttributeDefinitionBuilder
+//    .of("sample_name", LocalizedStrings.of(Locale.ENGLISH, "bla"))
+//    .build()
+//}
