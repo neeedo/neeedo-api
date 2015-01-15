@@ -6,7 +6,7 @@ import io.sphere.sdk.producttypes.ProductType
 import io.sphere.sdk.producttypes.commands.{ProductTypeCreateCommand}
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
 import io.sphere.sdk.queries.PagedQueryResult
-import model.sphere.{ProductTypeFactory, DemandProductType, CardProductTypeDraft}
+import model.sphere.{ProductTypeFactory}
 import play.api.Logger
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -65,6 +65,6 @@ class Demands(demandService: DemandService) extends Controller {
   }
 
   def test = Action.async {
-    demandService.writeDemandToSphere(demand1).map(x => Ok(x))
+    demandService.writeDemandToSphere(demand1).map(x => Ok(x.toString))
   }
 }

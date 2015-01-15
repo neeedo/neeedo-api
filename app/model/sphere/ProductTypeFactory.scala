@@ -15,8 +15,6 @@ object ProductTypeFactory {
 
   def demandType = ProductTypeDraft.of("demand", "desc", attributes)
 
-  private val attributes: java.util.List[AttributeDefinition] = userIdAttribute :: Nil
-
   private val userIdAttribute = TextAttributeDefinitionBuilder
     .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
@@ -31,6 +29,8 @@ object ProductTypeFactory {
     .of("priceMin", LocalizedStrings.of(Locale.ENGLISH, "priceMin"))
     .isRequired(true)
     .build()
+
+  private val attributes: java.util.List[AttributeDefinition] = userIdAttribute :: distanceAttribute :: priceMinAttribute :: Nil
 }
 
 //class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String)
