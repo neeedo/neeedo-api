@@ -11,42 +11,42 @@ import io.sphere.sdk.producttypes.{ProductType, ProductTypeDraft}
 import io.sphere.sdk.attributes._
 import scala.collection.JavaConversions._
 
-class DemandProductTypeDraftSupplier extends Supplier[ProductTypeDraft] {
+object ProductTypeFactory {
 
-  override def get = ProductTypeDraft.of("demand", "desc", createAttributes())
+  def demandType = ProductTypeDraft.of("demand", "desc", attributes)
 
-  def createAttributes(): java.util.List[AttributeDefinition] = userIdAttribute :: Nil
+  private val attributes: java.util.List[AttributeDefinition] = userIdAttribute :: Nil
 
-  def userIdAttribute = TextAttributeDefinitionBuilder
+  private val userIdAttribute = TextAttributeDefinitionBuilder
     .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
-  def distanceAttribute = NumberAttributeDefinitionBuilder
+  private val distanceAttribute = NumberAttributeDefinitionBuilder
     .of("distance", LocalizedStrings.of(Locale.ENGLISH, "distance"))
     .isRequired(true)
     .build()
 
-  def priceMinAttribute = MoneyAttributeDefinitionBuilder
+  private val priceMinAttribute = MoneyAttributeDefinitionBuilder
     .of("priceMin", LocalizedStrings.of(Locale.ENGLISH, "priceMin"))
     .isRequired(true)
     .build()
 }
 
-class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String)
-  extends Supplier[ProductDraft] {
-  val productType = productTypeRef.toReference
-
-  override def get(): ProductDraft = {
-    val masterVariant: ProductVariantDraft = ProductVariantDraftBuilder.of()
-//      .plusAttribute(CardType.attribute.valueOf(CardType.demand))
-      .plusAttribute(AttributeAccess.ofString().getterSetter("userId").valueOf(???))
-      .build()
-    val slug: LocalizedStrings = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
-
-    ProductDraftBuilder.of(productType, LocalizedStrings.of(Locale.ENGLISH, name), slug, masterVariant).build()
-  }
-}
+//class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String)
+//  extends Supplier[ProductDraft] {
+//  val productType = productTypeRef.toReference
+//
+//  override def get(): ProductDraft = {
+//    val masterVariant: ProductVariantDraft = ProductVariantDraftBuilder.of()
+////      .plusAttribute(CardType.attribute.valueOf(CardType.demand))
+//      .plusAttribute(AttributeAccess.ofString().getterSetter("userId"))
+//      .build()
+//    val slug: LocalizedStrings = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
+//
+//    ProductDraftBuilder.of(productType, LocalizedStrings.of(Locale.ENGLISH, name), slug, masterVariant).build()
+//  }
+//}
 
 //class CardProductTypeDraftSupplier extends Supplier[ProductTypeDraft] {
 //

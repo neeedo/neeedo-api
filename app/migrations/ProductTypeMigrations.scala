@@ -6,7 +6,7 @@ import io.sphere.sdk.producttypes.ProductType
 import io.sphere.sdk.producttypes.commands.{ProductTypeCreateCommand}
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
 import io.sphere.sdk.queries.PagedQueryResult
-import model.sphere.CardProductTypeDraft
+import model.sphere.{ProductTypeFactory, DemandProductType, CardProductTypeDraft}
 import play.api.Logger
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -29,11 +29,10 @@ class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
     val option: Future[Option[ProductType]] = queryResult.map(res => res.head())
 
     option.map {
-      case None => {
-        val createCommand = ProductTypeCreateCommand.of(new CardProductTypeDraft().get())
+      case None =>
+        val createCommand = ProductTypeCreateCommand.of(ProductTypeFactory.demandType)
         sphereClient.execute(createCommand)
         Logger.info(s"Cannot find Demand Product Type. Creating type $typeName...")
-      }
       case Some(prodType: ProductType) => Logger.info(s"Found Demand Product Type($typeName).")
     }
   }

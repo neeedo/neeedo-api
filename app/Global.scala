@@ -12,7 +12,7 @@ object Global extends GlobalSettings with Macwire {
   }
 
   override def onStop(app: Application): Unit = {
-    ElasticsearchClientFactory.getInstance.close
+    ElasticsearchClientFactory.getInstance.close()
   }
 
   override def onStart(app: Application): Unit = {
