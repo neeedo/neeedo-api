@@ -166,7 +166,7 @@ The request body must contain a valid demand json object
 201 Created
     
     {
-            "demandID":"1"
+            "demandId":"1"
     }
     
 400 Bad Request - Empty Body
