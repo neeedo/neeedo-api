@@ -25,8 +25,8 @@ class Demands(demandService: DemandService) extends Controller {
   def createDemand = Action {
     implicit request =>
       request.body.asJson match {
-      case Some(js) =>
-        js.asOpt[DemandDraft] match {
+      case Some(json) =>
+        json.asOpt[DemandDraft] match {
           case Some(demandDraft) => Created(Json.obj("demandId" -> 1))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
@@ -48,8 +48,8 @@ class Demands(demandService: DemandService) extends Controller {
       fetchDemand(id) match {
       case Some(demand) =>
         request.body.asJson match {
-          case Some(js) =>
-            js.asOpt[Demand] match {
+          case Some(json) =>
+            json.asOpt[Demand] match {
               case Some(x) => Ok
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
