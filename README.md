@@ -163,6 +163,8 @@ The request body must contain a valid demand json object
         }
     }
 
+*Note: The field ID will be ignored, during the next API update we will respond with the created demand's ID.*
+
 ### Response:
 201 Created
 
