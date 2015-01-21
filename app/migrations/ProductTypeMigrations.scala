@@ -2,7 +2,7 @@ package migrations
 
 import common.helper.Configloader
 import common.sphere.{SphereClient}
-import io.sphere.sdk.producttypes.ProductType
+import io.sphere.sdk.producttypes.{ProductTypeDraft, ProductType}
 import io.sphere.sdk.producttypes.commands.{ProductTypeCreateCommand}
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
 import io.sphere.sdk.queries.PagedQueryResult
@@ -20,20 +20,21 @@ class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
   }
 
   override def run(): Unit = {
-    createDemandType
+    createType("demand", ProductTypeFactory.demandType)
+    createType("offer", ProductTypeFactory.offerType)
   }
 
-  def createDemandType = {
-    val typeName = Configloader.getStringOpt("demand.typeName").get
+  def createType(configKey: String, typeDraft: ProductTypeDraft) = {
+    val typeName = Configloader.getStringOpt(s"$configKey.typeName").get
     val queryResult: Future[PagedQueryResult[ProductType]] = sphereClient.execute(ProductTypeQuery.of().byName(typeName))
     val option: Future[Option[ProductType]] = queryResult.map(res => res.head())
 
     option.map {
       case None =>
-        val createCommand = ProductTypeCreateCommand.of(ProductTypeFactory.demandType)
+        val createCommand = ProductTypeCreateCommand.of(typeDraft)
         sphereClient.execute(createCommand)
-        Logger.info(s"Cannot find Demand Product Type. Creating type $typeName...")
-      case Some(prodType: ProductType) => Logger.info(s"Found Demand Product Type($typeName).")
+        Logger.info(s"Cannot find $typeName Product Type. Creating type $typeName...")
+      case Some(prodType: ProductType) => Logger.info(s"Found $typeName Product Type($typeName).")
     }
   }
 }

@@ -4,6 +4,7 @@ import java.util.Locale
 import java.util.function.Supplier
 
 import com.github.slugify.Slugify
+import common.helper.Configloader
 import io.sphere.sdk.attributes.{AttributeAccess, EnumAttributeDefinitionBuilder, AttributeDefinition}
 import io.sphere.sdk.models.{Referenceable, PlainEnumValue, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraft, ProductVariantDraftBuilder, ProductDraftBuilder, ProductDraft}
@@ -13,24 +14,79 @@ import scala.collection.JavaConversions._
 
 object ProductTypeFactory {
 
-  def demandType = ProductTypeDraft.of("demand", "desc", attributes)
+  def demandType = ProductTypeDraft.of(Configloader.getStringOpt("demand.typeName").get, "desc", demandAttributes)
+  def offerType = ProductTypeDraft.of(Configloader.getStringOpt("offer.typeName").get, "desc", offerAttributes)
+
+  private val idAttribute = TextAttributeDefinitionBuilder
+    .of("id", LocalizedStrings.of(Locale.ENGLISH, "id"), TextInputHint.SINGLE_LINE)
+    .isRequired(true)
+    .build()
 
   private val userIdAttribute = TextAttributeDefinitionBuilder
     .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
+  private val productIdAttribute = TextAttributeDefinitionBuilder
+    .of("productId", LocalizedStrings.of(Locale.ENGLISH, "productId"), TextInputHint.SINGLE_LINE)
+    .isRequired(true)
+    .build()
+
+  private val tagsAttribute = TextAttributeDefinitionBuilder
+    .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), TextInputHint.SINGLE_LINE)
+    .isRequired(true)
+    .build()
+
+  private val longAttribute = NumberAttributeDefinitionBuilder
+    .of("longitude", LocalizedStrings.of(Locale.ENGLISH, "longitude"))
+    .isRequired(true)
+    .build()
+
+  private val latAttribute = NumberAttributeDefinitionBuilder
+    .of("latitude", LocalizedStrings.of(Locale.ENGLISH, "latitude"))
+    .isRequired(true)
+    .build()
+
   private val distanceAttribute = NumberAttributeDefinitionBuilder
     .of("distance", LocalizedStrings.of(Locale.ENGLISH, "distance"))
-    .isRequired(true)
+    .isRequired(false)
+    .build()
+
+  private val priceAttribute = MoneyAttributeDefinitionBuilder
+    .of("price", LocalizedStrings.of(Locale.ENGLISH, "price"))
+    .isRequired(false)
     .build()
 
   private val priceMinAttribute = MoneyAttributeDefinitionBuilder
     .of("priceMin", LocalizedStrings.of(Locale.ENGLISH, "priceMin"))
-    .isRequired(true)
+    .isRequired(false)
     .build()
 
-  private val attributes: java.util.List[AttributeDefinition] = userIdAttribute :: distanceAttribute :: priceMinAttribute :: Nil
+  private val priceMaxAttribute = MoneyAttributeDefinitionBuilder
+    .of("priceMax", LocalizedStrings.of(Locale.ENGLISH, "priceMax"))
+    .isRequired(false)
+    .build()
+
+  private val demandAttributes: java.util.List[AttributeDefinition] =
+    idAttribute ::
+    userIdAttribute ::
+    productIdAttribute ::
+    tagsAttribute ::
+    longAttribute ::
+    latAttribute ::
+    distanceAttribute ::
+    priceMinAttribute ::
+    priceMaxAttribute ::
+    Nil
+
+  private val offerAttributes: java.util.List[AttributeDefinition] =
+    idAttribute ::
+    userIdAttribute ::
+    tagsAttribute ::
+    longAttribute ::
+    latAttribute ::
+    priceAttribute ::
+    Nil
 }
 
 //class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String)
