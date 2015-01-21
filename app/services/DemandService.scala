@@ -27,18 +27,11 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
   def getDemandById(id: DemandId): Option[Demand] = ???
 
-  def addDemand(demand: Demand): Future[AddDemandResult] = {
+  def addDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
-      sphere <- writeDemandToSphere(demand)
-      es <- writeDemandToEs(demand) if sphere.getClass == classOf[DemandSaved]
-    } yield {
-      (es, sphere) match {
-        case (es: DemandSaved, sp: DemandSaved) => DemandSaved(sp.id)
-        case (es: DemandSaved, DemandSaveFailed) => DemandSaveEsFailed
-        case (DemandSaveFailed, sp: DemandSaved) => DemandSaveSphereFailed
-        case (DemandSaveFailed, DemandSaveFailed) => DemandSaveFailed
-      }
-    }
+      demandOption <- writeDemandToSphere(demandDraft)
+      es <- writeDemandToEs(demandOption.get) if demandOption.isDefined
+    } yield demandOption
   }
 
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
@@ -50,7 +43,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
-  def writeDemandToSphere(demand: Demand): Future[AddDemandResult] = {
+  def writeDemandToSphere(demandDraft: DemandDraft): Future[Option[Demand]] = {
 //    val productTypeCommand: ProductTypeCreateCommand = ProductTypeCreateCommand.of(new CardProductTypeDraft().get())
 //
 //    for {
@@ -62,6 +55,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 //    } yield "Bla"
 //
 
-    Future.successful(DemandSaveFailed)
+    Future.successful(Option(Demand(DemandId("1"), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))))
   }
 }
