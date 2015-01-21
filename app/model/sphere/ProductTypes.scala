@@ -13,4 +13,9 @@ object ProductTypes {
     val typeName = Configloader.getStringOpt("demand.typename").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }
+
+  val offer = {
+    val typeName = Configloader.getStringOpt("offer.typename").get
+    Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
+  }
 }
