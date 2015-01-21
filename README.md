@@ -149,7 +149,6 @@ POST `http://dry-depths-2035.herokuapp.com/demands`
 The request body must contain a valid demand json object
 
     {
-        "id":"1",
         "userId":"1",
         "tags":"socken bekleidung wolle",
         "location":{
@@ -163,11 +162,13 @@ The request body must contain a valid demand json object
         }
     }
 
-*Note: The field ID will be ignored, during the next API update we will respond with the created demand's ID.*
-
 ### Response:
 201 Created
-
+    
+    {
+            "demandId":"1"
+    }
+    
 400 Bad Request - Empty Body
 
 400 Bad Request - Invalid Json
