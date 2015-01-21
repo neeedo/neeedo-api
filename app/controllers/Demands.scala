@@ -24,8 +24,8 @@ class Demands(demandService: DemandService) extends Controller {
     implicit request =>
       request.body.asJson match {
       case Some(js) =>
-        js.asOpt[Demand] match {
-          case Some(demand) => Ok
+        js.asOpt[DemandDraft] match {
+          case Some(demandDraft) => Created(Json.obj("demandId" -> 1))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
       case None => BadRequest(Json.obj("error" -> "Missing body"))
