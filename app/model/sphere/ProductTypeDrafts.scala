@@ -6,7 +6,7 @@ import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.producttypes.ProductTypeDraft
 import io.sphere.sdk.attributes._
 import java.util.Locale
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ProductTypeDrafts {
 
@@ -14,80 +14,58 @@ object ProductTypeDrafts {
   val offer = ProductTypeDraft.of(Configloader.getStringOpt("offer.typeName").get, "desc", offerAttributes)
 
   private def demandAttributes: java.util.List[AttributeDefinition] =
-    id :: userId :: productId :: tags :: longitude :: latitude :: distance :: priceMin :: priceMax :: Nil
+    List(id ,  userId ,  productId ,  tags ,  longitude ,  latitude ,  distance ,  priceMin ,  priceMax).asJava
 
   private def offerAttributes: java.util.List[AttributeDefinition] =
-    id :: userId :: tags :: longitude :: latitude :: price :: Nil
+    List(id, userId, tags, longitude, latitude, price).asJava
 
-  private def id = TextAttributeDefinitionBuilder
+  private val id: AttributeDefinition = TextAttributeDefinitionBuilder
     .of("id", LocalizedStrings.of(Locale.ENGLISH, "id"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
-  private def userId = TextAttributeDefinitionBuilder
+  private val userId: AttributeDefinition = TextAttributeDefinitionBuilder
     .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
-  private def productId = TextAttributeDefinitionBuilder
+  private val productId: AttributeDefinition = TextAttributeDefinitionBuilder
     .of("productId", LocalizedStrings.of(Locale.ENGLISH, "productId"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
-  private def tags = TextAttributeDefinitionBuilder
+  private val tags: AttributeDefinition = TextAttributeDefinitionBuilder
     .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
-  private def longitude = NumberAttributeDefinitionBuilder
+  private val longitude: AttributeDefinition = NumberAttributeDefinitionBuilder
     .of("longitude", LocalizedStrings.of(Locale.ENGLISH, "longitude"))
     .isRequired(true)
     .build()
 
-  private def latitude = NumberAttributeDefinitionBuilder
+  private val latitude: AttributeDefinition = NumberAttributeDefinitionBuilder
     .of("latitude", LocalizedStrings.of(Locale.ENGLISH, "latitude"))
     .isRequired(true)
     .build()
 
-  private def distance = NumberAttributeDefinitionBuilder
+  private val distance: AttributeDefinition = NumberAttributeDefinitionBuilder
     .of("distance", LocalizedStrings.of(Locale.ENGLISH, "distance"))
     .isRequired(false)
     .build()
 
-  private def price = MoneyAttributeDefinitionBuilder
+  private val price: AttributeDefinition = MoneyAttributeDefinitionBuilder
     .of("price", LocalizedStrings.of(Locale.ENGLISH, "price"))
     .isRequired(false)
     .build()
 
-  private def priceMin = MoneyAttributeDefinitionBuilder
+  private val priceMin: AttributeDefinition = MoneyAttributeDefinitionBuilder
     .of("priceMin", LocalizedStrings.of(Locale.ENGLISH, "priceMin"))
     .isRequired(false)
     .build()
 
-  private def priceMax = MoneyAttributeDefinitionBuilder
+  private val priceMax: AttributeDefinition = MoneyAttributeDefinitionBuilder
     .of("priceMax", LocalizedStrings.of(Locale.ENGLISH, "priceMax"))
     .isRequired(false)
     .build()
 }
-
-//class DemandProductDraftSupplier(productTypeRef: Referenceable[ProductType], name: String)
-//  extends Supplier[ProductDraft] {
-//  val productType = productTypeRef.toReference
-//
-//  override def get(): ProductDraft = {
-//    val masterVariant: ProductVariantDraft = ProductVariantDraftBuilder.of()
-////      .plusAttribute(CardType.attribute.valueOf(CardType.demand))
-//      .plusAttribute(AttributeAccess.ofString().getterSetter("userId"))
-//      .build()
-//    val slug: LocalizedStrings = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
-//
-//    ProductDraftBuilder.of(productType, LocalizedStrings.of(Locale.ENGLISH, name), slug, masterVariant).build()
-//  }
-//}
-
-//object CardType {
-//    val demand = PlainEnumValue.of("Demand", "Demand")
-//
-//    val values = PlainEnumValue.of("Demand", "Demand") :: PlainEnumValue.of("Offer", "Offer") :: Nil
-//    val attribute = AttributeAccess.ofPlainEnumValue().getterSetter("cardType");
-//}
