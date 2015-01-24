@@ -49,11 +49,19 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
+  //
   def fetchDemand(id: DemandId): Option[Demand] = if (id.value == "1") Some(demand1) else None
 
-  def getDemand(id: DemandId) = Action {
+  def getDemandStub(id: DemandId) = Action {
     fetchDemand(id) match {
       case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
+      case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
+    }
+  }
+
+  def getDemand(id: DemandId) = Action.async {
+    demandService.getDemandById(id).map {
+      case Some(demand) => Ok(Json.toJson(demand))
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }

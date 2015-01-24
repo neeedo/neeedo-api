@@ -41,22 +41,10 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
     futureProductOption.map {
       productOptional: Optional[Product] =>
-        val productOption: Option[Product] = productOptional
-
-        productOption match {
-        case Some(product) => Some(Demand(
-                DemandId(product.getId),
-                UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-                getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
-                Location(
-                  Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-                  Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
-                ),
-                Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
-                Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
-                Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-              ))
-        case _ => Option.empty[Demand]
+        val option: Option[Product] = productOptional
+        option match {
+          case Some(product) => Some(productToDemand(product))
+          case _ => Option.empty[Demand]
       }
     }
   }
@@ -88,21 +76,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     val productDraft = ProductDraftBuilder.of(ProductTypes.demand, productName, slug, productVariant).build()
 
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
-      product =>
-        Option(
-          Demand(
-            DemandId(product.getId),
-            UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-            getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
-            Location(
-              Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-              Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
-            ),
-            Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
-            Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
-            Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-          )
-        )
+      product => Option(productToDemand(product))
     } recover {
       case e: Exception => {
         throw e
@@ -114,4 +88,20 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
   def getAttribute(product: Product, name: String) =
     product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
+
+  def productToDemand(product: Product): Demand = {
+    Demand(
+      DemandId(product.getId),
+      UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
+      getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+      Location(
+        Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
+        Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+      ),
+      Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
+      // Todo Nullpointer case
+      Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
+      Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
+    )
+  }
 }

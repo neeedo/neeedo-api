@@ -8,6 +8,7 @@ GET     /                           @controllers.Documentation.showDocumentation
 # Demands
 GET     /demands                     @controllers.Demands.listDemands()
 GET     /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
+GET     /demandsStub/:id             @controllers.Demands.getDemandStub(id: model.DemandId)
 POST    /demands                     @controllers.Demands.createDemand()
 POST    /demandsStub                 @controllers.Demands.createDemandStub()
 PUT     /demands/:id                 @controllers.Demands.updateDemand(id: model.DemandId)
