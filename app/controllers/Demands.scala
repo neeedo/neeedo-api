@@ -7,7 +7,7 @@ import play.api.mvc.{Action, Controller}
 import services.DemandService
 import scala.collection.immutable.Nil
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.concurrent.Future
 
 class Demands(demandService: DemandService) extends Controller {
   val demandDraft1 = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
@@ -22,12 +22,27 @@ class Demands(demandService: DemandService) extends Controller {
     Ok(Json.obj("demands" -> Json.toJson(demands)))
   }
 
-  def createDemand = Action {
+  def createDemand = Action.async {
+    implicit request =>
+      request.body.asJson match {
+        case Some(json) =>
+          json.asOpt[DemandDraft] match {
+            case Some(demandDraft) => demandService.addDemand(demandDraft).map {
+              case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
+              case _ => BadRequest(Json.obj("error" -> "Unknown error"))
+            }
+            case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
+          }
+        case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+      }
+  }
+
+  def createDemandStub = Action {
     implicit request =>
       request.body.asJson match {
       case Some(json) =>
         json.asOpt[DemandDraft] match {
-          case Some(demandDraft) => Created(Json.obj("demandId" -> 1))
+          case Some(demandDraft) => Created(Json.parse("""{"demand": { "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90", "userId": "1", "tags": "neues produkt pls 1312341234", "location": { "lat":13.534212, "lon":52.468562 }, "distance": 30, "price": { "min":25.0, "max":77.0 } } }"""))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
       case None => BadRequest(Json.obj("error" -> "Missing body"))

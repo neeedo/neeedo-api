@@ -9,13 +9,13 @@ import scala.concurrent.duration._
 object ProductTypes {
   private lazy val sphereClient = SphereClientFactory.getInstance
 
-  val demand = {
-    val typeName = Configloader.getStringOpt("demand.typename").get
+  def demand = {
+    val typeName = Configloader.getStringOpt("demand.typeName").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }
 
-  val offer = {
-    val typeName = Configloader.getStringOpt("offer.typename").get
+  def offer = {
+    val typeName = Configloader.getStringOpt("offer.typeName").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }
 }

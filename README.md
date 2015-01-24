@@ -145,6 +145,10 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 ### Ressource:
 POST `http://dry-depths-2035.herokuapp.com/demands`
 
+If you dont want to create actual demands during your tests you can still use the stubimplementation:
+POST `http://dry-depths-2035.herokuapp.com/demandsStub`
+
+
 ### Body:
 The request body must contain a valid demand json object
 
@@ -164,9 +168,22 @@ The request body must contain a valid demand json object
 
 ### Response:
 201 Created
-    
+
     {
-            "demandId":"1"
+        "demand": {
+            "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "userId": "1",
+            "tags": "neues produkt pls 1312341234",
+            "location": {
+                "lat":13.534212,
+                "lon":52.468562
+            },
+            "distance": 30,
+            "price": {
+                "min":25.0,
+                "max":77.0
+            }
+        }
     }
     
 400 Bad Request - Empty Body

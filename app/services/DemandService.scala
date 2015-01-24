@@ -1,15 +1,24 @@
 package services
 
+import java.util.Locale
+
+import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.SphereClient
+import io.sphere.sdk.attributes.{AttributeAccess, Attribute}
+import io.sphere.sdk.models.LocalizedStrings
+import io.sphere.sdk.products
+import io.sphere.sdk.products.commands.ProductCreateCommand
+import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder}
+import model.sphere.{ProductTypeDrafts, ProductTypes}
 import model.{Demand, DemandId}
 import org.elasticsearch.index.query.QueryBuilders
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import scala.concurrent.ExecutionContext.Implicits.global
-import common.helper.OptionalToOptionConverter._
-
 import scala.concurrent.Future
+import common.helper.OptionalToOptionConverter.optionalToOption
 
 class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient) {
   val demandIndex = IndexName("demands")
@@ -44,17 +53,40 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToSphere(demandDraft: DemandDraft): Future[Option[Demand]] = {
-//    val productTypeCommand: ProductTypeCreateCommand = ProductTypeCreateCommand.of(new CardProductTypeDraft().get())
-//
-//    for {
-//      prodType <- sphereClient.execute(productTypeCommand)
-//      product <- {
-//        val productTemplate = new DemandProductDraftSupplier(prodType, "test123").get()
-//        sphereClient.execute(ProductCreateCommand.of(productTemplate))
-//      }
-//    } yield "Bla"
-//
+    // TODO Produktname?
+    val productName = LocalizedStrings.of(Locale.ENGLISH, demandDraft.tags)
+    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(demandDraft.tags))
+    val productVariant = ProductVariantDraftBuilder.of()
+      .attributes(ProductTypeDrafts.buildDemandAttributes(demandDraft))
+      .build()
 
-    Future.successful(Option(Demand(DemandId("1"), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))))
+    val productDraft = ProductDraftBuilder.of(ProductTypes.demand, productName, slug, productVariant).build()
+
+    sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
+      product =>
+        Option(
+          Demand(
+            DemandId(product.getId),
+            UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
+            getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+            Location(
+              Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
+              Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+            ),
+            Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
+            Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
+            Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
+          )
+        )
+    } recover {
+      case e: Exception => {
+        throw e
+        Logger.error(e.getMessage)
+        Option.empty[Demand]
+      }
+    }
   }
+
+  def getAttribute(product: products.Product, name: String) =
+    product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
 }
