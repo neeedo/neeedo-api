@@ -82,10 +82,17 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
-  def deleteDemand(id: DemandId) = Action {
+  def deleteDemandStub(id: DemandId) = Action {
     fetchDemand(id) match {
       case Some(demand) => Ok
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
+    }
+  }
+
+  def deleteDemand(id: DemandId) = Action.async {
+    demandService.deleteDemand(id).map {
+      case Some(product) => Ok
+      case None => NotFound
     }
   }
 

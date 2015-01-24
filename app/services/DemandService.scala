@@ -36,8 +36,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
-    val fetchCommand = ProductFetchById.of(id.value)
-    val futureProductOption: Future[Optional[Product]] = sphereClient.execute(fetchCommand)
+    val futureProductOption = getProductById(id)
 
     futureProductOption.map {
       productOptional: Optional[Product] =>
@@ -48,6 +47,9 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       }
     }
   }
+
+  def getProductById(id: DemandId): Future[Optional[Product]] =
+    sphereClient.execute(ProductFetchById.of(id.value))
 
   def addDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
@@ -60,7 +62,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     elasticsearch.indexDocument(demandIndex, demandType, Json.toJson(demand)).map {
       case response if response.isCreated => DemandSaved(demand.id)
       case _ => DemandSaveFailed
-    }.recover {
+    } recover {
       case _ => DemandSaveFailed
     }
   }
@@ -105,11 +107,16 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     )
   }
 
-  def deleteDemand(id: DemandId) = {
-//    val productVariant = ProductVariantDraftBuilder.of()
-//      .attributes(ProductTypeDrafts.buildDemandAttributes())
-//      .build()
-//    val product = ProductBuilder.of(productType, masterData).id("foo-id").build();
-//    val productDeleteCommand = ProductDeleteByIdCommand.of(product)
+  def deleteDemand(id: DemandId):Future[Option[Product]] = {
+    for {
+      productOptional <- getProductById(id)
+      deletedProduct <- {
+        val option: Option[Product] = productOptional
+        option match {
+          case Some(product) => sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_))
+          case None => Future.successful(Option.empty[Product])
+        }
+      }
+    } yield deletedProduct
   }
 }

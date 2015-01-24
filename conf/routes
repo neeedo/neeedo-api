@@ -13,6 +13,7 @@ POST    /demands                     @controllers.Demands.createDemand()
 POST    /demandsStub                 @controllers.Demands.createDemandStub()
 PUT     /demands/:id                 @controllers.Demands.updateDemand(id: model.DemandId)
 DELETE  /demands/:id                 @controllers.Demands.deleteDemand(id: model.DemandId)
+DELETE  /demandsStub/:id             @controllers.Demands.deleteDemandStub(id: model.DemandId)
 OPTIONS /demands                     @controllers.Documentation.showDocumentation()
 GET     /demands-test                @controllers.Demands.test()
 
