@@ -8,7 +8,7 @@ import common.elasticsearch.ElasticsearchClient
 import common.sphere.SphereClient
 import io.sphere.sdk.attributes.{AttributeAccess, Attribute}
 import io.sphere.sdk.models.LocalizedStrings
-import io.sphere.sdk.products
+import io.sphere.sdk.products.Product
 import io.sphere.sdk.products.commands.ProductCreateCommand
 import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder}
@@ -37,11 +37,14 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
     val fetchCommand = ProductFetchById.of(id.value)
-    val futureProductOption: Future[Optional[products.Product]] = sphereClient.execute(fetchCommand)
+    val futureProductOption: Future[Optional[Product]] = sphereClient.execute(fetchCommand)
 
     futureProductOption.map {
-      productOption: Optional[products.Product] => productOption.map {
-        case Some(product: products.Product) => Some(Demand(
+      productOptional: Optional[Product] =>
+        val productOption: Option[Product] = productOptional
+
+        productOption match {
+        case Some(product) => Some(Demand(
                 DemandId(product.getId),
                 UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
                 getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
@@ -56,21 +59,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
         case _ => Option.empty[Demand]
       }
     }
-//      .map(productOpt => productOpt.map {
-//      case Some(product: products.Product) => Demand(
-//        DemandId(product.getId),
-//        UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-//        getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
-//        Location(
-//          Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-//          Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
-//        ),
-//        Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
-//        Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
-//        Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-//      )
-//      case None => None
-//    }).recover { case e: Exception => None }
   }
 
   def addDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
@@ -124,6 +112,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
-  def getAttribute(product: products.Product, name: String) =
+  def getAttribute(product: Product, name: String) =
     product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
 }
