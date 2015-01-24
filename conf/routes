@@ -6,13 +6,11 @@
 GET     /                           @controllers.Documentation.showDocumentation()
 
 # Demands
-GET     /demands                    @controllers.Demands.listDemands()
 GET     /demands/:id                @controllers.Demands.getDemand(id: model.DemandId)
 POST    /demands                    @controllers.Demands.createDemand()
 PUT     /demands/:id                @controllers.Demands.updateDemand(id: model.DemandId)
 DELETE  /demands/:id                @controllers.Demands.deleteDemand(id: model.DemandId)
 OPTIONS /demands                    @controllers.Documentation.showDocumentation()
-GET     /demands-test               @controllers.Demands.test()
 
 # Offers
 GET     /offers                     @controllers.Offers.listOffers()

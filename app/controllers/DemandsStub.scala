@@ -26,6 +26,7 @@ class DemandsStub extends Controller {
     }
   }
 
+  // TODO list könnte später vom matching controller übernommen werden?
   def listDemands = Action {
     val demands = demand1 :: demand2 :: demand3 :: Nil
     Ok(Json.obj("demands" -> Json.toJson(demands)))

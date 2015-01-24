@@ -6,36 +6,29 @@ import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.SphereClient
-import io.sphere.sdk.attributes.{AttributeAccess, Attribute}
+import io.sphere.sdk.attributes.AttributeAccess
 import io.sphere.sdk.models.LocalizedStrings
-import io.sphere.sdk.products.Product
+import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
 import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductFetchById
-import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder}
 import model.sphere.{ProductTypeDrafts, ProductTypes}
 import model.{Demand, DemandId}
-import org.elasticsearch.index.query.QueryBuilders
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import common.helper.OptionalToOptionConverter._
+
 
 class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient) {
   val demandIndex = IndexName("demands")
   val demandType = TypeName("demands")
 
-  def addDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
+  def createDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
       demandOption <- writeDemandToSphere(demandDraft)
       es <- writeDemandToEs(demandOption.get) if demandOption.isDefined
     } yield demandOption
-  }
-
-  def getDemands: Future[JsValue] = getDemandsFromEs.map {
-    hits => Json.obj("demands" -> hits.toSeq.map {
-      hit => Json.parse(hit.sourceAsString())
-    })
   }
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
@@ -51,14 +44,13 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
-  // Todo
-  def updateDemand(id: DemandId, demandDraft: DemandDraft): Future[Option[Demand]] = {
-    Future.successful(Option.empty[Demand])
-    //  for {
-    //    demandOption <- writeDemandToSphere(demandDraft)
-    //    es <- writeDemandToEs(demandOption.get) if demandOption.isDefined
-    //  } yield demandOption
+  def updateDemand(demandId: DemandId, demandDraft: DemandDraft): Future[Option[Demand]] = {
+    for {
+      createDemand <- createDemand(demandDraft)
+      deleteOldDemand <- deleteDemand(demandId)
+    } yield createDemand
   }
+
 
   def deleteDemand(id: DemandId):Future[Option[Product]] = {
     for {
@@ -78,9 +70,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
   def getProductById(id: DemandId): Future[Optional[Product]] =
     sphereClient.execute(ProductFetchById.of(id.value))
-
-  def getDemandsFromEs =
-    elasticsearch.search(demandIndex, demandType, QueryBuilders.matchAllQuery()).map(result => result.getHits.getHits)
 
   def productToDemand(product: Product): Demand = {
     Demand(
@@ -127,5 +116,4 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       }
     }
   }
-
 }

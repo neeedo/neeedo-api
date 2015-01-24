@@ -1,8 +1,8 @@
 import common.elasticsearch.ElasticsearchClientFactory
 import common.sphere.SphereClientFactory
-import controllers.{Documentation, Demands}
+import controllers.{Offers, Documentation, Demands}
 import migrations.ProductTypeMigrations
-import services.DemandService
+import services.{MatchingService, OfferService, DemandService}
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
@@ -13,12 +13,13 @@ trait WireDependencies {
 
   // Services
   lazy val demandService = wire[DemandService]
-  //lazy val offerService = wire[OfferService]
+  lazy val offerService = wire[OfferService]
+  lazy val matchingService = wire[MatchingService]
 
   // Controllers
   lazy val demandController = wire[Demands]
   lazy val documentationController = wire[Documentation]
-  //lazy val offerController = wire[OfferController]
+  lazy val offerController = wire[Offers]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
