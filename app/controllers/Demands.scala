@@ -59,11 +59,7 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
-
-  def test = Action {
-    Ok
-//    // obsolete?
-//    demandService.writeDemandToSphere(demandDraft1).map(Ok(_.toString))
-  }
+  // obsolete?
+  def test = Action {Ok} // demandService.writeDemandToSphere(demandDraft1).map(Ok(_.toString))
 
 }
