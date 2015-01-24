@@ -13,9 +13,8 @@ import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateC
 import io.sphere.sdk.products.queries.ProductFetchById
 import model.sphere.{ProductTypeDrafts, ProductTypes}
 import model.{Demand, DemandId}
-import org.elasticsearch.index.query.QueryBuilders
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import common.helper.OptionalToOptionConverter._
@@ -25,14 +24,11 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   val demandIndex = IndexName("demands")
   val demandType = TypeName("demands")
 
-  def getDemands: Future[JsValue] = getDemandsFromEs.map {
-    hits => Json.obj("demands" -> hits.toSeq.map {
-      hit => Json.parse(hit.sourceAsString())
-    })
-  }
-
-  def getDemandsFromEs = {
-    elasticsearch.search(demandIndex, demandType, QueryBuilders.matchAllQuery()).map(result => result.getHits.getHits)
+  def createDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
+    for {
+      demandOption <- writeDemandToSphere(demandDraft)
+      es <- writeDemandToEs(demandOption.get) if demandOption.isDefined
+    } yield demandOption
   }
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
@@ -48,9 +44,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
-  def getProductById(id: DemandId): Future[Optional[Product]] =
-    sphereClient.execute(ProductFetchById.of(id.value))
-
   def updateDemand(demandId: DemandId, demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
       createDemand <- createDemand(demandDraft)
@@ -58,16 +51,40 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     } yield createDemand
   }
 
-  def updateDemandInSphere(demand: DemandDraft): Future[Option[Demand]] = {
-    
-    Future.successful(Option.empty[Demand])
+
+  def deleteDemand(id: DemandId):Future[Option[Product]] = {
+    for {
+      productOptional <- getProductById(id)
+      deletedProduct <- {
+        val option: Option[Product] = productOptional
+        option match {
+          case Some(product) => sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_))
+          case None => Future.successful(Option.empty[Product])
+        }
+      }
+    } yield deletedProduct
   }
 
-  def createDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
-    for {
-      demandOption <- writeDemandToSphere(demandDraft)
-      es <- writeDemandToEs(demandOption.get) if demandOption.isDefined
-    } yield demandOption
+  def getAttribute(product: Product, name: String) =
+    product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
+
+  def getProductById(id: DemandId): Future[Optional[Product]] =
+    sphereClient.execute(ProductFetchById.of(id.value))
+
+  def productToDemand(product: Product): Demand = {
+    Demand(
+      DemandId(product.getId),
+      UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
+      getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+      Location(
+        Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
+        Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+      ),
+      Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
+      // Todo Nullpointer case
+      Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
+      Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
+    )
   }
 
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
@@ -98,37 +115,5 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
         Option.empty[Demand]
       }
     }
-  }
-
-  def getAttribute(product: Product, name: String) =
-    product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
-
-  def productToDemand(product: Product): Demand = {
-    Demand(
-      DemandId(product.getId),
-      UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-      getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
-      Location(
-        Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-        Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
-      ),
-      Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
-      // Todo Nullpointer case
-      Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
-      Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-    )
-  }
-
-  def deleteDemand(id: DemandId):Future[Option[Product]] = {
-    for {
-      productOptional <- getProductById(id)
-      deletedProduct <- {
-        val option: Option[Product] = productOptional
-        option match {
-          case Some(product) => sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_))
-          case None => Future.successful(Option.empty[Product])
-        }
-      }
-    } yield deletedProduct
   }
 }
