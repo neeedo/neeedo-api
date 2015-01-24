@@ -9,7 +9,7 @@ import common.sphere.SphereClient
 import io.sphere.sdk.attributes.{AttributeAccess, Attribute}
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.products.Product
-import io.sphere.sdk.products.commands.ProductCreateCommand
+import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder}
 import model.sphere.{ProductTypeDrafts, ProductTypes}
@@ -103,5 +103,13 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
       Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
     )
+  }
+
+  def deleteDemand(id: DemandId) = {
+//    val productVariant = ProductVariantDraftBuilder.of()
+//      .attributes(ProductTypeDrafts.buildDemandAttributes())
+//      .build()
+//    val product = ProductBuilder.of(productType, masterData).id("foo-id").build();
+//    val productDeleteCommand = ProductDeleteByIdCommand.of(product)
   }
 }
