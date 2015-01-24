@@ -24,8 +24,8 @@ object Demand {
 		(JsPath \ "location" \ "lat").read[Double] and
 		(JsPath \ "location" \ "lon").read[Double] and
 		(JsPath \ "distance").read[Int] and
-			(JsPath \ "price" \ "min").read[Double] and
-			(JsPath \ "price" \ "max").read[Double]
+		(JsPath \ "price" \ "min").read[Double] and
+		(JsPath \ "price" \ "max").read[Double]
 		) {
 		(id, uid, tags, lat, lon, distance, priceMin, priceMax) => Demand(DemandId(id), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
 		Distance(distance), Price(priceMin), Price(priceMax))

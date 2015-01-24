@@ -27,7 +27,7 @@ class Demands(demandService: DemandService) extends Controller {
       request.body.asJson match {
         case Some(json) =>
           json.asOpt[DemandDraft] match {
-            case Some(demandDraft) => demandService.addDemand(demandDraft).map {
+            case Some(demandDraft) => demandService.createDemand(demandDraft).map {
               case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
               case _ => BadRequest(Json.obj("error" -> "Unknown error"))
             }
@@ -66,13 +66,13 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
-  def updateDemand(id: DemandId) = Action {
+  def updateDemandStub(id: DemandId) = Action {
     implicit request =>
       fetchDemand(id) match {
       case Some(demand) =>
         request.body.asJson match {
           case Some(json) =>
-            json.asOpt[Demand] match {
+            json.asOpt[DemandDraft] match {
               case Some(x) => Ok
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
@@ -81,6 +81,20 @@ class Demands(demandService: DemandService) extends Controller {
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
+
+  def updateDemand(demandId: DemandId) = Action.async {
+    implicit request => request.body.asJson match {
+      case Some(json) => json.asOpt[DemandDraft] match {
+          case Some(demandDraft) => demandService.updateDemand(demandId, demandDraft).map {
+            case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
+            case _ => BadRequest(Json.obj("error" -> "Unknown error"))
+          }
+          case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
+        }
+      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+    }
+  }
+
 
   def deleteDemandStub(id: DemandId) = Action {
     fetchDemand(id) match {
