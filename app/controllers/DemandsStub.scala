@@ -19,7 +19,7 @@ class DemandsStub extends Controller {
     request.body.asJson match {
       case Some(json) =>
         json.asOpt[DemandDraft] match {
-          case Some(demandDraft) => Created(Json.parse("""{"demand": { "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90", "userId": "1", "tags": "neues produkt pls 1312341234", "location": { "lat":13.534212, "lon":52.468562 }, "distance": 30, "price": { "min":25.0, "max":77.0 } } }"""))
+          case Some(demandDraft) => Created(Json.obj("demand" -> Json.toJson(demand1)))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
       case None => BadRequest(Json.obj("error" -> "Missing body"))
