@@ -36,7 +36,7 @@ class Demands(demandService: DemandService) extends Controller {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[DemandDraft] match {
           case Some(demandDraft) => demandService.updateDemand(demandId, version, demandDraft).map {
-            case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
+            case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
             case _ => BadRequest(Json.obj("error" -> "Unknown error"))
           }
           case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
