@@ -2,7 +2,10 @@
 
 [![Dependency Status](https://www.versioneye.com/user/projects/54bfae036c0035c592000069/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54bfae036c0035c592000069)
 
+[![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/coverage.svg?branch=master)](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api?branch=master)
+
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
+
 
 How to run (Windows)
 ----------
@@ -16,7 +19,7 @@ cd api
 activator run
 ```
 
-How to run (Linux)
+How to run (Unix)
 ----------
 
 ```bash
@@ -73,11 +76,11 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 | id | Mandatory | alphanumeric |
 
 ###Response
-201 Created
+200 Ok
     
     {
         "demand":{
-            "id":"1",
+            "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId":"1",
             "tags":"socken bekleidung wolle",
@@ -124,7 +127,7 @@ The request body must contain a valid DemandDraft json object
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId": "1",
-            "tags": "neues produkt pls 1312341234",
+            "tags": "socken bekleidung wolle",
             "location": {
                 "lat":13.534212,
                 "lon":52.468562
@@ -162,7 +165,7 @@ The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle",
+        "tags":"socken bekleidung wolle rot",
         "location":{
             "lat":13.534212,
             "lon":52.468562
@@ -180,7 +183,7 @@ The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle",
+        "tags":"socken bekleidung wolle rot",
         "location":{
             "lat":13.534212,
             "lon":52.468562
