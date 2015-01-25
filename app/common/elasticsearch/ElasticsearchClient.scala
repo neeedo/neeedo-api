@@ -33,8 +33,7 @@ sealed trait ElasticsearchClient {
     client.prepareSearch(esIndex.value).setTypes(esType.value).setQuery(query).execute()
 }
 
-
-object LocalEsClient extends ElasticsearchClient {
+class LocalEsClient extends ElasticsearchClient {
   val nodeSettings = ImmutableSettings.settingsBuilder()
     .classLoader(classOf[Settings].getClassLoader)
     .put("path.data", "target/es-data/")
@@ -45,7 +44,7 @@ object LocalEsClient extends ElasticsearchClient {
   override def close() = node.close()
 }
 
-object RemoteEsClient extends ElasticsearchClient {
+class RemoteEsClient extends ElasticsearchClient {
   val clustername = Configloader.getStringOpt("elasticsearch.clustername").getOrElse("elasticsearch")
   val hosts = readHostsFromConfig(Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil))
   lazy val node: Node = NodeBuilder.nodeBuilder()

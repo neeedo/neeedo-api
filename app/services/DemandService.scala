@@ -20,7 +20,7 @@ import scala.concurrent.Future
 import common.helper.OptionalToOptionConverter._
 
 
-class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient) {
+class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
 
   def createDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
@@ -64,7 +64,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       .attributes(ProductTypeDrafts.buildDemandAttributes(demandDraft))
       .build()
 
-    val productDraft = ProductDraftBuilder.of(ProductTypes.demand, productName, slug, productVariant).build()
+    val productDraft = ProductDraftBuilder.of(productTypes.demand, productName, slug, productVariant).build()
 
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
       product => Option(productToDemand(product))
