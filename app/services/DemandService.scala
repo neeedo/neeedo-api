@@ -45,6 +45,37 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
+  def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
+    //TODO indexname und typename in config verankern?
+    val demandIndex = IndexName("demands")
+    val demandType = TypeName("demands")
+    elasticsearch.indexDocument(demandIndex, demandType, Json.toJson(demand)).map {
+      case response if response.isCreated => DemandSaved
+      case _ => DemandSaveFailed
+    } recover {
+      case _ => DemandSaveFailed
+    }
+  }
+
+  def writeDemandToSphere(demandDraft: DemandDraft): Future[Option[Demand]] = {
+    // TODO Produktname?
+    val productName = LocalizedStrings.of(Locale.ENGLISH, demandDraft.tags)
+    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(demandDraft.tags))
+    val productVariant = ProductVariantDraftBuilder.of()
+      .attributes(ProductTypeDrafts.buildDemandAttributes(demandDraft))
+      .build()
+
+    val productDraft = ProductDraftBuilder.of(ProductTypes.demand, productName, slug, productVariant).build()
+
+    sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
+      product => Option(productToDemand(product))
+    } recover {
+      case e: Exception =>
+        Logger.error(e.getMessage)
+        Option.empty[Demand]
+    }
+  }
+
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
     val futureProductOption = getProductById(id)
 
@@ -96,36 +127,5 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
       Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
     )
-  }
-
-  def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
-    //TODO indexname und typename in config verankern?
-    val demandIndex = IndexName("demands")
-    val demandType = TypeName("demands")
-    elasticsearch.indexDocument(demandIndex, demandType, Json.toJson(demand)).map {
-      case response if response.isCreated => DemandSaved
-      case _ => DemandSaveFailed
-    } recover {
-      case _ => DemandSaveFailed
-    }
-  }
-
-  def writeDemandToSphere(demandDraft: DemandDraft): Future[Option[Demand]] = {
-    // TODO Produktname?
-    val productName = LocalizedStrings.of(Locale.ENGLISH, demandDraft.tags)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(demandDraft.tags))
-    val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(ProductTypeDrafts.buildDemandAttributes(demandDraft))
-      .build()
-
-    val productDraft = ProductDraftBuilder.of(ProductTypes.demand, productName, slug, productVariant).build()
-
-    sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
-      product => Option(productToDemand(product))
-    } recover {
-      case e: Exception =>
-        Logger.error(e.getMessage)
-        Option.empty[Demand]
-    }
   }
 }
