@@ -127,7 +127,7 @@ The request body must contain a valid DemandDraft json object
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId": "1",
-            "tags": "neues produkt pls 1312341234",
+            "tags": "socken bekleidung wolle",
             "location": {
                 "lat":13.534212,
                 "lon":52.468562
@@ -165,7 +165,7 @@ The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle",
+        "tags":"socken bekleidung wolle rot",
         "location":{
             "lat":13.534212,
             "lon":52.468562
@@ -183,7 +183,7 @@ The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle",
+        "tags":"socken bekleidung wolle rot",
         "location":{
             "lat":13.534212,
             "lon":52.468562
