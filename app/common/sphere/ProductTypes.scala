@@ -1,8 +1,8 @@
-package model.sphere
+package common.sphere
 
 import common.helper.Configloader
-import common.sphere.SphereClientFactory
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 

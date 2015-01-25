@@ -1,15 +1,13 @@
-package model.sphere
+package common.sphere
 
+import java.util.Locale
 
 import common.domain.DemandDraft
 import common.helper.Configloader
-import io.sphere.sdk.attributes.AttributeDefinition
+import io.sphere.sdk.attributes._
 import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
 import io.sphere.sdk.producttypes.ProductTypeDraft
-import io.sphere.sdk.attributes._
-import java.util.Locale
 import io.sphere.sdk.utils.MoneyImpl
-
 import scala.collection.JavaConverters._
 
 object ProductTypeDrafts {

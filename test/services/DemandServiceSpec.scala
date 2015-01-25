@@ -4,7 +4,7 @@ import java.util.Locale
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
-import common.sphere.SphereClient
+import common.sphere.{ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
 import io.sphere.sdk.products.ProductVariantBuilder
@@ -14,7 +14,6 @@ import io.sphere.sdk.products.ProductBuilder
 import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.utils.MoneyImpl
-import model.sphere.ProductTypeDrafts
 import model.{DemandId, Demand}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification

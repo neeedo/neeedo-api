@@ -1,11 +1,10 @@
 package migrations
 
-import common.sphere.SphereClient
+import common.sphere.{ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.producttypes.{ProductTypeDraft, ProductType}
 import io.sphere.sdk.producttypes.commands.ProductTypeCreateCommand
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
 import io.sphere.sdk.queries.PagedQueryResult
-import model.sphere.ProductTypeDrafts
 import play.api.Logger
 import scala.concurrent.ExecutionContext.Implicits.global
 import common.helper.OptionalToOptionConverter._
