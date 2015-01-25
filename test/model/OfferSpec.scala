@@ -9,6 +9,7 @@ class OfferSpec extends Specification {
 
   val offerJs: JsObject = Json.obj(
     "id" -> "testId",
+    "version" -> 1L,
     "userId" -> "testUid",
     "productId" -> "testPid",
     "tags" -> "testTags",
@@ -20,6 +21,7 @@ class OfferSpec extends Specification {
   )
 
   val offer: Offer = Offer(OfferId("testId"),
+    Version(1L),
     UserId("testUid"),
     ProductId("testPid"),
     "testTags",
