@@ -1,65 +1,54 @@
 package controllers
 
 import common.domain._
-import model.{Demand, DemandId}
+import model.DemandId
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.DemandService
-
-import scala.collection.immutable.Nil
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class Demands(demandService: DemandService) extends Controller {
-  val demand1 = Demand(DemandId("1"), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-  val demand2 = Demand(DemandId("2"), UserId("2"), "auto lack blau", Location(Longitude(52.468562), Latitude(13.534212)), Distance(40), Price(150.0), Price(300.0))
-  val demand3 = Demand(DemandId("3"), UserId("3"), "notebook kein apple scheiss", Location(Longitude(20.0), Latitude(10.0)), Distance(25), Price(500.0), Price(1000.0))
 
-  def listDemands = Action {
-    val demands = demand1 :: demand2 :: demand3 :: Nil
-
-    Ok(Json.obj("demands" -> Json.toJson(demands)))
-  }
-
-  def createDemand = Action {
+  def createDemand = Action.async {
     implicit request =>
       request.body.asJson match {
-      case Some(js) =>
-        js.asOpt[DemandDraft] match {
-          case Some(demandDraft) => Created(Json.obj("demandId" -> 1))
-          case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
-        }
-      case None => BadRequest(Json.obj("error" -> "Missing body"))
-    }
-  }
-
-  def fetchDemand(id: DemandId): Option[Demand] = if (id.value == "1") Some(demand1) else None
-
-  def getDemand(id: DemandId) = Action {
-    fetchDemand(id) match {
-      case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
-      case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
-    }
-  }
-
-  def updateDemand(id: DemandId) = Action {
-    implicit request =>
-      fetchDemand(id) match {
-      case Some(demand) =>
-        request.body.asJson match {
-          case Some(js) =>
-            js.asOpt[Demand] match {
-              case Some(x) => Ok
-              case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
+        case Some(json) =>
+          json.asOpt[DemandDraft] match {
+            case Some(demandDraft) => demandService.createDemand(demandDraft).map {
+              case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
+              case _ => BadRequest(Json.obj("error" -> "Unknown error"))
             }
-          case None => BadRequest(Json.obj("error" -> "Missing body"))
-        }
+            case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
+          }
+        case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+      }
+  }
+
+  def getDemand(id: DemandId) = Action.async {
+    demandService.getDemandById(id).map {
+      case Some(demand) => Ok(Json.toJson(demand))
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
 
-  def deleteDemand(id: DemandId) = Action {
-    fetchDemand(id) match {
-      case Some(demand) => Ok
-      case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
+  def updateDemand(demandId: DemandId, version: Version) = Action.async {
+    implicit request => request.body.asJson match {
+      case Some(json) => json.asOpt[DemandDraft] match {
+          case Some(demandDraft) => demandService.updateDemand(demandId, version, demandDraft).map {
+            case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
+            case _ => BadRequest(Json.obj("error" -> "Unknown error"))
+          }
+          case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
+        }
+      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+    }
+  }
+
+  def deleteDemand(demandId: DemandId, version: Version) = Action.async {
+    demandService.deleteDemand(demandId, version).map {
+      case Some(product) => Ok
+      case None => NotFound
     }
   }
 }

@@ -1,4 +1,5 @@
 import common.elasticsearch.ElasticsearchClientFactory
+import migrations.ProductTypeMigrations
 import play.api.{Application, GlobalSettings}
 import com.softwaremill.macwire.{MacwireMacros, Macwire}
 
@@ -11,6 +12,10 @@ object Global extends GlobalSettings with Macwire {
   }
 
   override def onStop(app: Application): Unit = {
-    ElasticsearchClientFactory.getInstance.close
+    ElasticsearchClientFactory.getInstance.close()
+  }
+
+  override def onStart(app: Application): Unit = {
+    wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run()
   }
 }

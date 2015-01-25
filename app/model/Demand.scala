@@ -7,6 +7,7 @@ import play.api.mvc.PathBindable
 
 case class Demand(
 	id: DemandId,
+	version: Version,
 	uid: UserId,
 	tags: String,
 	location: Location,
@@ -19,21 +20,23 @@ object Demand {
 
 	implicit val demandReads: Reads[Demand] = (
 		(JsPath \ "id").read[String] and
+		(JsPath \ "version").read[Long] and
 		(JsPath \ "userId").read[String] and
 		(JsPath \ "tags").read[String] and
 		(JsPath \ "location" \ "lat").read[Double] and
 		(JsPath \ "location" \ "lon").read[Double] and
 		(JsPath \ "distance").read[Int] and
-			(JsPath \ "price" \ "min").read[Double] and
-			(JsPath \ "price" \ "max").read[Double]
+		(JsPath \ "price" \ "min").read[Double] and
+		(JsPath \ "price" \ "max").read[Double]
 		) {
-		(id, uid, tags, lat, lon, distance, priceMin, priceMax) => Demand(DemandId(id), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
+		(id, version, uid, tags, lat, lon, distance, priceMin, priceMax) => Demand(DemandId(id), Version(version), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
 		Distance(distance), Price(priceMin), Price(priceMax))
 		}
 
 	implicit val demandWrites = new Writes[Demand] {
 		def writes(d: Demand) = Json.obj(
 			"id" -> d.id.value,
+			"version" -> d.version.value,
 		  "userId" -> d.uid.value,
 		  "tags" -> d.tags,
 		  "location" -> Json.obj(

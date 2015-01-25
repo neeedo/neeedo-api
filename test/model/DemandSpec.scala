@@ -9,6 +9,7 @@ class DemandSpec extends Specification {
 
   val demandJs: JsObject = Json.obj(
     "id" -> "testId",
+    "version" -> 1L,
     "userId" -> "testUid",
     "tags" -> "testTags",
     "location" -> Json.obj(
@@ -23,6 +24,7 @@ class DemandSpec extends Specification {
   )
 
   val demand: Demand = Demand(DemandId("testId"),
+    Version(1L),
     UserId("testUid"),
     "testTags",
     Location(Longitude(20.0), Latitude(10.0)),

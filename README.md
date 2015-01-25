@@ -2,14 +2,13 @@
 
 [![Dependency Status](https://www.versioneye.com/user/projects/54bfae036c0035c592000069/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54bfae036c0035c592000069)
 
-[![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/coverage.svg?branch=master)](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api?branch=master)
-
 ![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
 
 How to run (Windows)
 ----------
 
-Please use the GIT Bash. It appeared to work better than using the Windows Bash.
+If possible use the GIT Bash. It appeared to work better than using the Windows Bash.
+Install sbt or activator on your local machine and run the following.
 
 ```bash
 git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
@@ -29,11 +28,8 @@ cd api
 API-Documentation
 ----------
 
-
+- [Stubs](#stubs)
 - [Demands](#demands)
-	- [Query all Demands](#query-all-demands)
-		- [Ressource:](#ressource)
-		- [Response:](#response)
 	- [Query single Demand](#query-single-demand)
 		- [Ressource:](#ressource-1)
 		- [URL Parameters:](#url-parameters)
@@ -55,59 +51,16 @@ API-Documentation
 		- [Response:](#response-4)
 		- [Example:](#example-2)
 
+
+# Stubs
+For the latter there are also stub implementations. You can access them by prepending `stub/` to the resource identifier.
+
+Demands: `http://dry-depths-2035.herokuapp.com/stub/demands`
+
+Offers: `http://dry-depths-2035.herokuapp.com/stub/offers`
+
+
 # Demands
-
-## Query all Demands
-### Ressource:
-GET `http://dry-depths-2035.herokuapp.com/demands`
-
-### Response:
-    {  
-       "demands":[  
-          {  
-             "id":"1",
-             "userId":"1",
-             "tags":"socken bekleidung wolle",
-             "location":{  
-                "lat":13.534212,
-                "lon":52.468562
-             },
-             "distance":30,
-             "price":{  
-                "min":25.0,
-                "max":77.0
-             }
-          },
-          {  
-             "id":"2",
-             "userId":"2",
-             "tags":"auto lack blau",
-             "location":{  
-                "lat":13.534212,
-                "lon":52.468562
-             },
-             "distance":40,
-             "price":{  
-                "min":150.0,
-                "max":300.0
-             }
-          },
-          {  
-             "id":"3",
-             "userId":"3",
-             "tags":"notebook kein apple scheiss",
-             "location":{  
-                "lat":10.0,
-                "lon":20.0
-             },
-             "distance":25,
-             "price":{  
-                "min":500.0,
-                "max":1000.0
-             }
-          }
-       ]
-    }
 
 ## Query single Demand
 ### Ressource:
@@ -117,14 +70,15 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
 | Name | Mandatory | Value Type |
 | ---- | --------- | ---------- |
-| id | Mandatory | numeric |
+| id | Mandatory | alphanumeric |
 
 ###Response
-200 Ok
+201 Created
     
     {
         "demand":{
             "id":"1",
+            "version": 1
             "userId":"1",
             "tags":"socken bekleidung wolle",
             "location":{
@@ -146,7 +100,7 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 POST `http://dry-depths-2035.herokuapp.com/demands`
 
 ### Body:
-The request body must contain a valid demand json object
+The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
@@ -164,9 +118,23 @@ The request body must contain a valid demand json object
 
 ### Response:
 201 Created
-    
+
     {
-            "demandId":"1"
+        "demand": {
+            "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "version": 1
+            "userId": "1",
+            "tags": "neues produkt pls 1312341234",
+            "location": {
+                "lat":13.534212,
+                "lon":52.468562
+            },
+            "distance": 30,
+            "price": {
+                "min":25.0,
+                "max":77.0
+            }
+        }
     }
     
 400 Bad Request - Empty Body
@@ -174,26 +142,25 @@ The request body must contain a valid demand json object
 400 Bad Request - Invalid Json
 
 ### Example:
-*Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
 
 ## Update Demand
 ### Ressource:
-PUT `http://dry-depths-2035.herokuapp.com/demands/{id}`
+PUT `http://dry-depths-2035.herokuapp.com/demands/{id}/{version}`
 
 ### URL Parameters:
 
 | Name | Mandatory | Value Type |
 | ---- | --------- | ---------- |
-| id | Mandatory | numeric |
+| id | Mandatory | alphanumeric |
+| version | Mandatory | numeric |
 
 
 ### Body:
-The request body must contain a valid demand json object
+The request body must contain a valid DemandDraft json object
 
     {
-        "id":"1",
         "userId":"1",
         "tags":"socken bekleidung wolle",
         "location":{
@@ -207,12 +174,24 @@ The request body must contain a valid demand json object
         }
     }
 	
-*Note: The field ID will be removed later, but is actually required for our intern JSON mapping.*
-*Also note: Later, we will change the API to only update the given fields, we don't expect the complete entity.*
 
 ### Response:
 200 Ok
 
+    {
+        "userId":"1",
+        "tags":"socken bekleidung wolle",
+        "location":{
+            "lat":13.534212,
+            "lon":52.468562
+        },
+        "distance":30,
+        "price":{
+            "min":25.0,
+            "max":77.0
+        }
+    }
+	
 400 Bad Request - Missing body
 
 400 Bad Request - Cannot parse json
@@ -221,19 +200,18 @@ The request body must contain a valid demand json object
 
 ### Example:
 
-*Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
-
-    curl -XPUT -H "Content-Type: application/json" -d '{"id":"1","userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1 -v 
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1/1 -v 
 
 ## Delete Demand
 ### Ressource:
-DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}`
+DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}/{version}`
 
 ### URL Parameters:
 
 | Name | Mandatory | Value Type |
 | ---- | --------- | ---------- |
-| id | Mandatory | numeric |
+| id | Mandatory | alphanumeric |
+| version | Mandatory | numeric |
 
 
 ### Response:
@@ -244,6 +222,4 @@ DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
 ### Example:
 
-*Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
-
-    curl -XDELETE http://dry-depths-2035.herokuapp.com/demands/1 -v
+    curl -XDELETE http://dry-depths-2035.herokuapp.com/demands/1/1 -v

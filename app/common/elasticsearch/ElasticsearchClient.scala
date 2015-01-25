@@ -6,7 +6,7 @@ import org.elasticsearch.action.{ListenableActionFuture, ActionListener}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
-import org.elasticsearch.common.settings.ImmutableSettings
+import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
@@ -35,7 +35,12 @@ sealed trait ElasticsearchClient {
 
 
 object LocalEsClient extends ElasticsearchClient {
-  lazy val node: Node = NodeBuilder.nodeBuilder().local(true).node()
+  val nodeSettings = ImmutableSettings.settingsBuilder()
+    .classLoader(classOf[Settings].getClassLoader)
+    .put("path.data", "target/es-data/")
+    .build()
+
+  lazy val node: Node = NodeBuilder.nodeBuilder().local(true).settings(nodeSettings).node()
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
 }
