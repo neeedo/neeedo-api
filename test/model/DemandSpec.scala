@@ -24,7 +24,8 @@ class DemandSpec extends Specification {
     )
   )
 
-  val demand: Demand = Demand(DemandId("testId"),
+  val demand: Demand = Demand(
+    DemandId("testId"),
     Version(1L),
     UserId("testUid"),
     "testTags",
