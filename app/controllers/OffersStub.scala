@@ -55,7 +55,7 @@ class OffersStub extends Controller {
       case Some(offer) =>
         request.body.asJson match {
           case Some(json) =>
-            json.asOpt[Offer] match {
+            json.asOpt[OfferDraft] match {
               case Some(_offer) => Ok
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
