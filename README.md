@@ -19,7 +19,7 @@ cd api
 activator run
 ```
 
-How to run (Linux)
+How to run (Unix)
 ----------
 
 ```bash
