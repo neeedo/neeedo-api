@@ -11,7 +11,6 @@ class OfferSpec extends Specification {
     "id" -> "testId",
     "version" -> 1L,
     "userId" -> "testUid",
-    "productId" -> "testPid",
     "tags" -> "testTags",
     "location" -> Json.obj(
       "lat" -> 10.0,
@@ -20,10 +19,10 @@ class OfferSpec extends Specification {
     "price" -> 100.0
   )
 
-  val offer: Offer = Offer(OfferId("testId"),
+  val offer: Offer = Offer(
+    OfferId("testId"),
     Version(1L),
     UserId("testUid"),
-    ProductId("testPid"),
     "testTags",
     Location(Longitude(20.0), Latitude(10.0)),
     Price(100.0))
