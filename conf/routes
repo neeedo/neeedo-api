@@ -8,8 +8,8 @@ GET     /                           @controllers.Documentation.showDocumentation
 # Demands
 GET     /demands/:id                @controllers.Demands.getDemand(id: model.DemandId)
 POST    /demands                    @controllers.Demands.createDemand()
-PUT     /demands/:id                @controllers.Demands.updateDemand(id: model.DemandId)
-DELETE  /demands/:id                @controllers.Demands.deleteDemand(id: model.DemandId)
+PUT     /demands/:id/:version       @controllers.Demands.updateDemand(id: model.DemandId, version: common.domain.Version)
+DELETE  /demands/:id/:version       @controllers.Demands.deleteDemand(id: model.DemandId, version: common.domain.Version)
 OPTIONS /demands                    @controllers.Documentation.showDocumentation()
 
 # Offers

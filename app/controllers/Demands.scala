@@ -32,10 +32,10 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
-  def updateDemand(demandId: DemandId) = Action.async {
+  def updateDemand(demandId: DemandId, version: Version) = Action.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[DemandDraft] match {
-          case Some(demandDraft) => demandService.updateDemand(demandId, demandDraft).map {
+          case Some(demandDraft) => demandService.updateDemand(demandId, version, demandDraft).map {
             case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
             case _ => BadRequest(Json.obj("error" -> "Unknown error"))
           }
@@ -45,8 +45,8 @@ class Demands(demandService: DemandService) extends Controller {
     }
   }
 
-  def deleteDemand(id: DemandId) = Action.async {
-    demandService.deleteDemand(id).map {
+  def deleteDemand(demandId: DemandId, version: Version) = Action.async {
+    demandService.deleteDemand(demandId, version).map {
       case Some(product) => Ok
       case None => NotFound
     }

@@ -1,5 +1,6 @@
 package services
 
+import java.util.concurrent.CompletionException
 import java.util.{Optional, Locale}
 
 import com.github.slugify.Slugify
@@ -7,7 +8,7 @@ import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.SphereClient
 import io.sphere.sdk.attributes.AttributeAccess
-import io.sphere.sdk.models.LocalizedStrings
+import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
 import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductFetchById
@@ -21,14 +22,27 @@ import common.helper.OptionalToOptionConverter._
 
 
 class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient) {
-  val demandIndex = IndexName("demands")
-  val demandType = TypeName("demands")
 
   def createDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
       demandOption <- writeDemandToSphere(demandDraft)
-      es <- writeDemandToEs(demandOption.get) if demandOption.isDefined
-    } yield demandOption
+      es <- demandOption match {
+        case Some(demand) => writeDemandToEs(demand)
+        case None => Future.successful(DemandSaveFailed)
+      }
+    } yield {
+      (demandOption, es) match {
+        case (None, DemandSaveFailed) =>
+          Logger.error("WriteDemandToSphere failed")
+          None
+        case (Some(demand), DemandSaveFailed) =>
+          deleteDemand(demand.id, demand.version)
+          Logger.error("WriteDemandToEs failed. Rollback.")
+          None
+        case _ =>
+          demandOption
+      }
+    }
   }
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
@@ -44,25 +58,21 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
-  def updateDemand(demandId: DemandId, demandDraft: DemandDraft): Future[Option[Demand]] = {
+  def updateDemand(demandId: DemandId, version: Version, demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
       createDemand <- createDemand(demandDraft)
-      deleteOldDemand <- deleteDemand(demandId)
+      deleteOldDemand <- deleteDemand(demandId, version)
     } yield createDemand
   }
 
 
-  def deleteDemand(id: DemandId):Future[Option[Product]] = {
-    for {
-      productOptional <- getProductById(id)
-      deletedProduct <- {
-        val option: Option[Product] = productOptional
-        option match {
-          case Some(product) => sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_))
-          case None => Future.successful(Option.empty[Product])
-        }
-      }
-    } yield deletedProduct
+  def deleteDemand(demandId: DemandId, version: Version): Future[Option[Product]] = {
+    val product: Versioned[Product] = Versioned.of(demandId.value, version.value)
+    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_)).recover {
+      // TODO besseres exception matching
+      case e: CompletionException => Option.empty[Product]
+      case e: Exception => throw e
+    }
   }
 
   def getAttribute(product: Product, name: String) =
@@ -74,6 +84,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   def productToDemand(product: Product): Demand = {
     Demand(
       DemandId(product.getId),
+      Version(product.getVersion),
       UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
       getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
       Location(
@@ -88,8 +99,11 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
+    //TODO indexname und typename in config verankern?
+    val demandIndex = IndexName("demands")
+    val demandType = TypeName("demands")
     elasticsearch.indexDocument(demandIndex, demandType, Json.toJson(demand)).map {
-      case response if response.isCreated => DemandSaved(demand.id)
+      case response if response.isCreated => DemandSaved
       case _ => DemandSaveFailed
     } recover {
       case _ => DemandSaveFailed
@@ -109,11 +123,9 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
       product => Option(productToDemand(product))
     } recover {
-      case e: Exception => {
-        throw e
+      case e: Exception =>
         Logger.error(e.getMessage)
         Option.empty[Demand]
-      }
     }
   }
 }
