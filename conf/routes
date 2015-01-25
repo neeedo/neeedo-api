@@ -32,8 +32,8 @@ OPTIONS        /stub/demands                @controllers.Documentation.showDocum
 GET             /stub/offers                @controllers.OffersStub.listOffers()
 GET             /stub/offers/:id            @controllers.OffersStub.getOffer(id: model.OfferId)
 POST            /stub/offers                @controllers.OffersStub.createOffer()
-PUT             /stub/offers/:id            @controllers.OffersStub.updateOffer(id: model.OfferId)
-DELETE          /stub/offers/:id            @controllers.OffersStub.deleteOffer(id: model.OfferId)
+PUT             /stub/offers/:id/:version   @controllers.OffersStub.updateOffer(id: model.OfferId, version: common.domain.Version)
+DELETE          /stub/offers/:id/:version   @controllers.OffersStub.deleteOffer(id: model.OfferId, version: common.domain.Version)
 OPTIONS         /stub/offers                @controllers.Documentation.showDocumentation()
 
 

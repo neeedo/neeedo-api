@@ -1,7 +1,7 @@
 package controllers
 
 import common.domain._
-import model.{OfferId, Offer, ProductId}
+import model._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
@@ -18,6 +18,13 @@ class OffersStub extends Controller {
     case "2" => Some(offer2)
     case "3" => Some(offer3)
     case _   => None
+  }
+
+  def fetchOffer(id: OfferId, version: Version): Option[Offer] = (id.value, version.value) match {
+    case ("1", 1L) => Some(offer1)
+    case ("2", 1L) => Some(offer2)
+    case ("3", 2L) => Some(offer3)
+    case (_, _)    => None
   }
 
   def createOffer = Action { implicit request =>
@@ -43,8 +50,8 @@ class OffersStub extends Controller {
     }
   }
 
-  def updateOffer(offerId: OfferId) = Action { implicit request =>
-    fetchOffer(offerId) match {
+  def updateOffer(offerId: OfferId, version: Version) = Action { implicit request =>
+    fetchOffer(offerId, version) match {
       case Some(offer) =>
         request.body.asJson match {
           case Some(json) =>
@@ -58,8 +65,8 @@ class OffersStub extends Controller {
     }
   }
 
-  def deleteOffer(offerId: OfferId) = Action {
-    fetchOffer(offerId) match {
+  def deleteOffer(offerId: OfferId, version: Version) = Action {
+    fetchOffer(offerId, version) match {
       case Some(offer) => Ok
       case None => NotFound(Json.obj("error" -> "Offer Entity not found"))
     }
