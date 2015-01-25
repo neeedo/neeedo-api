@@ -9,7 +9,6 @@ case class Offer(
   id: OfferId,
   version: Version,
   uid: UserId,
-  pid: ProductId,
   tags: String,
   location: Location,
   price: Price)
@@ -20,13 +19,12 @@ object Offer {
     (JsPath \ "id").read[String] and
     (JsPath \ "version").read[Long] and
     (JsPath \ "userId").read[String] and
-    (JsPath \ "productId").read[String] and
     (JsPath \ "tags").read[String] and
     (JsPath \ "location" \ "lat").read[Double] and
     (JsPath \ "location" \ "lon").read[Double] and
     (JsPath \ "price").read[Double]
     ) {
-    (id, version, uid, pid, tags, lat, lon, price) => Offer(OfferId(id), Version(version), UserId(uid), ProductId(pid), tags, Location(Longitude(lon), Latitude(lat)),
+    (id, version, uid, tags, lat, lon, price) => Offer(OfferId(id), Version(version), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
       Price(price))
   }
 
@@ -35,7 +33,6 @@ object Offer {
       "id" -> o.id.value,
       "version" -> o.version.value,
       "userId" -> o.uid.value,
-      "productId" -> o.pid.value,
       "tags" -> o.tags,
       "location" -> Json.obj(
         "lat" -> o.location.lat.value,

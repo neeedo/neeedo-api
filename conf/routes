@@ -3,31 +3,39 @@
 # ~~~~
 
 # Home page
-GET     /                           @controllers.Documentation.showDocumentation()
+GET            /                            @controllers.Documentation.showDocumentation()
 
 # Demands
-GET     /demands/:id                @controllers.Demands.getDemand(id: model.DemandId)
-POST    /demands                    @controllers.Demands.createDemand()
-PUT     /demands/:id/:version       @controllers.Demands.updateDemand(id: model.DemandId, version: common.domain.Version)
-DELETE  /demands/:id/:version       @controllers.Demands.deleteDemand(id: model.DemandId, version: common.domain.Version)
-OPTIONS /demands                    @controllers.Documentation.showDocumentation()
+GET            /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
+POST           /demands                     @controllers.Demands.createDemand()
+PUT            /demands/:id/:version        @controllers.Demands.updateDemand(id: model.DemandId, version: common.domain.Version)
+DELETE         /demands/:id/:version        @controllers.Demands.deleteDemand(id: model.DemandId, version: common.domain.Version)
+OPTIONS        /demands                     @controllers.Documentation.showDocumentation()
 
 # Offers
-GET     /offers                     @controllers.Offers.listOffers()
-GET     /offers/:id                 @controllers.Offers.getOffer(id: model.OfferId)
-POST    /offers                     @controllers.Offers.createOffer()
-PUT     /offers/:id                 @controllers.Offers.updateOffer(id: model.OfferId)
-DELETE  /offers/:id                 @controllers.Offers.deleteOffer(id: model.OfferId)
-OPTIONS /offers                     @controllers.Documentation.showDocumentation()
+GET            /offers                      @controllers.Offers.listOffers()
+GET            /offers/:id                  @controllers.Offers.getOffer(id: model.OfferId)
+POST           /offers                      @controllers.Offers.createOffer()
+PUT            /offers/:id                  @controllers.Offers.updateOffer(id: model.OfferId)
+DELETE         /offers/:id                  @controllers.Offers.deleteOffer(id: model.OfferId)
+OPTIONS        /offers                      @controllers.Documentation.showDocumentation()
 
 # Stub Demands
-GET     /stub/demands               @controllers.DemandsStub.listDemands()
-GET     /stub/demands/:id           @controllers.DemandsStub.getDemand(id: model.DemandId)
-POST    /stub/demands               @controllers.DemandsStub.createDemand()
-PUT     /stub/demands/:id           @controllers.DemandsStub.updateDemand(id: model.DemandId)
-DELETE  /stub/demands/:id           @controllers.DemandsStub.deleteDemand(id: model.DemandId)
-OPTIONS /stub/demands               @controllers.Documentation.showDocumentation()
+GET            /stub/demands                @controllers.DemandsStub.listDemands()
+GET            /stub/demands/:id            @controllers.DemandsStub.getDemand(id: model.DemandId)
+POST           /stub/demands                @controllers.DemandsStub.createDemand()
+PUT            /stub/demands/:id            @controllers.DemandsStub.updateDemand(id: model.DemandId)
+DELETE         /stub/demands/:id            @controllers.DemandsStub.deleteDemand(id: model.DemandId)
+OPTIONS        /stub/demands                @controllers.Documentation.showDocumentation()
+
+# Stub Offers
+GET             /stub/offers                @controllers.OffersStub.listOffers()
+GET             /stub/offers/:id            @controllers.OffersStub.getOffer(id: model.OfferId)
+POST            /stub/offers                @controllers.OffersStub.createOffer()
+PUT             /stub/offers/:id            @controllers.OffersStub.updateOffer(id: model.OfferId)
+DELETE          /stub/offers/:id            @controllers.OffersStub.deleteOffer(id: model.OfferId)
+OPTIONS         /stub/offers                @controllers.Documentation.showDocumentation()
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET            /assets/*file                controllers.Assets.at(path="/public", file)

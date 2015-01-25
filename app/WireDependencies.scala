@@ -1,6 +1,6 @@
 import common.elasticsearch.ElasticsearchClientFactory
 import common.sphere.SphereClientFactory
-import controllers.{Offers, Documentation, Demands}
+import controllers._
 import migrations.ProductTypeMigrations
 import services.{MatchingService, OfferService, DemandService}
 
@@ -20,6 +20,8 @@ trait WireDependencies {
   lazy val demandController = wire[Demands]
   lazy val documentationController = wire[Documentation]
   lazy val offerController = wire[Offers]
+  lazy val demandsStubController = wire[DemandsStub]
+  lazy val offersStubController = wire[OffersStub]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
