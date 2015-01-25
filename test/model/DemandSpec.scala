@@ -3,6 +3,7 @@ package model
 import common.domain._
 import org.specs2.mutable.Specification
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.PathBindable
 import play.api.test.WithApplication
 
 class DemandSpec extends Specification {
@@ -41,4 +42,15 @@ class DemandSpec extends Specification {
       Json.toJson(demand) must beEqualTo(demandJs)
     }
   }
+
+  "DemandId" should {
+    "be correctly be created from an identifier" in new WithApplication {
+      DemandId.pathBinder.bind("key1", "12345abc") mustEqual Right(DemandId("12345abc"))
+    }
+
+    "be correctly be transforem into an identifier" in new WithApplication {
+      DemandId.pathBinder.unbind("key", DemandId("abcd")) mustEqual("abcd")
+    }
+  }
+
 }
