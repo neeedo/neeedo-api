@@ -11,6 +11,7 @@ import io.sphere.sdk.products.ProductVariantBuilder
 import io.sphere.sdk.products.ProductDataBuilder
 import io.sphere.sdk.products.ProductCatalogDataBuilder
 import io.sphere.sdk.products.ProductBuilder
+import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.utils.MoneyImpl
 import model.sphere.ProductTypeDrafts
@@ -59,6 +60,15 @@ class DemandServiceSpec extends Specification with Mockito {
       val product = ProductBuilder.of(productType, masterData).id("foo-id").build()
 
       demandService.productToDemand(product) mustEqual demand
+    }
+
+    "getProductById must call Sphereclient execute with fetchcommand" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val demandService = new DemandService(es, sphere)
+
+      demandService.getProductById(DemandId("1"))
+      there was one (sphere).execute(ProductFetchById.of("1"))
     }
   }
 }
