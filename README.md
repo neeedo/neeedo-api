@@ -76,11 +76,11 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 | id | Mandatory | alphanumeric |
 
 ###Response
-201 Created
+200 Ok
     
     {
         "demand":{
-            "id":"1",
+            "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId":"1",
             "tags":"socken bekleidung wolle",
