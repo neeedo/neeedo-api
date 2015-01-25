@@ -57,7 +57,7 @@ class DemandsStub extends Controller {
         request.body.asJson match {
           case Some(json) =>
             json.asOpt[DemandDraft] match {
-              case Some(x) => Ok
+              case Some(x) => Ok(Json.obj("demand" -> Json.toJson(x)))
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
           case None => BadRequest(Json.obj("error" -> "Missing body"))

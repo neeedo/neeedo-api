@@ -31,7 +31,7 @@ class OffersStub extends Controller {
     request.body.asJson match {
       case Some(json) =>
         json.asOpt[OfferDraft] match {
-          case Some(offerDraft) => Created(Json.obj("demand" -> Json.toJson(offerDraft)))
+          case Some(offerDraft) => Created(Json.obj("offer" -> Json.toJson(offerDraft)))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
       case None => BadRequest(Json.obj("error" -> "Missing body"))
@@ -56,7 +56,7 @@ class OffersStub extends Controller {
         request.body.asJson match {
           case Some(json) =>
             json.asOpt[OfferDraft] match {
-              case Some(_offer) => Ok
+              case Some(_offer) => Ok(Json.obj("offer" -> Json.toJson(_offer)))
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
           case None => BadRequest(Json.obj("error" -> "Missing body"))
