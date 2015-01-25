@@ -13,7 +13,19 @@ class DemandsStub extends Controller {
   val demand2 = Demand(DemandId("2"), Version(1L), UserId("2"), "auto lack blau", Location(Longitude(52.468562), Latitude(13.534212)), Distance(40), Price(150.0), Price(300.0))
   val demand3 = Demand(DemandId("3"), Version(1L), UserId("3"), "notebook kein apple scheiss", Location(Longitude(20.0), Latitude(10.0)), Distance(25), Price(500.0), Price(1000.0))
 
-  def fetchDemand(id: DemandId): Option[Demand] = if (id.value == "1") Some(demand1) else None
+  def fetchDemand(id: DemandId, version: Version): Option[Demand] = (id.value, version.value) match {
+    case ("1", 1L) => Some(demand1)
+    case ("2", 1L) => Some(demand1)
+    case ("3", 1L) => Some(demand1)
+    case (_, _)    => None
+  }
+
+  def fetchDemand(id: DemandId) : Option[Demand] = id.value match {
+    case "1" => Some (demand1)
+    case "2" => Some (demand2)
+    case "3" => Some (demand3)
+    case _   => None
+  }
 
   def createDemand = Action { implicit request =>
     request.body.asJson match {
@@ -39,8 +51,8 @@ class DemandsStub extends Controller {
     }
   }
 
-  def updateDemand(id: DemandId) = Action { implicit request =>
-    fetchDemand(id) match {
+  def updateDemand(id: DemandId, version: Version) = Action { implicit request =>
+    fetchDemand(id, version) match {
       case Some(demand) =>
         request.body.asJson match {
           case Some(json) =>
@@ -54,8 +66,8 @@ class DemandsStub extends Controller {
     }
   }
 
-  def deleteDemand(id: DemandId) = Action {
-    fetchDemand(id) match {
+  def deleteDemand(id: DemandId, version: Version) = Action {
+    fetchDemand(id, version) match {
       case Some(demand) => Ok
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
