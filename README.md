@@ -28,7 +28,7 @@ cd api
 API-Documentation
 ----------
 
-
+- [Stubs](#stubs)
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
 		- [Ressource:](#ressource-1)
@@ -52,8 +52,12 @@ API-Documentation
 		- [Example:](#example-2)
 
 
-For the latter there are also stub implementations. You can access them by prepending `stub/` to the resource identifier like in 
-POST `http://dry-depths-2035.herokuapp.com/stub/demands`
+# Stubs
+For the latter there are also stub implementations. You can access them by prepending `stub/` to the resource identifier.
+
+Demands: `http://dry-depths-2035.herokuapp.com/stub/demands`
+
+Offers: `http://dry-depths-2035.herokuapp.com/stub/offers`
 
 
 # Demands
@@ -74,6 +78,7 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
     {
         "demand":{
             "id":"1",
+            "version": 1
             "userId":"1",
             "tags":"socken bekleidung wolle",
             "location":{
@@ -137,7 +142,6 @@ The request body must contain a valid DemandDraft json object
 400 Bad Request - Invalid Json
 
 ### Example:
-*Note: If you hand in another ID than 1, we will return 404 NOT FOUND for simulation cases.*
 
     curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
 
@@ -174,6 +178,20 @@ The request body must contain a valid DemandDraft json object
 ### Response:
 200 Ok
 
+    {
+        "userId":"1",
+        "tags":"socken bekleidung wolle",
+        "location":{
+            "lat":13.534212,
+            "lon":52.468562
+        },
+        "distance":30,
+        "price":{
+            "min":25.0,
+            "max":77.0
+        }
+    }
+	
 400 Bad Request - Missing body
 
 400 Bad Request - Cannot parse json
@@ -182,7 +200,7 @@ The request body must contain a valid DemandDraft json object
 
 ### Example:
 
-    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1 -v 
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1/1 -v 
 
 ## Delete Demand
 ### Ressource:
@@ -204,4 +222,4 @@ DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}/{version}`
 
 ### Example:
 
-    curl -XDELETE http://dry-depths-2035.herokuapp.com/demands/1 -v
+    curl -XDELETE http://dry-depths-2035.herokuapp.com/demands/1/1 -v
