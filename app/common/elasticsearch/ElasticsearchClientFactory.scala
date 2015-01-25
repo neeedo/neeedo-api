@@ -12,11 +12,11 @@ object ElasticsearchClientFactory {
   def returnClientForMode(mode: Mode) = mode match {
     case Mode.Dev =>
       if (Configloader.getBoolean("elasticsearch.dev.useRemoteClient"))
-        RemoteEsClient
+        new RemoteEsClient
       else
-        LocalEsClient
-    case Mode.Prod => RemoteEsClient
-    case Mode.Test => LocalEsClient
+        new LocalEsClient
+    case Mode.Prod => new RemoteEsClient
+    case Mode.Test => new LocalEsClient
   }
 
   def getInstance = returnClientForMode(Play.current.mode)
