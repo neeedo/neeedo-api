@@ -7,6 +7,7 @@ import play.api.mvc.PathBindable
 
 case class Offer(
   id: OfferId,
+  version: Version,
   uid: UserId,
   pid: ProductId,
   tags: String,
@@ -17,6 +18,7 @@ object Offer {
 
   implicit val offerReads: Reads[Offer] = (
     (JsPath \ "id").read[String] and
+    (JsPath \ "version").read[Long] and
     (JsPath \ "userId").read[String] and
     (JsPath \ "productId").read[String] and
     (JsPath \ "tags").read[String] and
@@ -24,13 +26,14 @@ object Offer {
     (JsPath \ "location" \ "lon").read[Double] and
     (JsPath \ "price").read[Double]
     ) {
-    (id, uid, pid, tags, lat, lon, price) => Offer(OfferId(id), UserId(uid), ProductId(pid), tags, Location(Longitude(lon), Latitude(lat)),
+    (id, version, uid, pid, tags, lat, lon, price) => Offer(OfferId(id), Version(version), UserId(uid), ProductId(pid), tags, Location(Longitude(lon), Latitude(lat)),
       Price(price))
   }
 
   implicit val offerWrites = new Writes[Offer] {
     def writes(o: Offer) = Json.obj(
       "id" -> o.id.value,
+      "version" -> o.version.value,
       "userId" -> o.uid.value,
       "productId" -> o.pid.value,
       "tags" -> o.tags,
