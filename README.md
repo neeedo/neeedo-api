@@ -1,15 +1,14 @@
 [![Build Status](https://travis-ci.org/HTW-Projekt-2014-Commercetools/api.svg?branch=master)](https://travis-ci.org/HTW-Projekt-2014-Commercetools/api)
 
-[![Dependency Status](https://www.versioneye.com/user/projects/54ad4141daa46ef29900001d/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54ad4141daa46ef29900001d)
+[![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/coverage.svg?branch=master)](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api?branch=#375687-mapping)
 
-[![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/coverage.svg?branch=master)](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api?branch=master)
-
-![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
+![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=#375687-mapping)
 
 How to run (Windows)
 ----------
 
-Please use the GIT Bash. It appeared to work better than using the Windows Bash.
+If possible use the GIT Bash. It appeared to work better than using the Windows Bash.
+Install sbt or activator on your local mashine and run the following.
 
 ```bash
 git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
