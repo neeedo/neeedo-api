@@ -36,4 +36,14 @@ class OfferSpec extends Specification {
       Json.toJson(offer) must beEqualTo(offerJs)
     }
   }
+
+  "OfferId" should {
+    "be correctly be created from an identifier" in new WithApplication {
+      OfferId.pathBinder.bind("key1", "12345abc") mustEqual Right(OfferId("12345abc"))
+    }
+
+    "be correctly be transform into an identifier" in new WithApplication {
+      OfferId.pathBinder.unbind("key", OfferId("12345abc")) mustEqual("12345abc")
+    }
+  }
 }

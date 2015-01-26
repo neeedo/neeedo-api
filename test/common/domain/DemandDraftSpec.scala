@@ -1,6 +1,5 @@
 package common.domain
 
-import model.Demand
 import org.specs2.mutable.Specification
 import play.api.libs.json.{Json, JsObject}
 import play.api.test.WithApplication

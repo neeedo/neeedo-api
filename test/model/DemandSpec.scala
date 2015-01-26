@@ -49,8 +49,8 @@ class DemandSpec extends Specification {
       DemandId.pathBinder.bind("key1", "12345abc") mustEqual Right(DemandId("12345abc"))
     }
 
-    "be correctly be transforem into an identifier" in new WithApplication {
-      DemandId.pathBinder.unbind("key", DemandId("abcd")) mustEqual("abcd")
+    "be correctly be transform into an identifier" in new WithApplication {
+      DemandId.pathBinder.unbind("key", DemandId("12345abc")) mustEqual("12345abc")
     }
   }
 
