@@ -1,6 +1,7 @@
 package services
 
-import java.util.Locale
+import java.util.{Optional, Locale}
+import java.util.concurrent.CompletionException
 import common.domain.Price
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
@@ -101,7 +102,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand))
     }
 
-    "createDemand must return Future[Option[Demand]] if parameters are fine" in loggingOffApp {
+    "createDemand must return Future[Option[Demand]] if parameters are valid" in loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -114,6 +115,71 @@ class DemandServiceSpec extends Specification with Mockito {
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.createDemand(demandDraft) must beEqualTo(Option(demand)).await
       there was one (sphere).execute(any)
+      there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand))
+    }
+
+    "writeDemandToEs must return DemandSaveFailed when IndexResponse is not created" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
+      es.indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand)) returns Future.successful(indexResponse)
+
+      val demandService = new DemandService(es, sphere, productTypes)
+      demandService.writeDemandToEs(demand) must beEqualTo(DemandSaveFailed).await
+      there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand))
+    }
+
+    "deleteDemand must return Option.empty[Product] when sphere execute throws CompletionException" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.failed(new CompletionException(new Exception()))
+
+      val demandService = new DemandService(es, sphere, productTypes)
+      demandService.deleteDemand(demandId, demandVersion) must beEqualTo(Option.empty[Product]).await
+      there was one (sphere).execute(any)
+    }
+
+    "getDemand by Id must return valid Demand if sphere returns valid Product" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(ProductFetchById.of(demandId.value)) returns Future.successful(Optional.of(product))
+
+      val demandService = new DemandService(es, sphere, productTypes)
+      demandService.getDemandById(demandId) must beEqualTo(Option(demand)).await
+      there was one (sphere).execute(any)
+    }
+
+    "getDemand by Id must return empty Option if sphere returns Option empty" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(ProductFetchById.of(demandId.value)) returns Future.successful(Optional.empty())
+
+      val demandService = new DemandService(es, sphere, productTypes)
+      demandService.getDemandById(demandId) must beEqualTo(Option.empty[Demand]).await
+      there was one (sphere).execute(any)
+    }
+
+    "updateDemand must return demand with valid parameters and call sphere twice" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
+      productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
+      val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
+      es.indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand)) returns Future.successful(indexResponse)
+
+      val demandService = new DemandService(es, sphere, productTypes)
+      demandService.updateDemand(demandId, demandVersion, demandDraft) must beEqualTo(Option(demand)).await
+      there was two (sphere).execute(any)
       there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand))
     }
   }
