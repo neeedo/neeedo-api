@@ -2,7 +2,7 @@ package services
 
 import java.util.Locale
 import common.domain._
-import common.elasticsearch.{LocalEsClient, ElasticsearchClient}
+import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
@@ -17,7 +17,7 @@ import io.sphere.sdk.utils.MoneyImpl
 import model.{DemandId, Demand}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json.Json
 import play.api.test.WithApplication
 import scala.collection.JavaConverters._
 import scala.concurrent.Future

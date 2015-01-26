@@ -2,6 +2,7 @@ package services
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
+import common.sphere.{ProductTypes, SphereClient}
 import model.{Offer, OfferId, ProductId}
 import org.elasticsearch.index.query.QueryBuilders
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -9,7 +10,7 @@ import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.Future
 
-class OfferService(elasticsearch: ElasticsearchClient) {
+class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
   val offerIndex = IndexName("offers")
   val offerType = TypeName("offers")
 
