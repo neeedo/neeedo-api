@@ -2,7 +2,6 @@ package common.elasticsearch
 
 import common.domain.{IndexName, TypeName}
 import common.helper.Configloader
-import org.elasticsearch.action.{ListenableActionFuture, ActionListener}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
@@ -10,18 +9,10 @@ import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
-
-import scala.concurrent.{Future, Promise}
+import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
+import scala.concurrent.Future
 
 sealed trait ElasticsearchClient {
-  implicit def convertListenableActionFutureToScalaFuture[T](x: ListenableActionFuture[T]): Future[T] = {
-    val p = Promise[T]()
-    x.addListener(new ActionListener[T] {
-      def onFailure(e: Throwable) = p.failure(e)
-      def onResponse(response: T) = p.success(response)
-    })
-    p.future
-  }
 
   lazy val client = createElasticsearchClient()
   def close(): Unit

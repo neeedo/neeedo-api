@@ -7,7 +7,7 @@ import io.sphere.sdk.producttypes.queries.ProductTypeQuery
 import io.sphere.sdk.queries.PagedQueryResult
 import play.api.Logger
 import scala.concurrent.ExecutionContext.Implicits.global
-import common.helper.OptionalToOptionConverter._
+import common.helper.ImplicitConversions._
 
 import scala.concurrent.Future
 

@@ -17,7 +17,7 @@ import play.api.Logger
 import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import common.helper.OptionalToOptionConverter._
+import common.helper.ImplicitConversions._
 
 
 class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {

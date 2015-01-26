@@ -10,14 +10,14 @@ import io.sphere.sdk.products.ProductVariantBuilder
 import io.sphere.sdk.products.ProductDataBuilder
 import io.sphere.sdk.products.ProductCatalogDataBuilder
 import io.sphere.sdk.products.ProductBuilder
-import io.sphere.sdk.products.commands.ProductCreateCommand
+import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{DemandId, Demand}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import play.api.libs.json.JsValue
+import play.api.libs.json.{Json, JsValue}
 import play.api.test.WithApplication
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -40,15 +40,13 @@ class DemandServiceSpec extends Specification with Mockito {
     val name = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle")
     val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(name, name, emptyProductVariant).build()).build()
     val product = ProductBuilder.of(productType, masterData).id("foo-id").build()
+    val demand = Demand(DemandId("foo-id"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
 
     "productToDemand must return valid Demand objects" in {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
       val demandService = new DemandService(es, sphere, productTypes)
-
-      val demand = Demand(DemandId("foo-id"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-
 
       demandService.productToDemand(product) mustEqual demand
     }
@@ -78,19 +76,19 @@ class DemandServiceSpec extends Specification with Mockito {
       demandService.createDemand(demandDraft) must be (Option.empty[Demand]).await
     }
 
-    //TODO mock vom esclient klappt noch nicht :-/
-//    "createDemand must return None if writing to es fails and deleteDemand should be called once with correct parameters" in new WithApplication {
-//      val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-//      val es = mock[LocalEsClient]
-//      val sphere = mock[SphereClient]
-//      val productTypes = mock[ProductTypes]
-//
-//      sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
-//      productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
-//      es.indexDocument(any[IndexName], any[TypeName], any[JsValue]) returns Future.failed(new RuntimeException("test exception"))
-//
-//      val demandService = new DemandService(es, sphere, productTypes)
-//      demandService.createDemand(demandDraft) must be (Option.empty[Demand]).await
-//    }
+    "createDemand must return None if writing to es fails and deleteDemand should be called once with correct parameters" in new WithApplication {
+      val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
+      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.successful(product)
+      productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
+      es.indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand)) returns Future.failed(new RuntimeException("test exception"))
+
+      val demandService = new DemandService(es, sphere, productTypes)
+      demandService.createDemand(demandDraft) must be (Option.empty[Demand]).await
+    }
   }
 }
