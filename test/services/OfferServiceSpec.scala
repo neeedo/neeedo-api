@@ -24,11 +24,11 @@ class OfferServiceSpec extends Specification with Mockito {
 //  val offer = Offer(OfferId("123456789abc"), Version(1L), UserId("1"), "socken bekleidung wolle",  Location(Longitude(52.468562), Latitude(13.534212)), Price(50.0))
 //  val offerDraft = OfferDraft(offer.uid, offer.tags, offer.location, offer.price)
 //  val attributeList = List(
-//  Attribute.of("userId", offer.uid.value),
-//  Attribute.of("tags", offer.tags),
-//  Attribute.of("longitude", offer.location.lon.value),
-//  Attribute.of("latitude", offer.location.lat.value),
-//  Attribute.of("price", MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
+//    Attribute.of("userId", offer.uid.value),
+//    Attribute.of("tags", offer.tags),
+//    Attribute.of("longitude", offer.location.lon.value),
+//    Attribute.of("latitude", offer.location.lat.value),
+//    Attribute.of("price", MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
 //  ).asJava
 //
 //  val esClient = mock[ElasticsearchClient]
@@ -40,7 +40,7 @@ class OfferServiceSpec extends Specification with Mockito {
 //  val name = LocalizedStrings.of(Locale.ENGLISH, offer.tags)
 //  val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(name, name, emptyProductVariant).build()).build()
 //  val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
-//
+
 //  "productToOffer" should {
 //    "return a valid Offer Object" in {
 //      offerService.productToOffer(product) mustEqual offer
@@ -55,6 +55,7 @@ class OfferServiceSpec extends Specification with Mockito {
 //  }
 //
 //  "createOffer" should {
+//
 //    "return None if writing to sphere fails" in new WithApplication {
 //      sphereClient.execute(any[ProductCreateCommand]) returns Future.failed(new RuntimeException("test exception"))
 //      productTypes.offer returns ProductTypeBuilder.of("id", ProductTypeDrafts.offer).build()
@@ -72,4 +73,5 @@ class OfferServiceSpec extends Specification with Mockito {
 //      offerService.createOffer(offerDraft) must be (Option.empty[Offer]).await
 //    }
 //  }
+
 }

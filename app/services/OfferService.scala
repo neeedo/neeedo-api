@@ -1,9 +1,12 @@
 package services
 
+import java.util.Optional
+
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, SphereClient}
-import model.{Offer, OfferId, ProductId}
+import io.sphere.sdk.products.Product
+import model.{OfferId, Offer}
 import org.elasticsearch.index.query.QueryBuilders
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsValue, Json}
@@ -38,4 +41,20 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
       case _ => OfferCouldNotBeSaved
     }
   }
+
+  // Todo implementation
+  def createOffer(offerDraft: OfferDraft): Future[Option[Offer]] = {
+    Future.successful(None)
+  }
+
+  // Todo implementation
+  def getProductById(id: OfferId): Future[Optional[Product]] = {
+    Future.successful(Optional.empty())
+  }
+
+  // Todo implementation
+  def productToOffer(product: Product): Offer = {
+    Offer(OfferId("1"), Version(1L), UserId("1"), "bla", Location(Longitude(1), Latitude(2)), Price(1))
+  }
+
 }
