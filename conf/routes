@@ -13,11 +13,10 @@ DELETE         /demands/:id/:version        @controllers.Demands.deleteDemand(id
 OPTIONS        /demands                     @controllers.Documentation.showDocumentation()
 
 # Offers
-GET            /offers                      @controllers.Offers.listOffers()
 GET            /offers/:id                  @controllers.Offers.getOffer(id: model.OfferId)
 POST           /offers                      @controllers.Offers.createOffer()
-PUT            /offers/:id                  @controllers.Offers.updateOffer(id: model.OfferId)
-DELETE         /offers/:id                  @controllers.Offers.deleteOffer(id: model.OfferId)
+PUT            /offers/:id/:version         @controllers.Offers.updateOffer(id: model.OfferId, version: common.domain.Version)
+DELETE         /offers/:id/:version         @controllers.Offers.deleteOffer(id: model.OfferId, version: common.domain.Version)
 OPTIONS        /offers                      @controllers.Documentation.showDocumentation()
 
 # Stub Demands
