@@ -41,11 +41,11 @@ class OfferServiceSpec extends Specification with Mockito {
   val productVariantDraft = ProductVariantDraftBuilder.of().attributes(productAttributeList).build()
 
 //  val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
-//  val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags)
-//
-//  val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+  val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags)
+
+  val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
 //  val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
-//
+
 //  "productToOffer" should {
 //    "return valid Offer objects" in {
 //      val es = mock[ElasticsearchClient]
@@ -56,34 +56,34 @@ class OfferServiceSpec extends Specification with Mockito {
 //      service.productToOffer(product) mustEqual offer
 //    }
 //  }
-//
-//  "getProductById" should {
-//    "call Sphereclient execute with fetchcommand" in {
-//      val es = mock[ElasticsearchClient]
-//      val sphere = mock[SphereClient]
-//      val productTypes = mock[ProductTypes]
-//      val service = new OfferService(es, sphere, productTypes)
-//
-//      service.getProductById(OfferId("1"))
-//      there was one (sphere).execute(ProductFetchById.of("1"))
-//    }
-//  }
-//
-//  "createOffer" should {
-//    "return None if writing to sphere fails" in WithQuietApplication {
-//      val es = mock[ElasticsearchClient]
-//      val sphere = mock[SphereClient]
-//      val productTypes = mock[ProductTypes]
-//
-//      sphere.execute(any[ProductCreateCommand]) returns Future.failed(new RuntimeException("test exception"))
-//      productTypes.offer returns ProductTypeBuilder.of("id", ProductTypeDrafts.offer).build()
-//
-//      val service = new OfferService(es, sphere, productTypes)
-//
-//      service.createOffer(offerDraft) must be (Option.empty[Offer]).await
-//      there was one (sphere).execute(any[ProductCreateCommand])
-//    }
-//
+
+  "getProductById" should {
+    "call Sphereclient execute with fetchcommand" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+      val service = new OfferService(es, sphere, productTypes)
+
+      service.getProductById(OfferId("1"))
+      there was one (sphere).execute(ProductFetchById.of("1"))
+    }
+  }
+
+  "createOffer" should {
+    "return None if writing to sphere fails" in WithQuietApplication {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(any[ProductCreateCommand]) returns Future.failed(new RuntimeException("test exception"))
+      productTypes.offer returns ProductTypeBuilder.of("id", ProductTypeDrafts.offer).build()
+
+      val service = new OfferService(es, sphere, productTypes)
+
+      service.createOffer(offerDraft) must be (Option.empty[Offer]).await
+      there was one (sphere).execute(any[ProductCreateCommand])
+    }
+
 //    "return None if writing to es fails and call sphere execute twice" in WithQuietApplication {
 //      val es = mock[ElasticsearchClient]
 //      val sphere = mock[SphereClient]
@@ -99,7 +99,7 @@ class OfferServiceSpec extends Specification with Mockito {
 //      there was two (sphere).execute(any)
 //      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer))
 //    }
-//
+
 //    "return Future[Option[Offer]] if parameters are valid" in WithQuietApplication {
 //      val es = mock[ElasticsearchClient]
 //      val sphere = mock[SphereClient]
@@ -115,38 +115,38 @@ class OfferServiceSpec extends Specification with Mockito {
 //      there was one (sphere).execute(any)
 //      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer))
 //    }
-//  }
-//
-//  "writeOfferToEs" should {
-//    "return OfferSaveFailed when IndexResponse is not created" in {
-//      val es = mock[ElasticsearchClient]
-//      val sphere = mock[SphereClient]
-//      val productTypes = mock[ProductTypes]
-//
-//      val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
-//      es.indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer)) returns Future.successful(indexResponse)
-//
-//      val service = new OfferService(es, sphere, productTypes)
-//      service.writeOfferToEs(offer) must beEqualTo(OfferSaveFailed).await
-//      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer))
-//    }
-//  }
-//
-//  "deleteOffer" should {
-//    "return Option.empty[Product] when sphere execute throws CompletionException" in {
-//      val es = mock[ElasticsearchClient]
-//      val sphere = mock[SphereClient]
-//      val productTypes = mock[ProductTypes]
-//
-//      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.failed(new CompletionException(new Exception()))
-//
-//      val service = new OfferService(es, sphere, productTypes)
-//      service.deleteOffer(offer.id, offer.version) must beEqualTo(Option.empty[Product]).await
-//      there was one (sphere).execute(any)
-//    }
-//  }
-//
-//  "getOfferById" should {
+  }
+
+  "writeOfferToEs" should {
+    "return OfferSaveFailed when IndexResponse is not created" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
+      es.indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer)) returns Future.successful(indexResponse)
+
+      val service = new OfferService(es, sphere, productTypes)
+      service.writeOfferToEs(offer) must beEqualTo(OfferSaveFailed).await
+      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer))
+    }
+  }
+
+  "deleteOffer" should {
+    "return Option.empty[Product] when sphere execute throws CompletionException" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.failed(new CompletionException(new Exception()))
+
+      val service = new OfferService(es, sphere, productTypes)
+      service.deleteOffer(offer.id, offer.version) must beEqualTo(Option.empty[Product]).await
+      there was one (sphere).execute(any)
+    }
+  }
+
+  "getOfferById" should {
 //    "return valid Offer if sphere returns valid Product" in {
 //      val es = mock[ElasticsearchClient]
 //      val sphere = mock[SphereClient]
@@ -158,20 +158,20 @@ class OfferServiceSpec extends Specification with Mockito {
 //      service.getOfferById(offer.id) must beEqualTo(Option(offer)).await
 //      there was one (sphere).execute(any)
 //    }
-//
-//    "return empty Option if sphere returns Option empty" in {
-//      val es = mock[ElasticsearchClient]
-//      val sphere = mock[SphereClient]
-//      val productTypes = mock[ProductTypes]
-//
-//      sphere.execute(ProductFetchById.of(offer.id.value)) returns Future.successful(Optional.empty())
-//
-//      val service = new OfferService(es, sphere, productTypes)
-//      service.getOfferById(offer.id) must beEqualTo(Option.empty[Offer]).await
-//      there was one (sphere).execute(any)
-//    }
-//  }
-//
+
+    "return empty Option if sphere returns Option empty" in {
+      val es = mock[ElasticsearchClient]
+      val sphere = mock[SphereClient]
+      val productTypes = mock[ProductTypes]
+
+      sphere.execute(ProductFetchById.of(offer.id.value)) returns Future.successful(Optional.empty())
+
+      val service = new OfferService(es, sphere, productTypes)
+      service.getOfferById(offer.id) must beEqualTo(Option.empty[Offer]).await
+      there was one (sphere).execute(any)
+    }
+  }
+
 //  "updateOffer" should {
 //    "return Offer with valid parameters and call sphere twice" in {
 //      val es = mock[ElasticsearchClient]

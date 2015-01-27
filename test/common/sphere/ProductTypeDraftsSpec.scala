@@ -25,4 +25,17 @@ class ProductTypeDraftsSpec  extends Specification {
     }
   }
 
+  "buildOfferAttributes" should {
+    "return correct java.util.List<Attribute>" in {
+      val offerDraft = OfferDraft(UserId("1"), "", Location(Longitude(1), Latitude(1)), Price(1))
+
+      ProductTypeDrafts.buildOfferAttributes(offerDraft) mustEqual List(
+        Attribute.of("userId", offerDraft.uid.value),
+        Attribute.of("tags", offerDraft.tags),
+        Attribute.of("longitude", offerDraft.location.lon.value),
+        Attribute.of("latitude", offerDraft.location.lat.value),
+        Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
+      ).asJava
+    }
+  }
 }
