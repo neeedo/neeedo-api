@@ -182,18 +182,22 @@ The request body must contain a valid DemandDraft json object
 200 Ok
 
     {
-        "userId":"1",
-        "tags":"socken bekleidung wolle rot",
-        "location":{
-            "lat":13.534212,
-            "lon":52.468562
-        },
-        "distance":30,
-        "price":{
-            "min":25.0,
-            "max":77.0
+        "demand": {
+            "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "version": 2
+            "userId": "1",
+            "tags": "socken bekleidung wolle rot",
+            "location": {
+                "lat":13.534212,
+                "lon":52.468562
+            },
+            "distance": 30,
+            "price": {
+                "min":25.0,
+                "max":77.0
+            }
         }
-    }
+    }	
 	
 400 Bad Request - Missing body
 
