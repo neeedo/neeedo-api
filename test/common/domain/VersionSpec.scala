@@ -14,10 +14,4 @@ class VersionSpec extends Specification {
       Version.pathBinder.unbind("key", Version(123L)) mustEqual "123"
     }
   }
-
-  "++" should {
-    "return the next Version" in {
-      Version(1L).++ mustEqual Version(2L)
-    }
-  }
 }
