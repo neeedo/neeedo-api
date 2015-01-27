@@ -1,18 +1,17 @@
 package services
 
-import java.util.{Optional, Locale}
-import java.util.concurrent.CompletionException
-import common.domain.Price
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.attributes.Attribute
-import io.sphere.sdk.models.{Versioned, DefaultCurrencyUnits, LocalizedStrings}
-import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, ProductVariantBuilder, ProductCatalogDataBuilder, ProductBuilder, ProductDataBuilder}
+import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
+import io.sphere.sdk.products.{ProductVariantBuilder, ProductVariantDraftBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductBuilder}
 import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.utils.MoneyImpl
+import java.util.{Optional, Locale}
+import java.util.concurrent.CompletionException
 import model.{DemandId, Demand}
 import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito

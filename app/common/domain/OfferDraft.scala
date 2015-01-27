@@ -1,9 +1,7 @@
 package common.domain
 
-import model.{Offer, ProductId}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.mvc.PathBindable
 
 case class OfferDraft(
   uid: UserId,
@@ -20,7 +18,8 @@ object OfferDraft {
     (JsPath \ "location" \ "lon").read[Double] and
     (JsPath \ "price").read[Double]
   ) {
-    (uid, tags, lat, lon, price) => OfferDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)), Price(price))
+    (uid, tags, lat, lon, price) =>
+      OfferDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)), Price(price))
   }
 
   implicit val offerWrites = new Writes[OfferDraft] {

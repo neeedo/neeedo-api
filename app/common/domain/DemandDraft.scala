@@ -23,8 +23,8 @@ object DemandDraft {
 		(JsPath \ "price" \ "min").read[Double] and
 		(JsPath \ "price" \ "max").read[Double]
 		) {
-		(uid, tags, lat, lon, distance, priceMin, priceMax) => DemandDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
-		Distance(distance), Price(priceMin), Price(priceMax))
+		(uid, tags, lat, lon, distance, priceMin, priceMax) =>
+			DemandDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)), Distance(distance), Price(priceMin), Price(priceMax))
 		}
 
 	implicit val demandWrites = new Writes[DemandDraft] {

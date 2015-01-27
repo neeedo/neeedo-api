@@ -18,10 +18,10 @@ trait WireDependencies {
 
   // Controllers
   lazy val demandController = wire[Demands]
-  lazy val documentationController = wire[Documentation]
   lazy val offerController = wire[Offers]
   lazy val demandsStubController = wire[DemandsStub]
   lazy val offersStubController = wire[OffersStub]
+  lazy val documentationController = wire[Documentation]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
