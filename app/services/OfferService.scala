@@ -38,7 +38,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     elasticsearch.indexDocument(offerIndex, offerType, Json.toJson(offer)).map(response =>
       OfferSaved
     ).recover {
-      case _ => OfferCouldNotBeSaved
+      case _ => OfferSaveFailed
     }
   }
 

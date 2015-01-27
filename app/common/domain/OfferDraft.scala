@@ -6,22 +6,21 @@ import play.api.libs.json._
 import play.api.mvc.PathBindable
 
 case class OfferDraft(
-                       uid: UserId,
-                       tags: String,
-                       location: Location,
-                       price: Price)
+  uid: UserId,
+  tags: String,
+  location: Location,
+  price: Price)
 
 object OfferDraft {
 
   implicit val offerReads: Reads[OfferDraft] = (
-      (JsPath \ "userId").read[String] and
-      (JsPath \ "tags").read[String] and
-      (JsPath \ "location" \ "lat").read[Double] and
-      (JsPath \ "location" \ "lon").read[Double] and
-      (JsPath \ "price").read[Double]
-    ) {
-    (uid, tags, lat, lon, price) => OfferDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
-      Price(price))
+    (JsPath \ "userId").read[String] and
+    (JsPath \ "tags").read[String] and
+    (JsPath \ "location" \ "lat").read[Double] and
+    (JsPath \ "location" \ "lon").read[Double] and
+    (JsPath \ "price").read[Double]
+  ) {
+    (uid, tags, lat, lon, price) => OfferDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)), Price(price))
   }
 
   implicit val offerWrites = new Writes[OfferDraft] {

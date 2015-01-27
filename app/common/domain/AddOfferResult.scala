@@ -1,7 +1,7 @@
 package common.domain
 
 sealed trait AddOfferResult
-object OfferCouldNotBeSaved extends AddOfferResult
+object OfferSaveFailed extends AddOfferResult
 object OfferSaved extends AddOfferResult
 
 

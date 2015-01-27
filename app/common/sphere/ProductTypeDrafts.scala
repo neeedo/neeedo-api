@@ -2,7 +2,7 @@ package common.sphere
 
 import java.util.Locale
 
-import common.domain.DemandDraft
+import common.domain.{OfferDraft, DemandDraft}
 import common.helper.Configloader
 import io.sphere.sdk.attributes._
 import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
@@ -22,6 +22,14 @@ object ProductTypeDrafts {
     Attribute.of("distance", demandDraft.distance.value),
     Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demandDraft.priceMin.value).bigDecimal, DefaultCurrencyUnits.EUR)),
     Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demandDraft.priceMax.value).bigDecimal, DefaultCurrencyUnits.EUR))
+  ).asJava
+
+  def buildOfferAttributes(offerDraft: OfferDraft) = List(
+    Attribute.of("userId", offerDraft.uid.value),
+    Attribute.of("tags", offerDraft.tags),
+    Attribute.of("longitude", offerDraft.location.lon.value),
+    Attribute.of("latitude", offerDraft.location.lat.value),
+    Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
   ).asJava
 
   private def demandAttributes: java.util.List[AttributeDefinition] =

@@ -13,7 +13,7 @@ class OffersStub extends Controller {
   val offer2 = Offer(OfferId("2"), Version(1L), UserId("2"), "comics sammlung avengers", Location(Longitude(52.468562), Latitude(13.534212)), Price(500.0))
   val offer3 = Offer(OfferId("3"), Version(2L), UserId("3"), "bekleidung handmade gestrickt mütze hipster", Location(Longitude(52.468562), Latitude(13.534212)), Price(5.0))
 
-  def fetchOffer(offerId: OfferId): Option[Offer] = offerId.value match {
+  def fetchOffer(id: OfferId): Option[Offer] = id.value match {
     case "1" => Some(offer1)
     case "2" => Some(offer2)
     case "3" => Some(offer3)
@@ -24,20 +24,21 @@ class OffersStub extends Controller {
     case ("1", 1L) => Some(offer1)
     case ("2", 1L) => Some(offer2)
     case ("3", 2L) => Some(offer3)
-    case (_, _)    => None
+    case _ => None
   }
 
   def createOffer = Action { implicit request =>
     request.body.asJson match {
       case Some(json) =>
         json.asOpt[OfferDraft] match {
-          case Some(offerDraft) => Created(Json.obj("offer" -> Json.toJson(offerDraft)))
+          case Some(_) => Created(Json.obj("offer" -> Json.toJson(offer1)))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
       case None => BadRequest(Json.obj("error" -> "Missing body"))
     }
   }
 
+  // TODO move to matching controller
   def listOffers = Action {
     val offers = offer1 :: offer2 :: offer3 :: Nil
     Ok(Json.obj("offers" -> Json.toJson(offers)))
@@ -50,13 +51,17 @@ class OffersStub extends Controller {
     }
   }
 
-  def updateOffer(offerId: OfferId, version: Version) = Action { implicit request =>
-    fetchOffer(offerId, version) match {
-      case Some(offer) =>
+  def updateOffer(id: OfferId, version: Version) = Action { implicit request =>
+    fetchOffer(id, version) match {
+      case Some(_) =>
         request.body.asJson match {
           case Some(json) =>
             json.asOpt[OfferDraft] match {
-              case Some(_offer) => Ok(Json.obj("offer" -> Json.toJson(_offer)))
+              case Some(draft) => {
+//                val updatedOffer = Offer(id, version ++, draft.uid, draft.tags, draft.location, draft.price)
+//                Ok(Json.obj("offer" -> Json.toJson(updatedOffer)))
+                Ok(Json.obj("offer" -> Json.toJson(draft)))
+              }
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
           case None => BadRequest(Json.obj("error" -> "Missing body"))
@@ -65,9 +70,9 @@ class OffersStub extends Controller {
     }
   }
 
-  def deleteOffer(offerId: OfferId, version: Version) = Action {
-    fetchOffer(offerId, version) match {
-      case Some(offer) => Ok
+  def deleteOffer(id: OfferId, version: Version) = Action {
+    fetchOffer(id, version) match {
+      case Some(_) => Ok
       case None => NotFound(Json.obj("error" -> "Offer Entity not found"))
     }
   }

@@ -2,7 +2,10 @@ package common.domain
 
 import play.api.mvc.PathBindable
 
-case class Version(value: Long)
+case class Version(value: Long) {
+  def ++ = Version(this.value + 1)
+}
+
 object Version {
   implicit def pathBinder: PathBindable[Version] = new PathBindable[Version] {
     override def bind(key: String, value: String): Either[String, Version] = {

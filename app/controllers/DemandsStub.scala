@@ -13,13 +13,6 @@ class DemandsStub extends Controller {
   val demand2 = Demand(DemandId("2"), Version(1L), UserId("2"), "auto lack blau", Location(Longitude(52.468562), Latitude(13.534212)), Distance(40), Price(150.0), Price(300.0))
   val demand3 = Demand(DemandId("3"), Version(1L), UserId("3"), "notebook kein apple scheiss", Location(Longitude(20.0), Latitude(10.0)), Distance(25), Price(500.0), Price(1000.0))
 
-  def fetchDemand(id: DemandId, version: Version): Option[Demand] = (id.value, version.value) match {
-    case ("1", 1L) => Some(demand1)
-    case ("2", 1L) => Some(demand1)
-    case ("3", 1L) => Some(demand1)
-    case (_, _)    => None
-  }
-
   def fetchDemand(id: DemandId) : Option[Demand] = id.value match {
     case "1" => Some (demand1)
     case "2" => Some (demand2)
@@ -27,18 +20,25 @@ class DemandsStub extends Controller {
     case _   => None
   }
 
+  def fetchDemand(id: DemandId, version: Version): Option[Demand] = (id.value, version.value) match {
+    case ("1", 1L) => Some(demand1)
+    case ("2", 1L) => Some(demand1)
+    case ("3", 1L) => Some(demand1)
+    case _ => None
+  }
+
   def createDemand = Action { implicit request =>
     request.body.asJson match {
       case Some(json) =>
         json.asOpt[DemandDraft] match {
-          case Some(demandDraft) => Created(Json.obj("demand" -> Json.toJson(demand1)))
+          case Some(_) => Created(Json.obj("demand" -> Json.toJson(demand1)))
           case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
         }
       case None => BadRequest(Json.obj("error" -> "Missing body"))
     }
   }
 
-  // TODO list könnte später vom matching controller übernommen werden?
+  // TODO move to matching controller
   def listDemands = Action {
     val demands = demand1 :: demand2 :: demand3 :: Nil
     Ok(Json.obj("demands" -> Json.toJson(demands)))
@@ -53,11 +53,15 @@ class DemandsStub extends Controller {
 
   def updateDemand(id: DemandId, version: Version) = Action { implicit request =>
     fetchDemand(id, version) match {
-      case Some(demand) =>
+      case Some(_) =>
         request.body.asJson match {
           case Some(json) =>
             json.asOpt[DemandDraft] match {
-              case Some(x) => Ok(Json.obj("demand" -> Json.toJson(x)))
+              case Some(draft) => {
+//                val updatedDemand = Demand(id, version ++, draft.uid, draft.tags, draft.location, draft.distance, draft. priceMin, draft.priceMax)
+//                Ok(Json.obj("demand" -> Json.toJson(updatedDemand)))
+                Ok(Json.obj("demand" -> Json.toJson(draft)))
+              }
               case None => BadRequest(Json.obj("error" -> "Cannot parse json"))
             }
           case None => BadRequest(Json.obj("error" -> "Missing body"))
@@ -68,7 +72,7 @@ class DemandsStub extends Controller {
 
   def deleteDemand(id: DemandId, version: Version) = Action {
     fetchDemand(id, version) match {
-      case Some(demand) => Ok
+      case Some(_) => Ok
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
