@@ -9,13 +9,13 @@
 Installation
 ----------
 
-0. Install Java JDK 1.8 and make sure to set the correct PATH settings (JAVA_HOME)
-1. Please login into your Sphere.IO backend account (http://admin.sphere.io).
-2. Navigate to "Developers -> API Access". 
+0. Install Java JDK 1.8 and make sure to set the correct PATH settings (JAVA_HOME). You can find it here: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html .
+1. Please login into your SPHERE.IO backend account (http://admin.sphere.io).
+2. Navigate to "Developers -> API Clients". 
 3. Run **git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git** .
 4. Copy the file **api/conf/custom-application-dummy.conf** and to **api/conf/custom-application.conf**.
 5. Set the following configuration values:
-- **sphere.project**: Copy and paste the **project name** as marked in the SPHERE Backend in red.
+- **sphere.project**: Copy and paste the **project name** as marked in the SPHERE.IO Backend in red.
 - **sphere.clientId**: Copy and paste the field **client_id** as marked in the backend.
 - **sphere.clientSecret**: Copy and paste the **field client_secret** as listed in the backend.
 6. Now refer to the How to Run section. 
