@@ -19,6 +19,9 @@ PUT            /offers/:id/:version         @controllers.Offers.updateOffer(id: 
 DELETE         /offers/:id/:version         @controllers.Offers.deleteOffer(id: model.OfferId, version: common.domain.Version)
 OPTIONS        /offers                      @controllers.Documentation.showDocumentation()
 
+# Matching
+GET            /matching/demands            @controllers.Matching.matchDemands()
+
 # Stub Demands
 GET            /stub/demands                @controllers.DemandsStub.listDemands()
 GET            /stub/demands/:id            @controllers.DemandsStub.getDemand(id: model.DemandId)
