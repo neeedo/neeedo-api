@@ -13,7 +13,7 @@ Installation
 1. Please login into your Sphere.IO backend account (http://admin.sphere.io).
 2. Navigate to "Developers -> API Access". 
 3. Run **git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git** .
-4. Copy the file **conf/custom-application-dummy.conf** and rename it to **conf/custom-application.conf**.
+4. Copy the file **api/conf/custom-application-dummy.conf** and to **api/conf/custom-application.conf**.
 5. Set the following configuration values:
 - **sphere.project**: Copy and paste the **project name** as marked in the SPHERE Backend in red.
 - **sphere.clientId**: Copy and paste the field **client_id** as marked in the backend.
