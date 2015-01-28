@@ -439,7 +439,7 @@ DELETE `http://dry-depths-2035.herokuapp.com/offers/{id}/{version}`
 
 ## Get List of all Demands
 ### Ressource:
-GET `http://dry-depths-2035.herokuapp.com/matchin/demands`
+GET `http://dry-depths-2035.herokuapp.com/matching/demands`
 
 
 ### Response:
@@ -448,5 +448,5 @@ GET `http://dry-depths-2035.herokuapp.com/matchin/demands`
 
 ### Example:
 
-    curl -XGET http://dry-depths-2035.herokuapp.com/matchin/demands -v
+    curl -XGET http://dry-depths-2035.herokuapp.com/matching/demands -v
     
