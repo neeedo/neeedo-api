@@ -1,6 +1,9 @@
 package model
 
 import common.domain._
+import io.sphere.sdk.attributes.AttributeAccess
+import io.sphere.sdk.products.Product
+import play.api.Logger
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.PathBindable
@@ -13,7 +16,7 @@ case class Offer(
   location: Location,
   price: Price)
 
-object Offer {
+object Offer extends ModelUtils {
 
   implicit val offerReads: Reads[Offer] = (
     (JsPath \ "id").read[String] and
@@ -40,6 +43,29 @@ object Offer {
       ),
       "price" -> o.price.value
     )
+  }
+
+  def productToOffer(product: Product): Option[Offer] = {
+    try {
+      Some(
+        Offer(
+          OfferId(product.getId),
+          Version(product.getVersion),
+          UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
+          getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+          Location(
+            Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
+            Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+          ),
+          // Todo Nullpointer case
+          Price(getAttribute(product, "price").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
+        )
+      )
+    } catch {
+      case e: Exception =>
+        Logger.error(s"Failed to parse product as a valid Offer.")
+        None
+    }
   }
 }
 

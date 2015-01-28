@@ -67,7 +67,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     val productDraft = ProductDraftBuilder.of(productTypes.demand, productName, slug, productVariant).build()
 
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
-      product => Option(productToDemand(product))
+      product => Demand.productToDemand(product)
     } recover {
       case e: Exception =>
         Logger.error(e.getMessage)
@@ -82,7 +82,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       productOptional: Optional[Product] =>
         val option: Option[Product] = productOptional
         option match {
-          case Some(product) => Some(productToDemand(product))
+          case Some(product) => Demand.productToDemand(product)
           case _ => Option.empty[Demand]
       }
     }
@@ -105,26 +105,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
-  def getAttribute(product: Product, name: String) =
-    product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
-
   def getProductById(id: DemandId): Future[Optional[Product]] =
     sphereClient.execute(ProductFetchById.of(id.value))
-
-  def productToDemand(product: Product): Demand = {
-    Demand(
-      DemandId(product.getId),
-      Version(product.getVersion),
-      UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-      getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
-      Location(
-        Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-        Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
-      ),
-      Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
-      // Todo Nullpointer case
-      Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
-      Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-    )
-  }
 }

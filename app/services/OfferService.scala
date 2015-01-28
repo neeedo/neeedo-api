@@ -7,15 +7,13 @@ import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
-import io.sphere.sdk.attributes.AttributeAccess
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder, Product}
 import model.{OfferId, Offer}
-import org.elasticsearch.index.query.QueryBuilders
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.Logger
 import common.helper.ImplicitConversions._
 
@@ -68,7 +66,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     val productDraft = ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()
 
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
-      product => Option(productToOffer(product))
+      product => Offer.productToOffer(product)
     } recover {
       case e: Exception =>
         Logger.error(e.getMessage)
@@ -83,7 +81,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
       productOptional: Optional[Product] =>
         val option: Option[Product] = productOptional
         option match {
-          case Some(product) => Some(productToOffer(product))
+          case Some(product) => Offer.productToOffer(product)
           case _ => Option.empty[Offer]
         }
     }
@@ -105,36 +103,6 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     }
   }
 
-  // Todo Not specific to demand or offer, move to arbitrary location
-  def getAttribute(product: Product, name: String) =
-    product.getMasterData.getStaged.getMasterVariant.getAttribute(name).get()
-
   def getProductById(id: OfferId): Future[Optional[Product]] =
     sphereClient.execute(ProductFetchById.of(id.value))
-
-  def productToOffer(product: Product): Offer = {
-    Offer(
-      OfferId(product.getId),
-      Version(product.getVersion),
-      UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-      getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
-      Location(
-        Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-        Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
-      ),
-      // Todo Nullpointer case
-      Price(getAttribute(product, "price").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-    )
-  }
-
-//  def getOffers: Future[JsValue] = getOffersFromEs.map {
-//    hits => Json.obj("offers" -> hits.toSeq.map {
-//      hit => Json.parse(hit.sourceAsString())
-//    })
-//  }
-
-//  def getOffersFromEs = {
-//    elasticsearch.search(offerIndex, offerType, QueryBuilders.matchAllQuery()).map(result => result.getHits.getHits)
-//  }
-
 }

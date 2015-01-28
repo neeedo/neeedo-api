@@ -17,13 +17,11 @@ import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
-import play.api.test.{FakeApplication, WithApplication}
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
+import test.TestApplications
 
 class DemandServiceSpec extends Specification with Mockito {
-
-  val loggingOffApp = new WithApplication(FakeApplication(additionalConfiguration = Map("logger.application" -> "OFF"))){}
 
   val productAttributeList = List(
     Attribute.of("userId", "1"),
@@ -52,15 +50,6 @@ class DemandServiceSpec extends Specification with Mockito {
 
   "Demand service" should {
 
-    "productToDemand must return valid Demand objects" in {
-      val es = mock[ElasticsearchClient]
-      val sphere = mock[SphereClient]
-      val productTypes = mock[ProductTypes]
-      val demandService = new DemandService(es, sphere, productTypes)
-
-      demandService.productToDemand(product) mustEqual demand
-    }
-
     "getProductById must call Sphereclient execute with fetchcommand" in {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
@@ -71,7 +60,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(ProductFetchById.of("1"))
     }
 
-    "createDemand must return None if writing to sphere fails" in loggingOffApp {
+    "createDemand must return None if writing to sphere fails" in TestApplications.loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -85,7 +74,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(any[ProductCreateCommand])
     }
 
-    "createDemand must return None if writing to es fails and call sphere execute twice" in loggingOffApp {
+    "createDemand must return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -101,7 +90,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand))
     }
 
-    "createDemand must return Future[Option[Demand]] if parameters are valid" in loggingOffApp {
+    "createDemand must return Future[Option[Demand]] if parameters are valid" in TestApplications.loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]

@@ -17,14 +17,11 @@ import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
-import play.api.test.{FakeApplication, WithApplication}
+import test.TestApplications
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class OfferServiceSpec extends Specification with Mockito {
-
-  // Todo outsource
-  val WithQuietApplication = new WithApplication(FakeApplication(additionalConfiguration = Map("logger.application" -> "OFF"))){}
 
   val offer = Offer(OfferId("abc123"), Version(1L), UserId("1"), "socken bekleidung wolle und mehr",  Location(Longitude(52.468562), Latitude(13.534212)), Price(50.0))
   val offerDraft = OfferDraft(offer.uid, offer.tags, offer.location, offer.price)
@@ -46,17 +43,6 @@ class OfferServiceSpec extends Specification with Mockito {
   val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
   val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
 
-  "productToOffer" should {
-    "return valid Offer objects" in {
-      val es = mock[ElasticsearchClient]
-      val sphere = mock[SphereClient]
-      val productTypes = mock[ProductTypes]
-      val service = new OfferService(es, sphere, productTypes)
-
-      service.productToOffer(product) mustEqual offer
-    }
-  }
-
   "getProductById" should {
     "call Sphereclient execute with fetchcommand" in {
       val es = mock[ElasticsearchClient]
@@ -70,7 +56,7 @@ class OfferServiceSpec extends Specification with Mockito {
   }
 
   "createOffer" should {
-    "return None if writing to sphere fails" in WithQuietApplication {
+    "return None if writing to sphere fails" in TestApplications.loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -84,7 +70,7 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(any[ProductCreateCommand])
     }
 
-    "return None if writing to es fails and call sphere execute twice" in WithQuietApplication {
+    "return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -100,7 +86,7 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer))
     }
 
-    "return Future[Option[Offer]] if parameters are valid" in WithQuietApplication {
+    "return Future[Option[Offer]] if parameters are valid" in TestApplications.loggingOffApp {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]

@@ -1,6 +1,9 @@
 package model
 
 import common.domain._
+import io.sphere.sdk.attributes.AttributeAccess
+import io.sphere.sdk.products.Product
+import play.api.Logger
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.PathBindable
@@ -14,9 +17,10 @@ case class Demand(
 	distance: Distance,
 	//TODO pricerange case class?
 	priceMin: Price,
-	priceMax: Price)
+	priceMax: Price) {
+}
 
-object Demand {
+object Demand extends ModelUtils {
 
 	implicit val demandReads: Reads[Demand] = (
 		(JsPath \ "id").read[String] and
@@ -50,6 +54,31 @@ object Demand {
 			)
 		)
 	}
+
+  def productToDemand(product: Product): Option[Demand] = {
+    try {
+      Some(
+          Demand(
+          DemandId(product.getId),
+          Version(product.getVersion),
+          UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
+          getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+          Location(
+            Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
+            Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+          ),
+          Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
+          // Todo Nullpointer case
+          Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
+          Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
+        )
+      )
+    } catch {
+      case e: Exception =>
+        Logger.error(s"Failed to parse product as a valid Demand.")
+        None
+    }
+  }
 }
 
 case class DemandId(value: String)
