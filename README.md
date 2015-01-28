@@ -18,7 +18,7 @@ Installation
 - **sphere.project**: Copy and paste the **project name** as marked in the SPHERE Backend in red.
 - **sphere.clientId**: Copy and paste the field **client_id** as marked in the backend.
 - **sphere.clientSecret**: Copy and paste the **field client_secret** as listed in the backend.
-6. Now refer to the How tu Run section. 
+6. Now refer to the How to Run section. 
 
 
 How to run (Windows)
