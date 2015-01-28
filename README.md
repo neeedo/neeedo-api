@@ -9,6 +9,7 @@
 Installation
 ----------
 
+0. Install Java JDK 1.8 and make sure to set the correct PATH settings (JAVA_HOME)
 1. Please login into your Sphere.IO backend account (http://admin.sphere.io).
 2. Navigate to "Developers -> API Access". 
 3. Run **git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git** .
@@ -27,7 +28,6 @@ If possible use the GIT Bash. It appeared to work better than using the Windows 
 Install sbt or activator on your local machine and run the following.
 
 ```bash
-git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
 cd api
 activator run
 ```
@@ -36,7 +36,6 @@ How to run (Unix)
 ----------
 
 ```bash
-git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
 cd api
 ./sbt run
 ```
