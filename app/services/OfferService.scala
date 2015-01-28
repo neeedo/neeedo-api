@@ -50,10 +50,8 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     val offerIndex = IndexName("offers")
     val offerType = TypeName("offers")
     elasticsearch.indexDocument(offerIndex, offerType, Json.toJson(offer)).map {
-      _.isCreated match {
-        case true => OfferSaved
-        case false => OfferSaveFailed
-      }
+      indexResponse => if (indexResponse.isCreated) OfferSaved
+      else OfferSaveFailed
     } recover {
       case _ => OfferSaveFailed
     }
