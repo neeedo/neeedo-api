@@ -1,10 +1,11 @@
 package controllers
 
 import play.api.mvc._
+import services.DocumentationService
 
-class Documentation extends Controller {
+class Documentation(service: DocumentationService) extends Controller {
 
   def showDocumentation = Action {
-    Ok
+    Ok(service.readDocumentation())
   }
 }
