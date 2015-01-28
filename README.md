@@ -74,18 +74,23 @@ API-Documentation
 		- [Ressource:](#ressource-5)
 		- [Body:](#body)
 		- [Response:](#response-5)
-		- [Example:](#example)
+		- [Example:](#example-3)
 	- [Update Offer](#update-offer)
 		- [Ressource:](#ressource-6)
 		- [URL Parameters:](#url-parameters-4)
 		- [Body:](#body-1)
 		- [Response:](#response-6)
-		- [Example:](#example-1)
+		- [Example:](#example-4)
 	- [Delete Offer](#delete-offer)
 		- [Ressource:](#ressource-7)
 		- [URL Parameters:](#url-parameters-6)
 		- [Response:](#response-7)
-		- [Example:](#example-2)
+		- [Example:](#example-5)
+	- [Get List of all Demands](#get-list-of-all-demands)
+	    - [Ressource:](#ressource-8)
+        - [Response:](#response-8)
+        - [Example:](#example-6)
+
 
 
 # Stubs
