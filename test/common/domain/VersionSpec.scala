@@ -11,7 +11,7 @@ class VersionSpec extends Specification {
     }
 
     "be correctly be transform into an identifier" in new WithApplication {
-      Version.pathBinder.unbind("key", Version(123L)) mustEqual("123")
+      Version.pathBinder.unbind("key", Version(123L)) mustEqual "123"
     }
   }
 }

@@ -13,3 +13,12 @@ libraryDependencies ++= Seq(
   "io.sphere.sdk.jvm" % "models" % "1.0.0-M9",
   "io.sphere.sdk.jvm" %% "play-2_3-java-client" % "1.0.0-M9"
 )
+
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
+
+initialize := {
+  val _ = initialize.value // run the previous initialization
+    if (sys.props("java.specification.version") < "1.8") {
+      sys.error("Java 8 is required for this project.")
+    }
+}

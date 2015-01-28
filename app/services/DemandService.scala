@@ -49,10 +49,8 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     val demandIndex = IndexName("demands")
     val demandType = TypeName("demands")
     elasticsearch.indexDocument(demandIndex, demandType, Json.toJson(demand)).map {
-      _.isCreated match {
-        case true => DemandSaved
-        case false => DemandSaveFailed
-      }
+      indexResponse => if (indexResponse.isCreated) DemandSaved
+      else DemandSaveFailed
     } recover {
       case _ => DemandSaveFailed
     }
