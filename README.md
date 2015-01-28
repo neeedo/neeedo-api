@@ -431,4 +431,17 @@ DELETE `http://dry-depths-2035.herokuapp.com/offers/{id}/{version}`
 ### Example:
 
     curl -XDELETE http://dry-depths-2035.herokuapp.com/offers/1/1 -v
+
+## Get List of all Demands
+### Ressource:
+GET `http://dry-depths-2035.herokuapp.com/matchin/demands`
+
+
+### Response:
+
+200 Ok
+
+### Example:
+
+    curl -XGET http://dry-depths-2035.herokuapp.com/matchin/demands -v
     
