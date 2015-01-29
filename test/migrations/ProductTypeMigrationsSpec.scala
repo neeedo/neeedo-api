@@ -1,5 +1,7 @@
 package migrations
 
+import java.util.concurrent.TimeUnit
+
 import common.sphere.{ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.producttypes.commands.ProductTypeCreateCommand
@@ -9,9 +11,10 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import test.TestApplications
 import scala.collection.JavaConverters._
+import scala.concurrent.duration.FiniteDuration
 
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 
 class ProductTypeMigrationsSpec extends Specification with Mockito {
   "ProductTypeMigrations" should {
@@ -23,7 +26,7 @@ class ProductTypeMigrationsSpec extends Specification with Mockito {
       sphereClient.execute(ProductTypeQuery.of().byName(ProductTypeDrafts.offer.getName)) returns Future.successful(emptyPagedResult)
 
       val productTypeMigrations: ProductTypeMigrations = new ProductTypeMigrations(sphereClient)
-      productTypeMigrations.run()
+      Await.result(productTypeMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
       there was one (sphereClient).execute(ProductTypeQuery.of().byName(ProductTypeDrafts.demand.getName))
       there was one (sphereClient).execute(ProductTypeQuery.of().byName(ProductTypeDrafts.offer.getName))
@@ -39,7 +42,7 @@ class ProductTypeMigrationsSpec extends Specification with Mockito {
       sphereClient.execute(ProductTypeQuery.of().byName(ProductTypeDrafts.offer.getName)) returns Future.successful(nonEmptyPagedResult)
 
       val productTypeMigrations: ProductTypeMigrations = new ProductTypeMigrations(sphereClient)
-      productTypeMigrations.run()
+      Await.result(productTypeMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
       there was no (sphereClient).execute(ProductTypeCreateCommand.of(ProductTypeDrafts.demand))
       there was no (sphereClient).execute(ProductTypeCreateCommand.of(ProductTypeDrafts.offer))

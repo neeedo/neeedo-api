@@ -1,6 +1,7 @@
 package migrations
 
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 import common.domain.{OfferDraft, DemandDraft}
 import common.sphere.{ProductTypeDrafts, SphereClient}
@@ -16,7 +17,8 @@ import services.{OfferService, DemandService}
 import test.TestApplications
 import scala.collection.JavaConverters._
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.FiniteDuration
 
 class ProductTestDataMigrationsSpec extends Specification with Mockito {
 
@@ -31,7 +33,7 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
           sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
 
           val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
-          productTestDataMigrations.run()
+          Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
           there was one (sphereClient).execute(ProductQuery.of())
           there was three (demandService).createDemand(any[DemandDraft])
@@ -55,7 +57,7 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
           sphereClient.execute(ProductQuery.of()) returns Future.successful(nonEmptyPagedResult)
 
           val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
-          productTestDataMigrations.run()
+          Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
           there was no (demandService).createDemand(any)
           there was no (offerService).createOffer(any)
@@ -71,7 +73,7 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
           sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
 
           val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
-          productTestDataMigrations.run()
+          Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
           there was no (demandService).createDemand(any)
           there was no (offerService).createOffer(any)
