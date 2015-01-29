@@ -40,47 +40,47 @@ API-Documentation
 - [Stubs](#stubs)
 - [Demands](#demands)
 	- [Query all Demands](#query-all-demands)
-		- [Ressource](#ressource)
+		- [Resource](#resource)
 		- [Response](#response)
 		- [Example](#example)
 	- [Query single Demand](#query-single-demand)
-		- [Ressource](#ressource-1)
+		- [Resource](#resource-1)
 		- [URL Parameters](#url-parameters)
 		- [Response](#response-1)
 	- [Create Demand](#create-demand)
-		- [Ressource](#ressource-2)
+		- [Resource](#resource-2)
 		- [Body](#body)
 		- [Response](#response-2)
 		- [Example](#example)
 	- [Update Demand](#update-demand)
-		- [Ressource](#ressource-3)
+		- [Resource](#resource-3)
 		- [URL Parameters](#url-parameters-1)
 		- [Body](#body-1)
 		- [Response](#response-3)
 		- [Example](#example-2)
 	- [Delete Demand](#delete-demand)
-		- [Ressource](#ressource-4)
+		- [Resource](#resource-4)
 		- [URL Parameters](#url-parameters-2)
 		- [Response](#response-4)
 		- [Example](#example-3)
 - [Offers](#offers)
 	- [Query single Offer](#query-single-offer)
-		- [Ressource](#ressource-5)
+		- [Resource](#resource-5)
 		- [URL Parameters](#url-parameters-3)
 		- [Response](#response-5)
 	- [Create Offer](#create-offer)
-		- [Ressource](#ressource-6)
+		- [Resource](#resource-6)
 		- [Body](#body)
 		- [Response](#response-6)
 		- [Example](#example-4)
 	- [Update Offer](#update-offer)
-		- [Ressource](#ressource-7)
+		- [Resource](#resource-7)
 		- [URL Parameters](#url-parameters-4)
 		- [Body](#body-1)
 		- [Response](#response-7)
 		- [Example](#example-5)
 	- [Delete Offer](#delete-offer)
-		- [Ressource](#ressource-8)
+		- [Resource](#resource-8)
 		- [URL Parameters](#url-parameters-6)
 		- [Response](#response-8)
 		- [Example](#example-6)
@@ -97,7 +97,7 @@ Offers: `http://dry-depths-2035.herokuapp.com/stub/offers`
 # Demands
 
 ## Query all Demands
-### Ressource
+### Resource
 GET `http://dry-depths-2035.herokuapp.com/matching/demands`
 
 ### Response
@@ -107,7 +107,7 @@ GET `http://dry-depths-2035.herokuapp.com/matching/demands`
     curl -XGET http://dry-depths-2035.herokuapp.com/matching/demands -v
     
 ## Query single Demand
-### Ressource
+### Resource
 GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 
 ### URL Parameters
@@ -140,7 +140,7 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
 404 - Not Found
 
 ## Create Demand
-### Ressource
+### Resource
 POST `http://dry-depths-2035.herokuapp.com/demands`
 
 ### Body
@@ -190,7 +190,7 @@ The request body must contain a valid DemandDraft json object
     curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
 
 ## Update Demand
-### Ressource
+### Resource
 PUT `http://dry-depths-2035.herokuapp.com/demands/{id}/{version}`
 
 ### URL Parameters
@@ -251,7 +251,7 @@ The request body must contain a valid DemandDraft json object
     curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1/1 -v 
 
 ## Delete Demand
-### Ressource
+### Resource
 DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}/{version}`
 
 ### URL Parameters
@@ -275,7 +275,7 @@ DELETE `http://dry-depths-2035.herokuapp.com/demands/{id}/{version}`
 # Offers
 
 ## Query single Offer
-### Ressourc
+### Resource
 GET `http://dry-depths-2035.herokuapp.com/offers/{id}`
 
 ### URL Parameters
@@ -307,7 +307,7 @@ GET `http://dry-depths-2035.herokuapp.com/offers/{id}`
 404 - Not Found
 
 ## Create Offer
-### Ressource
+### Resource
 POST `http://dry-depths-2035.herokuapp.com/offers`
 
 ### Body
@@ -355,7 +355,7 @@ The request body must contain a valid OfferDraft json object
     curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/offers -v
 
 ## Update Offer
-### Ressource
+### Resource
 PUT `http://dry-depths-2035.herokuapp.com/offers/{id}/{version}`
 
 ### URL Parameters
@@ -414,7 +414,7 @@ The request body must contain a valid OfferDraft json object
     curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/offers/1/1 -v 
 
 ## Delete Demand
-### Ressource
+### Resource
 DELETE `http://dry-depths-2035.herokuapp.com/offers/{id}/{version}`
 
 ### URL Parameters
