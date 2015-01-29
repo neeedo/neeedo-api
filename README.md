@@ -297,10 +297,7 @@ GET `http://dry-depths-2035.herokuapp.com/offers/{id}`
                 "lat":13.534212,
                 "lon":52.468562
             },
-            "price":{
-                "min":25.0,
-                "max":77.0
-            }
+            "price":25.0
         }
     }
     
@@ -320,10 +317,7 @@ The request body must contain a valid OfferDraft json object
             "lat":13.534212,
             "lon":52.468562
         },
-        "price":{
-            "min":25.0,
-            "max":77.0
-        }
+        "price":25.0
     }
 
 ### Response
@@ -339,10 +333,7 @@ The request body must contain a valid OfferDraft json object
                 "lat":13.534212,
                 "lon":52.468562
             },
-            "price": {
-                "min":25.0,
-                "max":77.0
-            }
+            "price":25.0
         }
     }
     
@@ -352,7 +343,7 @@ The request body must contain a valid OfferDraft json object
 
 ### Example
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/offers -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://dry-depths-2035.herokuapp.com/offers -v
 
 ## Update Offer
 ### Resource
@@ -376,10 +367,7 @@ The request body must contain a valid OfferDraft json object
             "lat":13.534212,
             "lon":52.468562
         },
-        "price":{
-            "min":25.0,
-            "max":77.0
-        }
+        "price":25.0
     }
 	
 
@@ -396,10 +384,7 @@ The request body must contain a valid OfferDraft json object
                 "lat":13.534212,
                 "lon":52.468562
             },
-            "price": {
-                "min":25.0,
-                "max":77.0
-            }
+            "price":25.0
         }
     }	
 	
@@ -411,7 +396,7 @@ The request body must contain a valid OfferDraft json object
 
 ### Example
 
-    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/offers/1/1 -v 
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://dry-depths-2035.herokuapp.com/offers/1/1 -v 
 
 ## Delete Demand
 ### Resource
