@@ -1,8 +1,10 @@
 import common.elasticsearch.ElasticsearchClientFactory
-import common.sphere.{ProductTypes, SphereClientFactory}
+import common.sphere.{MockProductTypes, SphereProductTypes, ProductTypes, SphereClientFactory}
 import controllers._
-import migrations.ProductTypeMigrations
+import migrations.{ProductTestDataMigrations, ProductTypeMigrations}
+import play.api.Play
 import services.{DocumentationService, MatchingService, OfferService, DemandService}
+import play.api.Mode
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
@@ -27,7 +29,9 @@ trait WireDependencies {
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
+  lazy val productTestDataMigration = wire[ProductTestDataMigrations]
 
   // Common
-  lazy val productTypes = wire[ProductTypes]
+  lazy val productTypes:ProductTypes = if (Play.current.mode == Mode.Test) wire[MockProductTypes]
+  else wire[SphereProductTypes]
 }

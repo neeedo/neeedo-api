@@ -56,7 +56,7 @@ class OfferServiceSpec extends Specification with Mockito {
   }
 
   "createOffer" should {
-    "return None if writing to sphere fails" in TestApplications.loggingOffApp {
+    "return None if writing to sphere fails" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -70,7 +70,7 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(any[ProductCreateCommand])
     }
 
-    "return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp {
+    "return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -86,7 +86,7 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), Json.toJson(offer))
     }
 
-    "return Future[Option[Offer]] if parameters are valid" in TestApplications.loggingOffApp {
+    "return Future[Option[Offer]] if parameters are valid" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]

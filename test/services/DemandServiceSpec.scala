@@ -60,7 +60,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(ProductFetchById.of("1"))
     }
 
-    "createDemand must return None if writing to sphere fails" in TestApplications.loggingOffApp {
+    "createDemand must return None if writing to sphere fails" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -74,7 +74,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(any[ProductCreateCommand])
     }
 
-    "createDemand must return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp {
+    "createDemand must return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -90,7 +90,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), Json.toJson(demand))
     }
 
-    "createDemand must return Future[Option[Demand]] if parameters are valid" in TestApplications.loggingOffApp {
+    "createDemand must return Future[Option[Demand]] if parameters are valid" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]

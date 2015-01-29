@@ -86,7 +86,7 @@ class DemandSpec extends Specification {
       Demand.productToDemand(validProduct) mustEqual Option(demand)
     }
 
-    "productToDemand must return None objects for invalid demand products" in TestApplications.loggingOffApp {
+    "productToDemand must return None objects for invalid demand products" in TestApplications.loggingOffApp() {
       Demand.productToDemand(invalidProduct) mustEqual None
     }
 

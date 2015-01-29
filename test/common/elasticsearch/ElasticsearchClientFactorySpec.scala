@@ -21,7 +21,7 @@ class ElasticsearchClientFactorySpec extends Specification {
     }
 
     "getInstance should return LocalClient in test mode" in new WithApplication {
-      ElasticsearchClientFactory.getInstance must haveClass[LocalEsClient]
+      ElasticsearchClientFactory.instance must haveClass[LocalEsClient]
     }
   }
 }

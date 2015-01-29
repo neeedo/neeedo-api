@@ -72,7 +72,7 @@ class OfferSpec extends Specification {
       Offer.productToOffer(validProduct) mustEqual Option(offer)
     }
 
-    "productToOffer must return None objects for invalid offer products" in TestApplications.loggingOffApp {
+    "productToOffer must return None objects for invalid offer products" in TestApplications.loggingOffApp() {
       Offer.productToOffer(invalidProduct) mustEqual None
     }
   }

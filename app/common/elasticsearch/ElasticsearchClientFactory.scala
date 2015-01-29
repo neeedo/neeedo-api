@@ -19,5 +19,5 @@ object ElasticsearchClientFactory {
     case Mode.Test => new LocalEsClient
   }
 
-  def getInstance = returnClientForMode(Play.current.mode)
+  private def getInstance = returnClientForMode(Play.current.mode)
 }
