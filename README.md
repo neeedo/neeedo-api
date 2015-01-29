@@ -9,7 +9,7 @@
 Installation
 ----------
 
-To run this project Java JDK 1.8 or higher is required.
+To run this project [Java JDK 1.8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) or higher is required.
 
 Checkout the project and create a `custom-application.conf`
 
