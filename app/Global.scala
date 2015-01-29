@@ -1,7 +1,12 @@
+import java.util.concurrent.TimeUnit
+
 import common.elasticsearch.ElasticsearchClientFactory
 import migrations.{ProductTestDataMigrations, ProductTypeMigrations}
-import play.api.{Mode, Play, Application, GlobalSettings}
+import play.api._
 import com.softwaremill.macwire.{MacwireMacros, Macwire}
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.FiniteDuration
 
 object Global extends GlobalSettings with Macwire {
   import MacwireMacros._
@@ -17,8 +22,9 @@ object Global extends GlobalSettings with Macwire {
 
   override def onStart(app: Application): Unit = {
     if (Play.current.mode != Mode.Test) {
-      wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run()
-      wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run()
+      Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(10, TimeUnit.SECONDS))
+      Await.result(wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(10, TimeUnit.SECONDS))
     }
   }
 }
+

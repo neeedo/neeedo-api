@@ -4,20 +4,22 @@ import common.helper.Configloader
 import io.sphere.sdk.attributes.AttributeDefinition
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
+import play.api.Logger
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
 trait ProductTypes {
-  val demand: ProductType
-  val offer: ProductType
+  def demand: ProductType
+  def offer: ProductType
 }
 
 class SphereProductTypes(sphereClient: SphereClient) extends ProductTypes {
-  val demand: ProductType = queryDemandType
-  val offer: ProductType = queryOfferType
+  lazy val demand: ProductType = queryDemandType
+  lazy val offer: ProductType = queryOfferType
 
   private def queryDemandType: ProductType = {
+    Logger.info("Querying producttypes")
     val typeName = Configloader.getStringOpt("demand.typeName").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }

@@ -22,8 +22,7 @@ class ProductTypeMigrationsSpec extends Specification with Mockito {
     "create offer and demand producttypes when they don't exist in Sphere.IO" in TestApplications.loggingOffApp() {
       val sphereClient = mock[SphereClient]
       val emptyPagedResult = PagedQueryResult.of(List.empty[ProductType].asJava)
-      sphereClient.execute(ProductTypeQuery.of().byName(ProductTypeDrafts.demand.getName)) returns Future.successful(emptyPagedResult)
-      sphereClient.execute(ProductTypeQuery.of().byName(ProductTypeDrafts.offer.getName)) returns Future.successful(emptyPagedResult)
+      sphereClient.execute(any[ProductTypeQuery]) returns Future.successful(emptyPagedResult)
 
       val productTypeMigrations: ProductTypeMigrations = new ProductTypeMigrations(sphereClient)
       Await.result(productTypeMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))

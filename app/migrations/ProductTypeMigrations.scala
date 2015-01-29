@@ -13,21 +13,25 @@ import scala.concurrent.Future
 
 class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
 
-  override def run(): Unit = {
-    createType(ProductTypeDrafts.demand)
-    createType(ProductTypeDrafts.offer)
+  override def run(): Future[Unit] = {
+    Logger.info("Starting to create Producttypes")
+    for {
+      demand <- createType(ProductTypeDrafts.demand)
+      offer <- createType(ProductTypeDrafts.offer)
+    } yield {
+      Logger.info("Product type migrations complete.")
+    }
   }
 
-  def createType(typeDraft: ProductTypeDraft): Unit = {
+  def createType(typeDraft: ProductTypeDraft): Future[Unit] = {
     val typeName = typeDraft.getName
     val queryResult: Future[PagedQueryResult[ProductType]] = sphereClient.execute(ProductTypeQuery.of().byName(typeName))
     val option: Future[Option[ProductType]] = queryResult.map(res => res.head())
 
     option.map {
       case None =>
-        Logger.info(s"Cannot find $typeName Product Type. Creating type $typeName...")
         val createCommand = ProductTypeCreateCommand.of(typeDraft)
-        sphereClient.execute(createCommand)
+        sphereClient.execute(createCommand).map(res => Logger.info(s"Cannot find $typeName Product Type. Creating type $typeName..."))
       case Some(prodType: ProductType) => Logger.info(s"Found $typeName Product Type($typeName).")
     }
   }

@@ -1,5 +1,7 @@
 package migrations
 
+import scala.concurrent.Future
+
 trait Migration {
-  def run()
+  def run() : Future[Unit]
 }

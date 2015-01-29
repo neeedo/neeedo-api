@@ -14,20 +14,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ProductTestDataMigrations(sphereClient: SphereClient, demandService: DemandService, offerService: OfferService) extends Migration {
 
-  override def run(): Unit = {
+  override def run(): Future[Unit] = {
     if (Configloader.getBoolean("sphere.IO.createTestData")) {
       val queryResult: Future[PagedQueryResult[Product]] = sphereClient.execute(ProductQuery.of())
-      val option: Future[Option[Product]] = queryResult.map(res => res.head())
+      val option: Future[Unit] = queryResult.map {
+        res =>
+          val result: Option[Product] = res.head()
 
-      option.map {
-        case Some(product) =>
-          Logger.info("You have products in your sphere.IO plattform. Test data won't be imported. You can deactivate this message by setting sphere.IO.createTestdata to false in your custom-application.conf")
-        case None =>
-          createDemands()
-          Logger.info("Creating Test Demands")
-          createOffers()
-          Logger.info("Creating Test Offers")
+          result match {
+          case Some(product) =>
+            Logger.info("You have products in your sphere.IO plattform. Test data won't be imported. You can deactivate this message by setting sphere.IO.createTestdata to false in your custom-application.conf")
+          case None =>
+            createDemands()
+            Logger.info("Creating Test Demands")
+            createOffers()
+            Logger.info("Creating Test Offers")
+        }
       }
+      option
+    } else {
+      Future.successful[Unit]()
     }
   }
 
