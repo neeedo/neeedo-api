@@ -25,6 +25,8 @@ class ProductTypeMigrationsSpec extends Specification with Mockito {
       val productTypeMigrations: ProductTypeMigrations = new ProductTypeMigrations(sphereClient)
       productTypeMigrations.run()
 
+      there was one (sphereClient).execute(ProductTypeQuery.of().byName(ProductTypeDrafts.demand.getName))
+      there was one (sphereClient).execute(ProductTypeQuery.of().byName(ProductTypeDrafts.offer.getName))
       there was one (sphereClient).execute(ProductTypeCreateCommand.of(ProductTypeDrafts.demand))
       there was one (sphereClient).execute(ProductTypeCreateCommand.of(ProductTypeDrafts.offer))
     }
