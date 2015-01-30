@@ -22,5 +22,3 @@ initialize := {
       sys.error("Java 8 is required for this project.")
     }
 }
-
-fail here

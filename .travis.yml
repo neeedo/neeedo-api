@@ -10,9 +10,7 @@ notifications:
   hipchat:
     rooms:
       secure: H2g8rdi7W4ZiU49IGozXTFvaugch84rqp/XiNnIAB1rID4R68p8TV7Khxz8JaitNqu4U4Iw2Z5y0aYJLdu+MyrrMsmpZ1aKvOaVfyDh+oRLpuM+pjsyCrzQVWpnYKFLJ7eesTK5ELx74I/h1tsuM7o8sCgLf5Wf7oDuXP737V20=
-    template:
-      'Build failed! %{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}'
-    on_success: never
+    on_success: change
     on_failure: change
     notify: true
 after_success: codecov
