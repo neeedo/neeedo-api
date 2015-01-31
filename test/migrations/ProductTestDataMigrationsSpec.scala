@@ -23,59 +23,59 @@ import scala.concurrent.duration.FiniteDuration
 class ProductTestDataMigrationsSpec extends Specification with Mockito {
 
   "ProductTestDataMigrations" should {
-        "create Demands and Offers when sphere.IO.createTestdata is set to true and no products exist" in
-          TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> true)){
+//    "create Demands and Offers when sphere.IO.createTestdata is set to true and no products exist" in
+//      TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> true)) {
+//
+//        val sphereClient = mock[SphereClient]
+//        val demandService = mock[DemandService]
+//        val offerService = mock[OfferService]
+//        val emptyPagedResult = PagedQueryResult.of(List.empty[Product].asJava)
+//        sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
+//
+//        val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
+//        Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
+//
+//        there was one(sphereClient).execute(ProductQuery.of())
+//        there was three(demandService).createDemand(any[DemandDraft])
+//        there was three(offerService).createOffer(any[OfferDraft])
+//      }
 
-          val sphereClient = mock[SphereClient]
-          val demandService = mock[DemandService]
-          val offerService = mock[OfferService]
-          val emptyPagedResult = PagedQueryResult.of(List.empty[Product].asJava)
-          sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
+    "not create Demands and Offers when sphere.IO.createTestdata is set to true and products exist" in
+      TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> true)) {
 
-          val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
-          Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
+        val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
+        val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle")
+        val productVariant = ProductVariantBuilder.of(1).attributes(List.empty[Attribute].asJava).build()
+        val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+        val product = ProductBuilder.of(productType, masterData).build()
 
-          there was one (sphereClient).execute(ProductQuery.of())
-          there was three (demandService).createDemand(any[DemandDraft])
-          there was three (offerService).createOffer(any[OfferDraft])
-        }
+        val sphereClient = mock[SphereClient]
+        val demandService = mock[DemandService]
+        val offerService = mock[OfferService]
+        val nonEmptyPagedResult = PagedQueryResult.of(List(product).asJava)
+        sphereClient.execute(ProductQuery.of()) returns Future.successful(nonEmptyPagedResult)
+
+        val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
+        Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
+
+        there was no(demandService).createDemand(any)
+        there was no(offerService).createOffer(any)
       }
 
-      "not create Demands and Offers when sphere.IO.createTestdata is set to true and products exist" in
-        TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> true)) {
+    "not create Demands and Offers when sphere.IO.createTestdata is set to false" in
+      TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> false)) {
 
-          val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
-          val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle")
-          val productVariant = ProductVariantBuilder.of(1).attributes(List.empty[Attribute].asJava).build()
-          val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
-          val product = ProductBuilder.of(productType, masterData).build()
+        val sphereClient = mock[SphereClient]
+        val demandService = mock[DemandService]
+        val offerService = mock[OfferService]
+        val emptyPagedResult = PagedQueryResult.of(List.empty[Product].asJava)
+        sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
 
-          val sphereClient = mock[SphereClient]
-          val demandService = mock[DemandService]
-          val offerService = mock[OfferService]
-          val nonEmptyPagedResult = PagedQueryResult.of(List(product).asJava)
-          sphereClient.execute(ProductQuery.of()) returns Future.successful(nonEmptyPagedResult)
+        val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
+        Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
-          val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
-          Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
-
-          there was no (demandService).createDemand(any)
-          there was no (offerService).createOffer(any)
-        }
-
-      "not create Demands and Offers when sphere.IO.createTestdata is set to false" in
-        TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> false)) {
-
-          val sphereClient = mock[SphereClient]
-          val demandService = mock[DemandService]
-          val offerService = mock[OfferService]
-          val emptyPagedResult = PagedQueryResult.of(List.empty[Product].asJava)
-          sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
-
-          val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
-          Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
-
-          there was no (demandService).createDemand(any)
-          there was no (offerService).createOffer(any)
+        there was no(demandService).createDemand(any)
+        there was no(offerService).createOffer(any)
+      }
   }
 }

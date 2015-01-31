@@ -19,7 +19,6 @@ class SphereProductTypes(sphereClient: SphereClient) extends ProductTypes {
   lazy val offer: ProductType = queryOfferType
 
   private def queryDemandType: ProductType = {
-    Logger.info("Querying producttypes")
     val typeName = Configloader.getStringOpt("demand.typeName").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }

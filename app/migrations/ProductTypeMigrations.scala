@@ -1,5 +1,6 @@
 package migrations
 
+import common.logger.MigrationsLogger
 import common.sphere.{ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.producttypes.{ProductTypeDraft, ProductType}
 import io.sphere.sdk.producttypes.commands.ProductTypeCreateCommand
@@ -14,13 +15,12 @@ import scala.concurrent.Future
 class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
 
   override def run(): Future[Unit] = {
-    Logger.info("Starting to create Producttypes")
+    MigrationsLogger.info("# Product Type Migrations started")
+
     for {
       demand <- createType(ProductTypeDrafts.demand)
       offer <- createType(ProductTypeDrafts.offer)
-    } yield {
-      Logger.info("Product type migrations complete.")
-    }
+    } yield(demand, offer)
   }
 
   def createType(typeDraft: ProductTypeDraft): Future[Unit] = {
@@ -28,11 +28,11 @@ class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
     val queryResult: Future[PagedQueryResult[ProductType]] = sphereClient.execute(ProductTypeQuery.of().byName(typeName))
     val option: Future[Option[ProductType]] = queryResult.map(res => res.head())
 
-    option.map {
+    option.flatMap {
       case None =>
         val createCommand = ProductTypeCreateCommand.of(typeDraft)
-        sphereClient.execute(createCommand).map(res => Logger.info(s"Cannot find $typeName Product Type. Creating type $typeName..."))
-      case Some(prodType: ProductType) => Logger.info(s"Found $typeName Product Type($typeName).")
+        sphereClient.execute(createCommand).map(res => MigrationsLogger.info(s"-> Cannot find $typeName Product Type. Creating type $typeName..."))
+      case Some(prodType: ProductType) => Future.successful(MigrationsLogger.info(s"-> Found $typeName Product Type($typeName)."))
     }
   }
 }
