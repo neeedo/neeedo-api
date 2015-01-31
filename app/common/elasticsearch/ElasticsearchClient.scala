@@ -37,24 +37,30 @@ class LocalEsClient extends ElasticsearchClient {
 
 class RemoteEsClient extends ElasticsearchClient {
   val clustername = Configloader.getStringOpt("elasticsearch.clustername").getOrElse("elasticsearch")
-  val hosts = readHostsFromConfig(Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil))
+  val hosts = readHostsFromConfig
   lazy val node: Node = NodeBuilder.nodeBuilder()
     .clusterName(clustername)
     .client(true)
     .settings(ImmutableSettings.settingsBuilder()
-      .put("discovery.zen.ping.unicast.hosts", hosts.map(hp => s"${hp.host}:${hp.port}").mkString(",")))
+      .classLoader(classOf[Settings].getClassLoader)
+      .put("discovery.zen.ping.unicast.hosts", hosts.mkString(",")))
     .node()
 
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
 
-  def readHostsFromConfig(configString: List[String]): List[HostWithPort] = {
-    configString.map {
+  def readHostsFromConfig: List[HostWithPort] = {
+    Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil).map {
       s =>
-        val hostAndPortArray = s.split(":")
-        HostWithPort(hostAndPortArray(0), hostAndPortArray(1).toInt)
+        val hostsAndPorts = s.split(":").toList
+        HostWithPort(
+          hostsAndPorts.dropRight(1).mkString(":").trim,
+          hostsAndPorts.takeRight(1).mkString.trim.toInt
+        )
     }
   }
 }
 
-case class HostWithPort(host: String, port: Int)
+case class HostWithPort(host: String, port: Int) {
+  override def toString = s"$host:$port"
+}

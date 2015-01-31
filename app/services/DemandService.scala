@@ -52,7 +52,8 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       indexResponse => if (indexResponse.isCreated) DemandSaved
       else DemandSaveFailed
     } recover {
-      case _ => DemandSaveFailed
+      case e: Exception => //throw e
+        DemandSaveFailed
     }
   }
 
