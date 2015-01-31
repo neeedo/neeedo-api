@@ -7,7 +7,6 @@ import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
-import io.sphere.sdk.attributes.AttributeAccess
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
 import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}

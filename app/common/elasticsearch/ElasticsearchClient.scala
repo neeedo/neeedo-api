@@ -5,7 +5,9 @@ import common.helper.Configloader
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
+import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
+import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
@@ -40,10 +42,12 @@ class RemoteEsClient extends ElasticsearchClient {
   val hosts = readHostsFromConfig
   lazy val node: Node = NodeBuilder.nodeBuilder()
     .clusterName(clustername)
-    .client(true)
     .settings(ImmutableSettings.settingsBuilder()
       .classLoader(classOf[Settings].getClassLoader)
-      .put("discovery.zen.ping.unicast.hosts", hosts.mkString(",")))
+      .put("discovery.zen.ping.unicast.hosts", hosts.mkString(","))
+      .put("node.name", "neeedo-client"))
+    .client(true)
+    .data(false)
     .node()
 
   override def createElasticsearchClient(): Client = node.client()
@@ -60,6 +64,16 @@ class RemoteEsClient extends ElasticsearchClient {
     }
   }
 }
+//
+//class RemoteTransportEsClient extends ElasticsearchClient {
+//  override def close(): Unit = client.close()
+//
+//  override def createElasticsearchClient(): Client = new TransportClient(
+//    ImmutableSettings.settingsBuilder()
+//      .classLoader(classOf[Settings].getClassLoader)
+//      .put("cluster.name", "neeed-es").build())
+//  .addTransportAddress(new InetSocketTransportAddress("groupelite.de", 9300))
+//}
 
 case class HostWithPort(host: String, port: Int) {
   override def toString = s"$host:$port"

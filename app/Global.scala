@@ -22,9 +22,7 @@ object Global extends GlobalSettings with Macwire {
   }
 
   override def onStart(app: Application): Unit = {
-    if (Play.current.mode != Mode.Test) {
-      migrations
-    }
+    if (Play.current.mode != Mode.Test) migrations
   }
 
   def migrations = {
