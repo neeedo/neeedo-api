@@ -24,6 +24,17 @@ sealed trait ElasticsearchClient {
     client.prepareIndex(esIndex.value, esType.value).setSource(doc.toString()).execute()
   def search(esIndex: IndexName, esType: TypeName, query: QueryBuilder): Future[SearchResponse] =
     client.prepareSearch(esIndex.value).setTypes(esType.value).setQuery(query).execute()
+
+  def readHostsFromConfig: List[HostWithPort] = {
+    Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil).map {
+      s =>
+        val hostsAndPorts = s.split(":").toList
+        HostWithPort(
+          hostsAndPorts.dropRight(1).mkString(":").trim,
+          hostsAndPorts.takeRight(1).mkString.trim.toInt
+        )
+    }
+  }
 }
 
 class LocalEsClient extends ElasticsearchClient {
@@ -52,28 +63,25 @@ class RemoteEsClient extends ElasticsearchClient {
 
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
+}
 
-  def readHostsFromConfig: List[HostWithPort] = {
-    Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil).map {
-      s =>
-        val hostsAndPorts = s.split(":").toList
-        HostWithPort(
-          hostsAndPorts.dropRight(1).mkString(":").trim,
-          hostsAndPorts.takeRight(1).mkString.trim.toInt
-        )
+class RemoteTransportEsClient extends ElasticsearchClient {
+  override def close(): Unit = client.close()
+
+  override def createElasticsearchClient(): Client = {
+    val hosts: List[HostWithPort] = readHostsFromConfig
+    val initialClient = new TransportClient(
+      ImmutableSettings.settingsBuilder()
+        .classLoader(classOf[Settings].getClassLoader)
+        .put("cluster.name", "neeedo-es").build()
+    )
+
+    hosts.foldLeft(initialClient) {
+      (client,hostWithPort) =>
+        client.addTransportAddress(new InetSocketTransportAddress(hostWithPort.host, hostWithPort.port))
     }
   }
 }
-//
-//class RemoteTransportEsClient extends ElasticsearchClient {
-//  override def close(): Unit = client.close()
-//
-//  override def createElasticsearchClient(): Client = new TransportClient(
-//    ImmutableSettings.settingsBuilder()
-//      .classLoader(classOf[Settings].getClassLoader)
-//      .put("cluster.name", "neeed-es").build())
-//  .addTransportAddress(new InetSocketTransportAddress("groupelite.de", 9300))
-//}
 
 case class HostWithPort(host: String, port: Int) {
   override def toString = s"$host:$port"
