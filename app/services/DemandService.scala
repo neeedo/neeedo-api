@@ -96,11 +96,11 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
 
-  def deleteDemand(demandId: DemandId, version: Version): Future[Option[Product]] = {
+  def deleteDemand(demandId: DemandId, version: Version): Future[Option[Demand]] = {
     val product: Versioned[Product] = Versioned.of(demandId.value, version.value)
-    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_)).recover {
+    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Demand.productToDemand).recover {
       // TODO besseres exception matching
-      case e: CompletionException => Option.empty[Product]
+      case e: CompletionException => Option.empty[Demand]
       case e: Exception => throw e
     }
   }

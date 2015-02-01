@@ -10,10 +10,9 @@ import scala.concurrent.Future
 
 class Demands(service: DemandService) extends Controller {
 
-  def createDemand = Action.async { implicit request =>
-    request.body.asJson match {
-      case Some(json) =>
-        json.asOpt[DemandDraft] match {
+  def createDemand = Action.async {
+    implicit request => request.body.asJson match {
+      case Some(json) => json.asOpt[DemandDraft] match {
           case Some(draft) => service.createDemand(draft).map {
             case Some(demand) => Created(Json.obj("demand" -> Json.toJson(demand)))
             case _ => BadRequest(Json.obj("error" -> "Unknown error"))
@@ -26,7 +25,7 @@ class Demands(service: DemandService) extends Controller {
 
   def getDemand(id: DemandId) = Action.async {
     service.getDemandById(id).map {
-      case Some(demand) => Ok(Json.toJson(demand))
+      case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
       case None => NotFound(Json.obj("error" -> "Demand Entity not found"))
     }
   }
