@@ -6,7 +6,7 @@
 SCW_HOME=/home/deploy/api
 PID_FILE=/home/deploy/RUNNING_PID
 LOCK_FILE=$SCW_HOME/lock
-OUT_FILE=$SCW_HOME/logs/neeedo.log
+OUT_FILE=$SCW_HOME/logs/application.log
 
 case "$1" in
   start)
