@@ -4,12 +4,11 @@ scala:
 jdk:
 - oraclejdk8
 before_install:
-- openssl aes-256-cbc -K $encrypted_7d81a13424f8_key -iv $encrypted_7d81a13424f8_iv
-  -in id_rsa.enc -out ~/.ssh/id_rsa -d
+- "openssl aes-256-cbc -K $encrypted_7d81a13424f8_key -iv $encrypted_7d81a13424f8_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d"
 - sudo pip install codecov
 before_script:
 - chmod 600 ~/.ssh/id_rsa
-script: ./sbt clean coverage test
+script: ./sbt coverage test
 notifications:
   email: false
   hipchat:
@@ -19,4 +18,3 @@ notifications:
     on_failure: change
     notify: true
 after_success: ./after-success.sh
-secure: A6roKji3bsVvfQ9c0kTY9h259rvNcKGz+RghHgE56RIP9ClJR0VJhsTyghKkwiIBfDTr0jJveBXu4sq6PH4iGqIcn1f6t1YI8ggw4Pmzvp+kZPTLZZ0s8fm/VQlq5f4aAVMH4cO5ISHzyuF1Zkv+4surWbCM/PgVSVJAEaRa+KY=
