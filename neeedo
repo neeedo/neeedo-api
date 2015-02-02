@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# Neeedo Startscript
+# description: Script to start/stop/restart play app
+
+SCW_HOME=/home/deploy/api
+PID_FILE=/home/deploy/RUNNING_PID
+LOCK_FILE=$SCW_HOME/lock
+OUT_FILE=$SCW_HOME/logs/neeedo.log
+
+case "$1" in
+  start)
+       # lock
+       echo -n "Starting Neeedo-API: "
+      if [ -e $PID_FILE ]; then
+         echo "PID_FILE: $PID_FILE exists"
+         ps -p $(cat $PID_FILE) >> /dev/null
+         if [ $? == 0 ]; then
+           echo "Neeedo-API is already running"
+           exit 0
+         fi
+         echo "Neeedo-API is not running. Remove $PID_FILE "
+         rm $PID_FILE
+       fi
+       daemonize -E PATH=$PATH -l $LOCK_FILE -e $OUT_FILE -o $OUT_FILE $SCW_HOME/target/universal/stage/bin/api -Dpidfile.path=$PID_FILE
+
+       count=30
+       while [ $count -gt 0 ]
+       do
+         STATUS=$(curl --max-time 5 -sLw "%{http_code}"  http://127.0.0.1:9000/status -o /dev/null);
+         if [ "$STATUS" = "200" ]; then
+           echo "done."
+           exit 0
+         fi
+         echo -n "."
+         sleep 1
+         count=$((count-1))
+       done
+       echo "failed."
+       exit 1
+       ;;
+  stop)
+        echo -n "Stopping Neeedo-API: "
+        if [ -e $PID_FILE ]; then
+          PID=$(cat $PID_FILE)
+          count=15
+          while [ $count -gt 0 ]
+          do
+            ps -p $PID >> /dev/null 2>&1
+            if [ "$?" != 0 ]; then
+              echo "done."
+              exit 0
+            fi
+            kill -TERM $PID
+            echo -n "."
+            sleep 1
+            count=$((count-1))
+          done
+          echo "Send KILL to $PID"
+          kill -9 $PID
+        else
+          echo "already stopped"
+        fi
+        true
+        ;;
+  restart)
+        ./neeedo stop
+        ./neeedo start
+        ;;
+  status)
+        echo -n "Status of Neeedo-API: "
+        RETVAL=2
+        MSG="not running."
+        if [ -e $PID_FILE ]; then
+                PID=$(cat $PID_FILE)
+                ps $PID >> /dev/null
+                if [ $? = 0 ]; then
+                        MSG="running."
+                        RETVAL=0
+                fi
+        fi
+        echo $MSG
+        ;;
+  *)
+        echo "Usage: neeedo {start|stop|restart}"
+        RETVAL=2
+esac
+
+exit $RETVAL

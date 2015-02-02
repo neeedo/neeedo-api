@@ -1,9 +1,13 @@
 language: scala
 scala:
-- 2.11.1
+- 2.11.4
 jdk:
 - oraclejdk8
-before_install: sudo pip install codecov
+before_install:
+- "openssl aes-256-cbc -K $encrypted_a9a6b7fa867b_key -iv $encrypted_a9a6b7fa867b_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d"
+- sudo pip install codecov
+before_script:
+- chmod 600 ~/.ssh/id_rsa
 script: ./sbt clean coverage test
 notifications:
   email: false
@@ -13,9 +17,5 @@ notifications:
     on_success: change
     on_failure: change
     notify: true
-after_success: codecov
-deploy:
-  provider: heroku
-  api_key:
-    secure: SlhotCW8l/Q7bvTZ6ubR2N6OfRaw4lPnL9cshyER4CnWUY2s7ZlZopEkVUZv5GC9RBdq16iOUC9JXLa+1lZieJ30RVN/EtwH/jHUtUadRB2yBAY27iVRyL1G4QzsHSkXZmNSP+CtACO9cLjR/MY1CugwOddijyUQ0aYqTdDsPmA=
-  app: dry-depths-2035
+after_success: ./after-success.sh
+secure: A6roKji3bsVvfQ9c0kTY9h259rvNcKGz+RghHgE56RIP9ClJR0VJhsTyghKkwiIBfDTr0jJveBXu4sq6PH4iGqIcn1f6t1YI8ggw4Pmzvp+kZPTLZZ0s8fm/VQlq5f4aAVMH4cO5ISHzyuF1Zkv+4surWbCM/PgVSVJAEaRa+KY=
