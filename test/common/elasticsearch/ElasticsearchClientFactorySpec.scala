@@ -11,13 +11,13 @@ class ElasticsearchClientFactorySpec extends Specification {
 
       ElasticsearchClientFactory.returnClientForMode(Mode.Test) must haveClass[LocalEsClient]
       ElasticsearchClientFactory.returnClientForMode(Mode.Dev) must haveClass[LocalEsClient]
-      ElasticsearchClientFactory.returnClientForMode(Mode.Prod) must haveClass[RemoteTransportEsClient]
+      ElasticsearchClientFactory.returnClientForMode(Mode.Prod) must haveClass[RemoteEsClient]
     }
 
     "returnClientForMode must return remote es client in dev when elasticsearch.dev.useRemoteClient is true" in
       new WithApplication(FakeApplication(additionalConfiguration = Map("elasticsearch.dev.useRemoteClient" -> true))) {
 
-        ElasticsearchClientFactory.returnClientForMode(Mode.Dev) must haveClass[RemoteTransportEsClient]
+        ElasticsearchClientFactory.returnClientForMode(Mode.Dev) must haveClass[RemoteEsClient]
     }
 
     "getInstance should return LocalClient in test mode" in new WithApplication {
