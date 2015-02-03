@@ -56,9 +56,8 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def writeOfferToSphere(draft: OfferDraft): Future[Option[Offer]] = {
-    // TODO Produktname?
-    val productName = LocalizedStrings.of(Locale.ENGLISH, draft.tags)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(draft.tags))
+    val productName = LocalizedStrings.of(Locale.ENGLISH, draft.generatedName)
+    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(draft.generatedName))
     val productVariant = ProductVariantDraftBuilder.of()
       .attributes(ProductTypeDrafts.buildOfferAttributes(draft))
       .build()

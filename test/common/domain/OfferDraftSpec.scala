@@ -8,7 +8,7 @@ class OfferDraftSpec extends Specification {
 
   val offerDraftJs: JsObject = Json.obj(
     "userId" -> "testUid",
-    "tags" -> "testTags",
+    "tags" -> Json.arr("testTags"),
     "location" -> Json.obj(
       "lat" -> 10.0,
       "lon" -> 20.0
@@ -18,7 +18,7 @@ class OfferDraftSpec extends Specification {
 
   val offerDraft = OfferDraft(
     UserId("testUid"),
-    "testTags",
+    Set("testTags"),
     Location(Longitude(20.0), Latitude(10.0)),
     Price(100.0))
 

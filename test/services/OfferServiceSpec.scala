@@ -23,12 +23,12 @@ import scala.concurrent.Future
 
 class OfferServiceSpec extends Specification with Mockito {
 
-  val offer = Offer(OfferId("abc123"), Version(1L), UserId("1"), "socken bekleidung wolle und mehr",  Location(Longitude(52.468562), Latitude(13.534212)), Price(50.0))
+  val offer = Offer(OfferId("abc123"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"),  Location(Longitude(52.468562), Latitude(13.534212)), Price(50.0))
   val offerDraft = OfferDraft(offer.uid, offer.tags, offer.location, offer.price)
 
   val productAttributeList = List(
     Attribute.of("userId", offer.uid.value),
-    Attribute.of("tags", offer.tags),
+    Attribute.of("tags", offer.tags.mkString(";")),
     Attribute.of("longitude", offer.location.lon.value),
     Attribute.of("latitude", offer.location.lat.value),
     Attribute.of("price", MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
@@ -38,7 +38,7 @@ class OfferServiceSpec extends Specification with Mockito {
   val productVariantDraft = ProductVariantDraftBuilder.of().attributes(productAttributeList).build()
 
   val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
-  val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags)
+  val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";"))
 
   val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
   val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()

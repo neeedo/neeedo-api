@@ -28,7 +28,8 @@ object ProductTypeDrafts {
 
   def buildOfferAttributes(offerDraft: OfferDraft) = List(
     Attribute.of("userId", offerDraft.uid.value),
-    Attribute.of("tags", offerDraft.tags),
+    // Todo save as SetType in sphere, this is just an ugly workaround
+    Attribute.of("tags", offerDraft.tags.mkString(";")),
     Attribute.of("longitude", offerDraft.location.lon.value),
     Attribute.of("latitude", offerDraft.location.lat.value),
     Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, DefaultCurrencyUnits.EUR))

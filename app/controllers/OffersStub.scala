@@ -7,11 +7,11 @@ import play.api.mvc.{Action, Controller}
 
 
 class OffersStub extends Controller {
-  val offerDraft1 = OfferDraft(UserId("1"), "smartphone neuwertig iphone", Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95))
+  val offerDraft1 = OfferDraft(UserId("1"), Set("smartphone", "neuwertig", "iphone"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95))
 
-  val offer1 = Offer(OfferId("1"), Version(1L), UserId("1"), "computer PC service reparatur", Location(Longitude(52.468562), Latitude(13.534212)), Price(20.0))
-  val offer2 = Offer(OfferId("2"), Version(1L), UserId("2"), "comics sammlung avengers", Location(Longitude(52.468562), Latitude(13.534212)), Price(500.0))
-  val offer3 = Offer(OfferId("3"), Version(2L), UserId("3"), "bekleidung handmade gestrickt mütze hipster", Location(Longitude(52.468562), Latitude(13.534212)), Price(5.0))
+  val offer1 = Offer(OfferId("1"), Version(1L), UserId("1"), Set("computer", "PC", "service", "reparatur"), Location(Longitude(52.468562), Latitude(13.534212)), Price(20.0))
+  val offer2 = Offer(OfferId("2"), Version(1L), UserId("2"), Set("comics", "sammlung", "avengers"), Location(Longitude(52.468562), Latitude(13.534212)), Price(500.0))
+  val offer3 = Offer(OfferId("3"), Version(2L), UserId("3"), Set("bekleidung", "handmade", "gestrickt", "mütze", "hipster"), Location(Longitude(52.468562), Latitude(13.534212)), Price(5.0))
 
   def fetchOffer(id: OfferId): Option[Offer] = id.value match {
     case "1" => Some(offer1)
