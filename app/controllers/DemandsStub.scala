@@ -7,11 +7,11 @@ import play.api.mvc.{Action, Controller}
 import scala.collection.immutable.Nil
 
 class DemandsStub extends Controller {
-  val demandDraft1 = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+  val demandDraft1 = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "b2ekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
 
-  val demand1 = Demand(DemandId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-  val demand2 = Demand(DemandId("2"), Version(1L), UserId("2"), "auto lack blau", Location(Longitude(52.468562), Latitude(13.534212)), Distance(40), Price(150.0), Price(300.0))
-  val demand3 = Demand(DemandId("3"), Version(1L), UserId("3"), "notebook kein apple scheiss", Location(Longitude(20.0), Latitude(10.0)), Distance(25), Price(500.0), Price(1000.0))
+  val demand1 = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"),  Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+  val demand2 = Demand(DemandId("2"), Version(1L), UserId("2"), Set("socken", "bekleidung", "wolle"), Set("auto", "lack", "blau"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(40), Price(150.0), Price(300.0))
+  val demand3 = Demand(DemandId("3"), Version(1L), UserId("3"), Set("socken", "bekleidung", "wolle"), Set("notebook", "kein apple scheiss"), Location(Longitude(20.0), Latitude(10.0)), Distance(25), Price(500.0), Price(1000.0))
 
   def fetchDemand(id: DemandId) : Option[Demand] = id.value match {
     case "1" => Some (demand1)

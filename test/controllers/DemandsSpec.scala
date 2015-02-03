@@ -43,7 +43,7 @@ class DemandsSpec extends Specification with Mockito {
     "createDemand must return 400 unknown error when dermandService returns empty option" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.createDemand(demandDraft) returns Future.successful(Option.empty)
       val fakeRequest = FakeRequest(Helpers.POST, "/")
         .withHeaders(("Content-Type","application/json"))
@@ -57,8 +57,8 @@ class DemandsSpec extends Specification with Mockito {
     "createDemand must return 200 when dermandService returns demand" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.createDemand(demandDraft) returns Future.successful(Option(demand))
 
       val fakeRequest = FakeRequest(Helpers.POST, "/")
@@ -73,7 +73,7 @@ class DemandsSpec extends Specification with Mockito {
     "getDemand must return 200 and the demand json for a valid id" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.getDemandById(DemandId("1")) returns Future.successful(Option(demand))
 
       val res: Future[Result] = ctrl.getDemand(DemandId("1"))(FakeRequest())
@@ -96,7 +96,7 @@ class DemandsSpec extends Specification with Mockito {
     "deleteDemand must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.deleteDemand(DemandId("1"), Version(1L)) returns Future.successful(Option(demand))
 
       val res: Future[Result] = ctrl.deleteDemand(DemandId("1"), Version(1L))(FakeRequest(Helpers.DELETE, "/demands/1/1"))
@@ -123,7 +123,7 @@ class DemandsSpec extends Specification with Mockito {
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
     }
 
-    "updateDemandd must return 400 cannot parse json for put requests with invalid demand draft" in {
+    "updateDemand must return 400 cannot parse json for put requests with invalid demand draft" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
       val demandDraftJson = Json.parse("""{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212},"distance":30,"price":{"min":25.0,"max":77.0}}""")
@@ -139,7 +139,7 @@ class DemandsSpec extends Specification with Mockito {
     "updateDemands must return 400 unknown error when dermandService returns empty option" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.updateDemand(DemandId("1"), Version(1L), demandDraft) returns Future.successful(Option.empty)
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")
         .withHeaders(("Content-Type","application/json"))
@@ -153,8 +153,8 @@ class DemandsSpec extends Specification with Mockito {
     "createDemands must return 200 when dermandService returns demand" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.updateDemand(DemandId("1"), Version(1L), demandDraft) returns Future.successful(Option(demand))
 
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")

@@ -26,7 +26,7 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
   "ProductTestDataMigrations" should {
     "create Demands and Offers when sphere.IO.createTestdata is set to true and no products exist" in
       TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> true)) {
-        val demand = Demand(DemandId("1"), Version(1L), UserId("1"), "tags", Location(Longitude(1.0), Latitude(1.0)), Distance(30), Price(40.0), Price(60.0))
+        val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("tags"), Location(Longitude(1.0), Latitude(1.0)), Distance(30), Price(40.0), Price(60.0))
         val offer = Offer(OfferId("1"), Version(1L), UserId("1"), "tags", Location(Longitude(1.0), Latitude(1.0)), Price(70.0))
         val sphereClient = mock[SphereClient]
         val demandService = mock[DemandService]

@@ -11,11 +11,12 @@ class ProductTypeDraftsSpec  extends Specification {
 
   "buildDemandAttributes" should {
     "return correct java.util.List<Attribute>" in {
-      val demandDraft = DemandDraft(UserId("1"), "", Location(Longitude(1), Latitude(1)), Distance(1), Price(1), Price(1))
+      val demandDraft = DemandDraft(UserId("1"), Set("abc", "efg"), Set("abc", "efg"), Location(Longitude(1), Latitude(1)), Distance(1), Price(1), Price(1))
 
       ProductTypeDrafts.buildDemandAttributes(demandDraft) mustEqual List(
         Attribute.of("userId", demandDraft.uid.value),
-        Attribute.of("tags", demandDraft.tags),
+        Attribute.of("mustTags", demandDraft.mustTags.mkString(";")),
+        Attribute.of("shouldTags", demandDraft.shouldTags.mkString(";")),
         Attribute.of("longitude", demandDraft.location.lon.value),
         Attribute.of("latitude", demandDraft.location.lat.value),
         Attribute.of("distance", demandDraft.distance.value),

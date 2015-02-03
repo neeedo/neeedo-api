@@ -12,7 +12,8 @@ case class Demand(
 	id: DemandId,
 	version: Version,
 	uid: UserId,
-	tags: String,
+	mustTags: Set[String],
+	shouldTags: Set[String],
 	location: Location,
 	distance: Distance,
 	//TODO pricerange case class?
@@ -26,15 +27,26 @@ object Demand extends ModelUtils {
 		(JsPath \ "id").read[String] and
 		(JsPath \ "version").read[Long] and
 		(JsPath \ "userId").read[String] and
-		(JsPath \ "tags").read[String] and
+		(JsPath \ "mustTags").read[Set[String]] and
+		(JsPath \ "shouldTags").read[Set[String]] and
 		(JsPath \ "location" \ "lat").read[Double] and
 		(JsPath \ "location" \ "lon").read[Double] and
 		(JsPath \ "distance").read[Int] and
 		(JsPath \ "price" \ "min").read[Double] and
 		(JsPath \ "price" \ "max").read[Double]
 		) {
-		(id, version, uid, tags, lat, lon, distance, priceMin, priceMax) => Demand(DemandId(id), Version(version), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
-		Distance(distance), Price(priceMin), Price(priceMax))
+		(id, version, uid, mustTags, shouldTags, lat, lon, distance, priceMin, priceMax) =>
+      Demand(
+        DemandId(id),
+        Version(version),
+        UserId(uid),
+        mustTags,
+        shouldTags,
+        Location( Longitude(lon), Latitude(lat) ),
+		    Distance(distance),
+        Price(priceMin),
+        Price(priceMax)
+      )
 		}
 
 	implicit val demandWrites = new Writes[Demand] {
@@ -42,7 +54,8 @@ object Demand extends ModelUtils {
 			"id" -> d.id.value,
 			"version" -> d.version.value,
 		  "userId" -> d.uid.value,
-		  "tags" -> d.tags,
+		  "mustTags" -> d.mustTags,
+		  "shouldTags" -> d.shouldTags,
 		  "location" -> Json.obj(
 			  "lat" -> d.location.lat.value,
 			  "lon" -> d.location.lon.value
@@ -58,11 +71,12 @@ object Demand extends ModelUtils {
   def productToDemand(product: Product): Option[Demand] = {
     try {
       Some(
-          Demand(
+        Demand(
           DemandId(product.getId),
           Version(product.getVersion),
           UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-          getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+          getAttribute(product, "mustTags").getValue(AttributeAccess.ofString().attributeMapper()).split(";").toSet,
+          getAttribute(product, "shouldTags").getValue(AttributeAccess.ofString().attributeMapper()).split(";").toSet,
           Location(
             Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
             Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))

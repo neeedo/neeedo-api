@@ -18,6 +18,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import common.helper.ImplicitConversions._
 
+import scala.util.Random
+
 
 class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
 
@@ -57,9 +59,8 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToSphere(demandDraft: DemandDraft): Future[Option[Demand]] = {
-    // TODO Produktname?
-    val productName = LocalizedStrings.of(Locale.ENGLISH, demandDraft.tags)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(demandDraft.tags))
+    val productName = LocalizedStrings.of(Locale.ENGLISH, demandDraft.generatedName)
+    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(demandDraft.generatedName))
     val productVariant = ProductVariantDraftBuilder.of()
       .attributes(ProductTypeDrafts.buildDemandAttributes(demandDraft))
       .build()

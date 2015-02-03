@@ -8,7 +8,8 @@ class DemandDraftSpec extends Specification {
 
   val demandDraftJs: JsObject = Json.obj(
     "userId" -> "testUid",
-    "tags" -> "testTags",
+    "mustTags" -> Json.arr("testTag1", "testTag2"),
+    "shouldTags" -> Json.arr("testTag1", "testTag2"),
     "location" -> Json.obj(
       "lat" -> 10.0,
       "lon" -> 20.0
@@ -22,7 +23,8 @@ class DemandDraftSpec extends Specification {
 
   val demandDraft: DemandDraft = DemandDraft(
     UserId("testUid"),
-    "testTags",
+    Set("testTag1", "testTag2"),
+    Set("testTag1", "testTag2"),
     Location(Longitude(20.0), Latitude(10.0)),
     Distance(1),
     Price(50.0),

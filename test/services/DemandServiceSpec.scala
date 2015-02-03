@@ -25,7 +25,8 @@ class DemandServiceSpec extends Specification with Mockito {
 
   val productAttributeList = List(
     Attribute.of("userId", "1"),
-    Attribute.of("tags", "socken bekleidung wolle"),
+    Attribute.of("mustTags", "socken;bekleidung;wolle"),
+    Attribute.of("shouldTags", "socken;bekleidung;wolle"),
     Attribute.of("longitude", 52.468562),
     Attribute.of("latitude", 13.534212),
     Attribute.of("distance", 30),
@@ -36,8 +37,8 @@ class DemandServiceSpec extends Specification with Mockito {
   val demandId = DemandId("foo-id")
   val demandVersion = Version(1L)
 
-  val demand = Demand(demandId, demandVersion, UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-  val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+  val demand = Demand(demandId, demandVersion, UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+  val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
 
   val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
   val productVariantDraft = ProductVariantDraftBuilder.of().attributes(productAttributeList).build()

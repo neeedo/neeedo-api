@@ -26,7 +26,8 @@ class DemandSpec extends Specification {
     "id" -> demandId.value,
     "version" -> 1L,
     "userId" -> "1",
-    "tags" -> "socken bekleidung wolle",
+    "mustTags" -> Json.arr("socken", "bekleidung", "wolle"),
+    "shouldTags" -> Json.arr("socken", "bekleidung", "wolle"),
     "location" -> Json.obj(
       "lon" -> 52.468562,
       "lat" -> 13.534212
@@ -40,7 +41,8 @@ class DemandSpec extends Specification {
 
   val validProductAttributeList = List(
     Attribute.of("userId", "1"),
-    Attribute.of("tags", "socken bekleidung wolle"),
+    Attribute.of("mustTags", "socken;bekleidung;wolle"),
+    Attribute.of("shouldTags", "socken;bekleidung;wolle"),
     Attribute.of("longitude", 52.468562),
     Attribute.of("latitude", 13.534212),
     Attribute.of("distance", 30),
@@ -50,14 +52,15 @@ class DemandSpec extends Specification {
 
   val invalidProductAttributeList = List(
     Attribute.of("userId", "1"),
-    Attribute.of("tags", "socken bekleidung wolle"),
+    Attribute.of("mustTags", "socken bekleidung wolle"),
+    Attribute.of("shouldTags", "socken bekleidung wolle"),
     Attribute.of("latitude", 13.534212),
     Attribute.of("distance", 30),
     Attribute.of("priceMin", MoneyImpl.of(BigDecimal(25.0).bigDecimal, DefaultCurrencyUnits.EUR)),
     Attribute.of("priceMax", MoneyImpl.of(BigDecimal(77.0).bigDecimal, DefaultCurrencyUnits.EUR))
   ).asJava
 
-  val demand = Demand(demandId, demandVersion, UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
+  val demand = Demand(demandId, demandVersion, UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
   
   val validProductVariant = ProductVariantBuilder.of(1).attributes(validProductAttributeList).build()
   val invalidProductVariant = ProductVariantBuilder.of(1).attributes(invalidProductAttributeList).build()
