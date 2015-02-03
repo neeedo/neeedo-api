@@ -10,11 +10,19 @@ import play.api.mvc.Result
 import play.api.test.{FakeHeaders, FakeRequest, Helpers}
 import services.DemandService
 import play.api.test.Helpers.defaultAwaitTimeout
-import test.TestApplications
+import test.{TestData, TestApplications}
 
 import scala.concurrent.Future
 
 class DemandsSpec extends Specification with Mockito {
+
+  val demandId = TestData.demandId
+  val demandVersion = TestData.version
+  val demand = TestData.demand
+  val demandJson = TestData.demandJson
+  val demandDraft = TestData.demandDraft
+  val demandDraftJson = TestData.demandDraftJson
+
   "Demands Controller" should {
 
     "createDemand must return 400 missing body for post requests without body" in {
@@ -43,11 +51,10 @@ class DemandsSpec extends Specification with Mockito {
     "createDemand must return 400 unknown error when dermandService returns empty option" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.createDemand(demandDraft) returns Future.successful(Option.empty)
       val fakeRequest = FakeRequest(Helpers.POST, "/")
         .withHeaders(("Content-Type","application/json"))
-        .withJsonBody(Json.toJson(demandDraft))
+        .withJsonBody(demandDraftJson)
       val res: Future[Result] = ctrl.createDemand()(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
@@ -57,37 +64,34 @@ class DemandsSpec extends Specification with Mockito {
     "createDemand must return 200 when dermandService returns demand" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
       demandService.createDemand(demandDraft) returns Future.successful(Option(demand))
 
       val fakeRequest = FakeRequest(Helpers.POST, "/")
         .withHeaders(("Content-Type","application/json"))
-        .withJsonBody(Json.toJson(demandDraft))
+        .withJsonBody(demandDraftJson)
       val res: Future[Result] = ctrl.createDemand()(fakeRequest)
 
       Helpers.status(res) must equalTo(201)
-      Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> Json.toJson(demand)).toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> demandJson).toString())
     }
 
     "getDemand must return 200 and the demand json for a valid id" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      demandService.getDemandById(DemandId("1")) returns Future.successful(Option(demand))
+      demandService.getDemandById(demandId) returns Future.successful(Option(demand))
 
-      val res: Future[Result] = ctrl.getDemand(DemandId("1"))(FakeRequest())
+      val res: Future[Result] = ctrl.getDemand(demandId)(FakeRequest())
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> Json.toJson(demand)).toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> demandJson).toString())
     }
 
     "getDemand must return 404 and error json for a invalid id" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      demandService.getDemandById(DemandId("1")) returns Future.successful(Option.empty[Demand])
+      demandService.getDemandById(demandId) returns Future.successful(Option.empty[Demand])
 
-      val res: Future[Result] = ctrl.getDemand(DemandId("1"))(FakeRequest())
+      val res: Future[Result] = ctrl.getDemand(demandId)(FakeRequest())
 
       Helpers.status(res) must equalTo(404)
       Helpers.contentAsString(res) must equalTo(Json.obj("error" -> "Demand Entity not found").toString())
@@ -96,10 +100,9 @@ class DemandsSpec extends Specification with Mockito {
     "deleteDemand must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      demandService.deleteDemand(DemandId("1"), Version(1L)) returns Future.successful(Option(demand))
+      demandService.deleteDemand(demandId, demandVersion) returns Future.successful(Option(demand))
 
-      val res: Future[Result] = ctrl.deleteDemand(DemandId("1"), Version(1L))(FakeRequest(Helpers.DELETE, "/demands/1/1"))
+      val res: Future[Result] = ctrl.deleteDemand(demandId, demandVersion)(FakeRequest(Helpers.DELETE, "/demands/1/1"))
 
       Helpers.status(res) must equalTo(200)
     }
@@ -107,9 +110,9 @@ class DemandsSpec extends Specification with Mockito {
     "deleteDemand must return 404 for an invalid id or version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      demandService.deleteDemand(DemandId("1"), Version(1L)) returns Future.successful(Option.empty[Demand])
+      demandService.deleteDemand(demandId, demandVersion) returns Future.successful(Option.empty[Demand])
 
-      val res: Future[Result] = ctrl.deleteDemand(DemandId("1"), Version(1L))(FakeRequest(Helpers.DELETE, "/demands/1/1"))
+      val res: Future[Result] = ctrl.deleteDemand(demandId, demandVersion)(FakeRequest(Helpers.DELETE, "/demands/1/1"))
 
       Helpers.status(res) must equalTo(404)
     }
@@ -117,7 +120,7 @@ class DemandsSpec extends Specification with Mockito {
     "updateDemand must return 400 missing body for put requests without body" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val res: Future[Result] = ctrl.updateDemand(DemandId("1"), Version(1L))(FakeRequest(Helpers.PUT, "/demands/1/1"))
+      val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(FakeRequest(Helpers.PUT, "/demands/1/1"))
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
@@ -130,7 +133,7 @@ class DemandsSpec extends Specification with Mockito {
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(demandDraftJson)
-      val res: Future[Result] = ctrl.updateDemand(DemandId("1"), Version(1L))(fakeRequest)
+      val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
@@ -139,12 +142,11 @@ class DemandsSpec extends Specification with Mockito {
     "updateDemands must return 400 unknown error when dermandService returns empty option" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      demandService.updateDemand(DemandId("1"), Version(1L), demandDraft) returns Future.successful(Option.empty)
+      demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.successful(Option.empty)
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")
         .withHeaders(("Content-Type","application/json"))
-        .withJsonBody(Json.toJson(demandDraft))
-      val res: Future[Result] = ctrl.updateDemand(DemandId("1"), Version(1L))(fakeRequest)
+        .withJsonBody(demandDraftJson)
+      val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Unknown error\"}")
@@ -153,17 +155,15 @@ class DemandsSpec extends Specification with Mockito {
     "createDemands must return 200 when dermandService returns demand" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
-      val demandDraft = DemandDraft(UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      val demand = Demand(DemandId("1"), Version(1L), UserId("1"), Set("socken", "bekleidung", "wolle"), Set("socken", "bekleidung", "wolle"), Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
-      demandService.updateDemand(DemandId("1"), Version(1L), demandDraft) returns Future.successful(Option(demand))
+      demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.successful(Option(demand))
 
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")
         .withHeaders(("Content-Type","application/json"))
-        .withJsonBody(Json.toJson(demandDraft))
-      val res: Future[Result] = ctrl.updateDemand(DemandId("1"), Version(1L))(fakeRequest)
+        .withJsonBody(demandDraftJson)
+      val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(fakeRequest)
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> Json.toJson(demand)).toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> demandJson).toString())
     }
   }
 }

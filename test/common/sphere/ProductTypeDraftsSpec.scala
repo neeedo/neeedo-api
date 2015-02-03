@@ -5,13 +5,14 @@ import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.DefaultCurrencyUnits
 import io.sphere.sdk.utils.MoneyImpl
 import org.specs2.mutable.Specification
+import test.TestData
 import scala.collection.JavaConverters._
 
 class ProductTypeDraftsSpec  extends Specification {
 
   "buildDemandAttributes" should {
     "return correct java.util.List<Attribute>" in {
-      val demandDraft = DemandDraft(UserId("1"), Set("abc", "efg"), Set("abc", "efg"), Location(Longitude(1), Latitude(1)), Distance(1), Price(1), Price(1))
+      val demandDraft = TestData.demandDraft
 
       ProductTypeDrafts.buildDemandAttributes(demandDraft) mustEqual List(
         Attribute.of("userId", demandDraft.uid.value),
@@ -28,7 +29,7 @@ class ProductTypeDraftsSpec  extends Specification {
 
   "buildOfferAttributes" should {
     "return correct java.util.List<Attribute>" in {
-      val offerDraft = OfferDraft(UserId("1"), Set("abc"), Location(Longitude(1), Latitude(1)), Price(1))
+      val offerDraft = TestData.offerDraft
 
       ProductTypeDrafts.buildOfferAttributes(offerDraft) mustEqual List(
         Attribute.of("userId", offerDraft.uid.value),
