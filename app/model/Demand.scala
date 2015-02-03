@@ -5,8 +5,8 @@ import io.sphere.sdk.attributes.AttributeAccess
 import io.sphere.sdk.products.Product
 import play.api.Logger
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import play.api.mvc.PathBindable
+import play.api.libs.functional.syntax._
 
 case class Demand(
 	id: DemandId,

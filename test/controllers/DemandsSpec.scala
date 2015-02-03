@@ -123,7 +123,7 @@ class DemandsSpec extends Specification with Mockito {
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
     }
 
-    "updateDemandd must return 400 cannot parse json for put requests with invalid demand draft" in {
+    "updateDemands must return 400 cannot parse json for put requests with invalid demand draft" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
       val demandDraftJson = Json.parse("""{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212},"distance":30,"price":{"min":25.0,"max":77.0}}""")
@@ -150,7 +150,7 @@ class DemandsSpec extends Specification with Mockito {
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Unknown error\"}")
     }
 
-    "createDemands must return 200 when dermandService returns demand" in {
+    "updateDemands must return 200 when dermandService returns demand" in {
       val demandService = mock[DemandService]
       val ctrl = new Demands(demandService)
       val demandDraft = DemandDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Distance(30), Price(25.0), Price(77.0))
