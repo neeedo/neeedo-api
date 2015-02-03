@@ -1,13 +1,12 @@
 package controllers
 
 
-import common.domain._
-import model.{DemandId, Demand}
+import model.Demand
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import play.api.test.{FakeRequest, Helpers}
 import services.DemandService
 import play.api.test.Helpers.defaultAwaitTimeout
 import test.{TestData, TestApplications}

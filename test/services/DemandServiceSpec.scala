@@ -10,7 +10,7 @@ import io.sphere.sdk.products.queries.ProductFetchById
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import java.util.{Optional, Locale}
 import java.util.concurrent.CompletionException
-import model.{DemandId, Demand}
+import model.Demand
 import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
@@ -43,8 +43,8 @@ class DemandServiceSpec extends Specification with Mockito {
       val productTypes = mock[ProductTypes]
       val demandService = new DemandService(es, sphere, productTypes)
 
-      demandService.getProductById(DemandId("1"))
-      there was one (sphere).execute(ProductFetchById.of("1"))
+      demandService.getProductById(demandId)
+      there was one (sphere).execute(ProductFetchById.of(demandId.value))
     }
 
     "createDemand must return None if writing to sphere fails" in TestApplications.loggingOffApp() {

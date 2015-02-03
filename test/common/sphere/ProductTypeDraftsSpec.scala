@@ -1,6 +1,5 @@
 package common.sphere
 
-import common.domain._
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.DefaultCurrencyUnits
 import io.sphere.sdk.utils.MoneyImpl

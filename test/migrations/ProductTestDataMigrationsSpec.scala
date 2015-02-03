@@ -11,7 +11,6 @@ import io.sphere.sdk.products.queries.ProductQuery
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.products.{ProductVariantBuilder, ProductCatalogDataBuilder, ProductBuilder, ProductDataBuilder, Product}
 import io.sphere.sdk.queries.PagedQueryResult
-import model.{OfferId, Offer, DemandId, Demand}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import services.{OfferService, DemandService}
