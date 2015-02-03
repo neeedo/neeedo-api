@@ -17,9 +17,9 @@ import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
+import test.TestApplications
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
-import test.TestApplications
 
 class DemandServiceSpec extends Specification with Mockito {
 

@@ -9,10 +9,7 @@ case class OfferDraft(
   uid: UserId,
   tags: Set[String],
   location: Location,
-  price: Price) {
-
-  val generatedName = "Biete: " + tags.mkString(" ") + " " + new Random().nextInt(1000)
-}
+  price: Price)
 
 object OfferDraft {
 
@@ -38,4 +35,6 @@ object OfferDraft {
       "price" -> o.price.value
     )
   }
+
+  def generateName(offerDraft: OfferDraft) = "Biete: " + offerDraft.tags.mkString(" ")
 }

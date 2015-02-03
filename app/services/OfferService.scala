@@ -18,6 +18,7 @@ import play.api.Logger
 import common.helper.ImplicitConversions._
 
 import scala.concurrent.Future
+import scala.util.Random
 
 class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
 
@@ -56,8 +57,9 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def writeOfferToSphere(draft: OfferDraft): Future[Option[Offer]] = {
-    val productName = LocalizedStrings.of(Locale.ENGLISH, draft.generatedName)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(draft.generatedName))
+    val name = OfferDraft.generateName(draft) + " " + Random.nextInt(1000)
+    val productName = LocalizedStrings.of(Locale.ENGLISH, name)
+    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()
       .attributes(ProductTypeDrafts.buildOfferAttributes(draft))
       .build()

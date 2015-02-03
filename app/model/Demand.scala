@@ -18,8 +18,7 @@ case class Demand(
 	distance: Distance,
 	//TODO pricerange case class?
 	priceMin: Price,
-	priceMax: Price) {
-}
+	priceMax: Price)
 
 object Demand extends ModelUtils {
 

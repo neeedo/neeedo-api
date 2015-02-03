@@ -13,10 +13,7 @@ case class DemandDraft(
 	distance: Distance,
 	//TODO pricerange case class?
 	priceMin: Price,
-	priceMax: Price) {
-
-  val generatedName = "Suche: " + mustTags.mkString(" ") + " " + new Random().nextInt(1000)
-}
+	priceMax: Price)
 
 object DemandDraft {
 
@@ -58,4 +55,6 @@ object DemandDraft {
 			)
 		)
 	}
+
+  def generateName(demandDraft: DemandDraft) = "Suche: " + demandDraft.mustTags.mkString(" ")
 }

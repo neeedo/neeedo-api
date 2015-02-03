@@ -29,7 +29,7 @@ object Offer extends ModelUtils {
     ) {
     (id, version, uid, tags, lat, lon, price) => Offer(OfferId(id), Version(version), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
       Price(price))
-  }
+    }
 
   implicit val offerWrites = new Writes[Offer] {
     def writes(o: Offer) = Json.obj(
