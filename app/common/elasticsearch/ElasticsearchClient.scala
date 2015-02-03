@@ -65,24 +65,6 @@ class RemoteEsClient extends ElasticsearchClient {
   override def close() = node.close()
 }
 
-class RemoteTransportEsClient extends ElasticsearchClient {
-  override def close(): Unit = client.close()
-
-  override def createElasticsearchClient(): Client = {
-    val hosts: List[HostWithPort] = readHostsFromConfig
-    val initialClient = new TransportClient(
-      ImmutableSettings.settingsBuilder()
-        .classLoader(classOf[Settings].getClassLoader)
-        .put("cluster.name", "neeedo-es").build()
-    )
-
-    hosts.foldLeft(initialClient) {
-      (client,hostWithPort) =>
-        client.addTransportAddress(new InetSocketTransportAddress(hostWithPort.host, hostWithPort.port))
-    }
-  }
-}
-
 case class HostWithPort(host: String, port: Int) {
   override def toString = s"$host:$port"
 }
