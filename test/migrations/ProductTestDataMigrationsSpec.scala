@@ -41,8 +41,8 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
         Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
         there was one(sphereClient).execute(ProductQuery.of())
-        there was three(demandService).createDemand(any[DemandDraft])
-        there was three(offerService).createOffer(any[OfferDraft])
+        there was 4.times(demandService).createDemand(any[DemandDraft])
+        there was 4.times(offerService).createOffer(any[OfferDraft])
       }
 
     "not create Demands and Offers when sphere.IO.createTestdata is set to true and products exist" in

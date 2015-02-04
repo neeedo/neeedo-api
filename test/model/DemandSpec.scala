@@ -52,6 +52,7 @@ class DemandSpec extends Specification {
     }
 
     "demand object should be correctly parsed into a demand json" in new WithApplication {
+      println(demandJson)
       Json.toJson(demand) must beEqualTo(demandJson)
     }
 

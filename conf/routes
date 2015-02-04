@@ -22,6 +22,7 @@ OPTIONS        /offers                      @controllers.Documentation.showDocum
 
 # Matching
 GET            /matching/demands            @controllers.Matching.matchDemands()
+POST           /matching/demand/:from/:size @controllers.Matching.matchDemand(from: common.domain.From, size: common.domain.PageSize)
 
 # Stub Demands
 # GET            /stub/demands                @controllers.DemandsStub.listDemands()

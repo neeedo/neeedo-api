@@ -20,8 +20,8 @@ sealed trait ElasticsearchClient {
   def close(): Unit
   def createElasticsearchClient(): Client
 
-  def indexDocument(esIndex: IndexName, esType: TypeName, doc: JsValue): Future[IndexResponse] =
-    client.prepareIndex(esIndex.value, esType.value).setSource(doc.toString()).execute()
+  def indexDocument(id: String, esIndex: IndexName, esType: TypeName, doc: JsValue): Future[IndexResponse] =
+    client.prepareIndex(esIndex.value, esType.value).setSource(doc.toString()).setId(id).execute()
   def search(esIndex: IndexName, esType: TypeName, query: QueryBuilder): Future[SearchResponse] =
     client.prepareSearch(esIndex.value).setTypes(esType.value).setQuery(query).execute()
 

@@ -6,6 +6,7 @@ import java.util.{Locale, Optional}
 import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
+import common.helper.Configloader
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
@@ -45,10 +46,10 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def writeOfferToEs(offer: Offer): Future[AddOfferResult] = {
-    //TODO indexname und typename in config verankern?
-    val offerIndex = IndexName("offers")
-    val offerType = TypeName("offers")
-    elasticsearch.indexDocument(offerIndex, offerType, Json.toJson(offer)).map {
+    val offerIndex = IndexName(Configloader.getString("offer.typeName"))
+    val offerType = offerIndex.toTypeName
+
+    elasticsearch.indexDocument(offer.id.value, offerIndex, offerType, Json.toJson(offer)).map {
       indexResponse => if (indexResponse.isCreated) OfferSaved
       else OfferSaveFailed
     } recover {

@@ -6,6 +6,7 @@ import java.util.{Optional, Locale}
 import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
+import common.helper.Configloader
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
@@ -46,10 +47,10 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
-    //TODO indexname und typename in config verankern?
-    val demandIndex = IndexName("demands")
-    val demandType = TypeName("demands")
-    elasticsearch.indexDocument(demandIndex, demandType, Json.toJson(demand)).map {
+    val demandIndex = IndexName(Configloader.getString("demand.typeName"))
+    val demandType = demandIndex.toTypeName
+
+    elasticsearch.indexDocument(demand.id.value, demandIndex, demandType, Json.toJson(demand)).map {
       indexResponse => if (indexResponse.isCreated) DemandSaved
       else DemandSaveFailed
     } recover {

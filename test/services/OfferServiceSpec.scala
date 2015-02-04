@@ -2,6 +2,7 @@ package services
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
+import common.helper.Configloader
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.products.{ProductVariantBuilder, ProductVariantDraftBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductBuilder}
@@ -34,6 +35,9 @@ class OfferServiceSpec extends Specification with Mockito {
 
   val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
   val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
+
+  val offerIndex = IndexName("offer")
+  val offerType = offerIndex.toTypeName
 
   "getProductById" should {
     "call Sphereclient execute with fetchcommand" in {
@@ -70,12 +74,12 @@ class OfferServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       sphere.execute(any[ProductDeleteByIdCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
-      es.indexDocument(IndexName("offers"), TypeName("offers"), offerJson) returns Future.failed(new RuntimeException("test exception"))
+      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.failed(new RuntimeException("test exception"))
 
       val service = new OfferService(es, sphere, productTypes)
       service.createOffer(offerDraft) must be (Option.empty[Offer]).await
       there was two (sphere).execute(any)
-      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
 
     "return Future[Option[Offer]] if parameters are valid" in TestApplications.loggingOffApp() {
@@ -86,27 +90,29 @@ class OfferServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
-      es.indexDocument(IndexName("offers"), TypeName("offers"), offerJson) returns Future.successful(indexResponse)
+      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
       service.createOffer(offerDraft) must beEqualTo(Option(offer)).await
       there was one (sphere).execute(any)
-      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
   }
 
   "writeOfferToEs" should {
-    "return OfferSaveFailed when IndexResponse is not created" in {
-      val es = mock[ElasticsearchClient]
+    "return OfferSaveFailed when IndexResponse is not created" in
+      TestApplications.configOffApp(Map("offer.typeName" -> offerIndex.value)) {
+
+        val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
-      es.indexDocument(IndexName("offers"), TypeName("offers"), offerJson) returns Future.successful(indexResponse)
+      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
       service.writeOfferToEs(offer) must beEqualTo(OfferSaveFailed).await
-      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
   }
 
@@ -151,7 +157,9 @@ class OfferServiceSpec extends Specification with Mockito {
   }
 
   "updateOffer" should {
-    "return Offer with valid parameters and call sphere twice" in {
+    "return Offer with valid parameters and call sphere twice" in
+      TestApplications.configOffApp(Map("offer.typeName" -> offerIndex.value)) {
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -159,12 +167,12 @@ class OfferServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
-      es.indexDocument(IndexName("offers"), TypeName("offers"), offerJson) returns Future.successful(indexResponse)
+      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
       service.updateOffer(offerId, offerVersion, offerDraft) must beEqualTo(Option(offer)).await
       there was two (sphere).execute(any)
-      there was one (es).indexDocument(IndexName("offers"), TypeName("offers"), offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
   }
 

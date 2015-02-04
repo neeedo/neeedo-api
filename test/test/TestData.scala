@@ -1,6 +1,7 @@
 package test
 
 import common.domain._
+import common.helper.Configloader
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.DefaultCurrencyUnits
 import io.sphere.sdk.utils.MoneyImpl
@@ -9,6 +10,8 @@ import play.api.libs.json.{Json, JsObject}
 import scala.collection.JavaConverters._
 
 object TestData {
+
+  // Model
   val demandId = DemandId("testDemandId")
   val offerId = OfferId("testOfferId")
   val version = Version(1L)

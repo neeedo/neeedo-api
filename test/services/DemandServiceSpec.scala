@@ -35,6 +35,9 @@ class DemandServiceSpec extends Specification with Mockito {
   val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
   val product = ProductBuilder.of(productType, masterData).id(demandId.value).build()
 
+  val demandIndex = IndexName("demand")
+  val demandType = demandIndex.toTypeName
+
   "Demand service" should {
 
     "getProductById must call Sphereclient execute with fetchcommand" in {
@@ -69,12 +72,12 @@ class DemandServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       sphere.execute(any[ProductDeleteByIdCommand]) returns Future.successful(product)
       productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
-      es.indexDocument(IndexName("demands"), TypeName("demands"), demandJson) returns Future.failed(new RuntimeException("test exception"))
+      es.indexDocument(demandId.value, demandIndex, demandType, demandJson) returns Future.failed(new RuntimeException("test exception"))
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.createDemand(demandDraft) must be (Option.empty[Demand]).await
       there was two (sphere).execute(any)
-      there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), demandJson)
+      there was one (es).indexDocument(demandId.value, demandIndex, demandType, demandJson)
     }
 
     "createDemand must return Future[Option[Demand]] if parameters are valid" in TestApplications.loggingOffApp() {
@@ -85,25 +88,27 @@ class DemandServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
-      es.indexDocument(IndexName("demands"), TypeName("demands"), demandJson) returns Future.successful(indexResponse)
+      es.indexDocument(demandId.value, demandIndex, demandType, demandJson) returns Future.successful(indexResponse)
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.createDemand(demandDraft) must beEqualTo(Option(demand)).await
       there was one (sphere).execute(any)
-      there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), demandJson)
+      there was one (es).indexDocument(demandId.value, demandIndex, demandType, demandJson)
     }
 
-    "writeDemandToEs must return DemandSaveFailed when IndexResponse is not created" in {
+    "writeDemandToEs must return DemandSaveFailed when IndexResponse is not created" in
+      TestApplications.configOffApp(Map("demand.typeName" -> demandIndex.value)) {
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
-      es.indexDocument(IndexName("demands"), TypeName("demands"), demandJson) returns Future.successful(indexResponse)
+      es.indexDocument(demandId.value, demandIndex, demandType, demandJson) returns Future.successful(indexResponse)
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.writeDemandToEs(demand) must beEqualTo(DemandSaveFailed).await
-      there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), demandJson)
+      there was one (es).indexDocument(demandId.value, demandIndex, demandType, demandJson)
     }
 
     "deleteDemand must return Option.empty[Product] when sphere execute throws CompletionException" in {
@@ -142,7 +147,9 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(any)
     }
 
-    "updateDemand must return demand with valid parameters and call sphere twice" in {
+    "updateDemand must return demand with valid parameters and call sphere twice" in
+      TestApplications.configOffApp(Map("offer.typeName" -> demandIndex.value)) {
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -150,12 +157,12 @@ class DemandServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
-      es.indexDocument(IndexName("demands"), TypeName("demands"), demandJson) returns Future.successful(indexResponse)
+      es.indexDocument(demandId.value, demandIndex, demandType, demandJson) returns Future.successful(indexResponse)
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.updateDemand(demandId, demandVersion, demandDraft) must beEqualTo(Option(demand)).await
       there was two (sphere).execute(any)
-      there was one (es).indexDocument(IndexName("demands"), TypeName("demands"), demandJson)
+      there was one (es).indexDocument(demandId.value, demandIndex, demandType, demandJson)
     }
   }
 }
