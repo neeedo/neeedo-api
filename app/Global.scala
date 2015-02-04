@@ -27,8 +27,8 @@ object Global extends GlobalSettings with Macwire {
 
   def migrations = {
     MigrationsLogger.info("### Migrations started ###")
-    Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(10, TimeUnit.SECONDS))
-    Await.result(wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(10, TimeUnit.SECONDS))
+    Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    Await.result(wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     MigrationsLogger.info("### Migrations done ###\n")
   }
 }

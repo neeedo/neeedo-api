@@ -22,8 +22,8 @@ object ProductTypeDrafts {
     Attribute.of("longitude", demandDraft.location.lon.value),
     Attribute.of("latitude", demandDraft.location.lat.value),
     Attribute.of("distance", demandDraft.distance.value),
-    Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demandDraft.priceMin.value).bigDecimal, DefaultCurrencyUnits.EUR)),
-    Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demandDraft.priceMax.value).bigDecimal, DefaultCurrencyUnits.EUR))
+    Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demandDraft.priceMin.value).bigDecimal, "EUR")),
+    Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demandDraft.priceMax.value).bigDecimal, "EUR"))
   ).asJava
 
   def buildOfferAttributes(offerDraft: OfferDraft) = List(
@@ -32,7 +32,7 @@ object ProductTypeDrafts {
     Attribute.of("tags", offerDraft.tags.mkString(";")),
     Attribute.of("longitude", offerDraft.location.lon.value),
     Attribute.of("latitude", offerDraft.location.lat.value),
-    Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
+    Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR"))
   ).asJava
 
   private def demandAttributes: java.util.List[AttributeDefinition] =
