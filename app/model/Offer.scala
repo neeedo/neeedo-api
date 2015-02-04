@@ -12,7 +12,7 @@ case class Offer(
   id: OfferId,
   version: Version,
   uid: UserId,
-  tags: String,
+  tags: Set[String],
   location: Location,
   price: Price)
 
@@ -22,14 +22,14 @@ object Offer extends ModelUtils {
     (JsPath \ "id").read[String] and
     (JsPath \ "version").read[Long] and
     (JsPath \ "userId").read[String] and
-    (JsPath \ "tags").read[String] and
+    (JsPath \ "tags").read[Set[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
     (JsPath \ "location" \ "lon").read[Double] and
     (JsPath \ "price").read[Double]
     ) {
     (id, version, uid, tags, lat, lon, price) => Offer(OfferId(id), Version(version), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
       Price(price))
-  }
+    }
 
   implicit val offerWrites = new Writes[Offer] {
     def writes(o: Offer) = Json.obj(
@@ -52,7 +52,7 @@ object Offer extends ModelUtils {
           OfferId(product.getId),
           Version(product.getVersion),
           UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-          getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()),
+          getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()).split(";").toSet,
           Location(
             Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
             Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))

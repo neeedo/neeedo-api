@@ -11,11 +11,10 @@ import io.sphere.sdk.products.queries.ProductQuery
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.products.{ProductVariantBuilder, ProductCatalogDataBuilder, ProductBuilder, ProductDataBuilder, Product}
 import io.sphere.sdk.queries.PagedQueryResult
-import model.{OfferId, Offer, DemandId, Demand}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import services.{OfferService, DemandService}
-import test.TestApplications
+import test.{TestData, TestApplications}
 import scala.collection.JavaConverters._
 
 import scala.concurrent.{Await, Future}
@@ -26,8 +25,8 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
   "ProductTestDataMigrations" should {
     "create Demands and Offers when sphere.IO.createTestdata is set to true and no products exist" in
       TestApplications.loggingOffApp(Map("sphere.IO.createTestData" -> true)) {
-        val demand = Demand(DemandId("1"), Version(1L), UserId("1"), "tags", Location(Longitude(1.0), Latitude(1.0)), Distance(30), Price(40.0), Price(60.0))
-        val offer = Offer(OfferId("1"), Version(1L), UserId("1"), "tags", Location(Longitude(1.0), Latitude(1.0)), Price(70.0))
+        val demand = TestData.demand
+        val offer = TestData.offer
         val sphereClient = mock[SphereClient]
         val demandService = mock[DemandService]
         val offerService = mock[OfferService]

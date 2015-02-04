@@ -9,7 +9,7 @@ import play.api.mvc.Result
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeRequest, Helpers}
 import services.OfferService
-import test.TestApplications
+import test.{TestData, TestApplications}
 
 import scala.concurrent.Future
 
@@ -49,7 +49,7 @@ class OffersSpec extends Specification with Mockito {
     "createOffer must return 400 unknown error when offerService returns empty option" in {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val offerDraft = OfferDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(25.0))
+      val offerDraft = TestData.offerDraft
       offerService.createOffer(offerDraft) returns Future.successful(Option.empty)
       val fakeRequest = FakeRequest(Helpers.POST, "/")
         .withHeaders(("Content-Type","application/json"))
@@ -63,8 +63,8 @@ class OffersSpec extends Specification with Mockito {
     "createOffer must return 200 when offerService returns offer" in {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val offerDraft = OfferDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(25.0))
-      val offer = Offer(OfferId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(25.0))
+      val offerDraft = TestData.offerDraft
+      val offer = TestData.offer
       offerService.createOffer(offerDraft) returns Future.successful(Option(offer))
 
       val fakeRequest = FakeRequest(Helpers.POST, "/")
@@ -79,7 +79,7 @@ class OffersSpec extends Specification with Mockito {
     "getOffer must return 200 and the offer json for a valid id" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val offer = Offer(OfferId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(77.0))
+      val offer = TestData.offer
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option(offer))
 
       val res: Future[Result] = ctrl.getOffer(OfferId("1"))(FakeRequest())
@@ -102,7 +102,7 @@ class OffersSpec extends Specification with Mockito {
     "deleteOffer must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val offer = Offer(OfferId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(77.0))
+      val offer = TestData.offer
       offerService.deleteOffer(OfferId("1"), Version(1L)) returns Future.successful(Option(offer))
 
       val res: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(FakeRequest(Helpers.DELETE, "/offer/1/1"))
@@ -152,7 +152,7 @@ class OffersSpec extends Specification with Mockito {
     "updateOffers must return 400 unknown error when offerService returns empty option" in {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val offerDraft = OfferDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(25.0))
+      val offerDraft = TestData.offerDraft
       offerService.updateOffer(OfferId("1"), Version(1L), offerDraft) returns Future.successful(Option.empty)
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")
         .withHeaders(("Content-Type","application/json"))
@@ -166,8 +166,8 @@ class OffersSpec extends Specification with Mockito {
     "updateOffers must return 200 when offerService returns offer" in {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val offerDraft = OfferDraft(UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(25.0))
-      val offer = Offer(OfferId("1"), Version(1L), UserId("1"), "socken bekleidung wolle", Location(Longitude(52.468562), Latitude(13.534212)), Price(77.0))
+      val offerDraft = TestData.offerDraft
+      val offer = TestData.offer
       offerService.updateOffer(OfferId("1"), Version(1L), offerDraft) returns Future.successful(Option(offer))
 
       val fakeRequest = FakeRequest(Helpers.PUT, "/demands/1/1")

@@ -3,9 +3,11 @@ package common.domain
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+import scala.util.Random
+
 case class OfferDraft(
   uid: UserId,
-  tags: String,
+  tags: Set[String],
   location: Location,
   price: Price)
 
@@ -13,7 +15,7 @@ object OfferDraft {
 
   implicit val offerReads: Reads[OfferDraft] = (
     (JsPath \ "userId").read[String] and
-    (JsPath \ "tags").read[String] and
+    (JsPath \ "tags").read[Set[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
     (JsPath \ "location" \ "lon").read[Double] and
     (JsPath \ "price").read[Double]
@@ -33,4 +35,6 @@ object OfferDraft {
       "price" -> o.price.value
     )
   }
+
+  def generateName(offerDraft: OfferDraft) = "Biete: " + offerDraft.tags.mkString(" ")
 }
