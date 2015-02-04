@@ -17,4 +17,6 @@ notifications:
     on_success: change
     on_failure: change
     notify: true
-after_success: ./after-success.sh
+after_success:
+- codecov
+- ./deploy.sh

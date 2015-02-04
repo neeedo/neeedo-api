@@ -26,7 +26,7 @@ class Offers(service: OfferService) extends Controller {
 
   def getOffer(id: OfferId) = Action.async {
     service.getOfferById(id).map {
-      case Some(offer) => Ok(Json.toJson(offer))
+      case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
       case None => NotFound(Json.obj("error" -> "Offer Entity not found"))
     }
   }
