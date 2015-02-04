@@ -3,7 +3,7 @@ import common.sphere.{MockProductTypes, SphereProductTypes, ProductTypes, Sphere
 import controllers._
 import migrations.{ProductTestDataMigrations, ProductTypeMigrations}
 import play.api.Play
-import services.{DocumentationService, MatchingService, OfferService, DemandService}
+import services._
 import play.api.Mode
 
 trait WireDependencies {
@@ -17,7 +17,6 @@ trait WireDependencies {
   lazy val demandService = wire[DemandService]
   lazy val offerService = wire[OfferService]
   lazy val matchingService = wire[MatchingService]
-  lazy val documentationService = wire[DocumentationService]
 
   // Controllers
   lazy val demandController = wire[Demands]

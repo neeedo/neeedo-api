@@ -1,11 +1,12 @@
 package controllers
 
 import play.api.mvc._
-import services.DocumentationService
 
-class Documentation(service: DocumentationService) extends Controller {
+class Documentation extends Controller {
 
   def showDocumentation = Action {
-    Ok(service.readDocumentation())
+//    // currently not working correct, do we need this anyways?
+//    Ok(service.readDocumentation())
+    Redirect("https://github.com/HTW-Projekt-2014-Commercetools/api/blob/master/README.md")
   }
 }
