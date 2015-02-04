@@ -36,8 +36,7 @@ sbt run
 
 API-Documentation
 ----------
-
-- [Stubs](#stubs)
+- [Status](#status)
 - [Demands](#demands)
 	- [Query all Demands](#query-all-demands)
 		- [Resource](#resource)
@@ -84,16 +83,11 @@ API-Documentation
 		- [URL Parameters](#url-parameters-6)
 		- [Response](#response-8)
 		- [Example](#example-6)
+
+# Status
+The status will be reported under `http://dry-depths-2035.herokuapp.com/status`.
+Currently responds 200 OK if application is online.
 	
-
-# Stubs
-For the latter there are also stub implementations. You can access them by prepending `stub/` to the resource identifier.
-
-Demands: `http://dry-depths-2035.herokuapp.com/stub/demands`
-
-Offers: `http://dry-depths-2035.herokuapp.com/stub/offers`
-
-
 # Demands
 
 ## Query all Demands
@@ -124,7 +118,8 @@ GET `http://dry-depths-2035.herokuapp.com/demands/{id}`
             "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId":"1",
-            "tags":"socken bekleidung wolle",
+            "mustTags":["socken", "bekleidung", "wolle"],
+            "shouldTags":["rot", "weich", "warm"],
             "location":{
                 "lat":13.534212,
                 "lon":52.468562
@@ -148,7 +143,8 @@ The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle",
+        "mustTags":["socken", "bekleidung", "wolle"],
+        "shouldTags":["rot", "weich", "warm"],
         "location":{
             "lat":13.534212,
             "lon":52.468562
@@ -168,7 +164,8 @@ The request body must contain a valid DemandDraft json object
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId": "1",
-            "tags": "socken bekleidung wolle",
+            "mustTags":["socken", "bekleidung", "wolle"],
+            "shouldTags":["rot", "weich", "warm"],
             "location": {
                 "lat":13.534212,
                 "lon":52.468562
@@ -187,7 +184,7 @@ The request body must contain a valid DemandDraft json object
 
 ### Example
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","mustTags":["socken","bekleidung","wolle"],"shouldTags":["rot","weich","warm"],"location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands -v
 
 ## Update Demand
 ### Resource
@@ -206,7 +203,8 @@ The request body must contain a valid DemandDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle rot",
+        "mustTags":["socken", "bekleidung", "wolle"],
+        "shouldTags":["rot", "weich", "warm"],
         "location":{
             "lat":13.534212,
             "lon":52.468562
@@ -227,7 +225,8 @@ The request body must contain a valid DemandDraft json object
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 2
             "userId": "1",
-            "tags": "socken bekleidung wolle rot",
+            "mustTags":["socken", "bekleidung", "wolle"],
+            "shouldTags":["rot", "weich", "warm"],
             "location": {
                 "lat":13.534212,
                 "lon":52.468562
@@ -248,7 +247,7 @@ The request body must contain a valid DemandDraft json object
 
 ### Example
 
-    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1/1 -v 
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","mustTags":["socken","bekleidung","wolle"], "shouldTags":["rot","weich","warm"],"location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://dry-depths-2035.herokuapp.com/demands/1/1 -v 
 
 ## Delete Demand
 ### Resource
@@ -292,7 +291,7 @@ GET `http://dry-depths-2035.herokuapp.com/offers/{id}`
             "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId":"1",
-            "tags":"socken bekleidung wolle",
+            "tags":["socken", "bekleidung", "wolle"],
             "location":{
                 "lat":13.534212,
                 "lon":52.468562
@@ -312,7 +311,7 @@ The request body must contain a valid OfferDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle",
+        "tags":["socken", "bekleidung", "wolle"],
         "location":{
             "lat":13.534212,
             "lon":52.468562
@@ -328,7 +327,7 @@ The request body must contain a valid OfferDraft json object
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1
             "userId": "1",
-            "tags": "socken bekleidung wolle",
+            "tags":["socken", "bekleidung", "wolle"],
             "location": {
                 "lat":13.534212,
                 "lon":52.468562
@@ -343,7 +342,7 @@ The request body must contain a valid OfferDraft json object
 
 ### Example
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://dry-depths-2035.herokuapp.com/offers -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://dry-depths-2035.herokuapp.com/offers -v
 
 ## Update Offer
 ### Resource
@@ -362,7 +361,7 @@ The request body must contain a valid OfferDraft json object
 
     {
         "userId":"1",
-        "tags":"socken bekleidung wolle rot",
+        "tags":["socken", "bekleidung", "wolle"],
         "location":{
             "lat":13.534212,
             "lon":52.468562
@@ -379,7 +378,7 @@ The request body must contain a valid OfferDraft json object
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 2
             "userId": "1",
-            "tags": "socken bekleidung wolle rot",
+            "tags":["socken", "bekleidung", "wolle"],
             "location": {
                 "lat":13.534212,
                 "lon":52.468562
@@ -396,7 +395,7 @@ The request body must contain a valid OfferDraft json object
 
 ### Example
 
-    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://dry-depths-2035.herokuapp.com/offers/1/1 -v 
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://dry-depths-2035.herokuapp.com/offers/1/1 -v 
 
 ## Delete Demand
 ### Resource
