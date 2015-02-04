@@ -18,6 +18,7 @@ import play.api.Logger
 import common.helper.ImplicitConversions._
 
 import scala.concurrent.Future
+import scala.util.Random
 
 class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
 
@@ -56,9 +57,9 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def writeOfferToSphere(draft: OfferDraft): Future[Option[Offer]] = {
-    // TODO Produktname?
-    val productName = LocalizedStrings.of(Locale.ENGLISH, draft.tags)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(draft.tags))
+    val name = OfferDraft.generateName(draft) + " " + Random.nextInt(1000)
+    val productName = LocalizedStrings.of(Locale.ENGLISH, name)
+    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()
       .attributes(ProductTypeDrafts.buildOfferAttributes(draft))
       .build()
@@ -94,11 +95,11 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     } yield createOffer
   }
 
-  def deleteOffer(id: OfferId, version: Version): Future[Option[Product]] = {
+  def deleteOffer(id: OfferId, version: Version): Future[Option[Offer]] = {
     val product: Versioned[Product] = Versioned.of(id.value, version.value)
-    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Some(_)).recover {
+    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Offer.productToOffer).recover {
       // TODO enhance exception matching
-      case e: CompletionException => Option.empty[Product]
+      case e: CompletionException => Option.empty[Offer]
       case e: Exception => throw e
     }
   }

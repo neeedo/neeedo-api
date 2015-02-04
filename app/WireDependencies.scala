@@ -21,8 +21,8 @@ trait WireDependencies {
   // Controllers
   lazy val demandController = wire[Demands]
   lazy val offerController = wire[Offers]
-  lazy val demandsStubController = wire[DemandsStub]
-  lazy val offersStubController = wire[OffersStub]
+  //lazy val demandsStubController = wire[DemandsStub]
+  //lazy val offersStubController = wire[OffersStub]
   lazy val documentationController = wire[Documentation]
   lazy val matchingController = wire[Matching]
   lazy val staticController = wire[Static]

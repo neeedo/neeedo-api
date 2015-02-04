@@ -16,7 +16,9 @@ object ProductTypeDrafts {
 
   def buildDemandAttributes(demandDraft: DemandDraft) = List(
     Attribute.of("userId", demandDraft.uid.value),
-    Attribute.of("tags", demandDraft.tags),
+    // Todo save as SetType in sphere, this is just an ugly workaround
+    Attribute.of("mustTags", demandDraft.mustTags.mkString(";")),
+    Attribute.of("shouldTags", demandDraft.shouldTags.mkString(";")),
     Attribute.of("longitude", demandDraft.location.lon.value),
     Attribute.of("latitude", demandDraft.location.lat.value),
     Attribute.of("distance", demandDraft.distance.value),
@@ -26,14 +28,15 @@ object ProductTypeDrafts {
 
   def buildOfferAttributes(offerDraft: OfferDraft) = List(
     Attribute.of("userId", offerDraft.uid.value),
-    Attribute.of("tags", offerDraft.tags),
+    // Todo save as SetType in sphere, this is just an ugly workaround
+    Attribute.of("tags", offerDraft.tags.mkString(";")),
     Attribute.of("longitude", offerDraft.location.lon.value),
     Attribute.of("latitude", offerDraft.location.lat.value),
     Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
   ).asJava
 
   private def demandAttributes: java.util.List[AttributeDefinition] =
-    List(userId, tags, longitude, latitude, distance, priceMin, priceMax).asJava
+    List(userId, mustTags, shouldTags, longitude, latitude, distance, priceMin, priceMax).asJava
 
   private def offerAttributes: java.util.List[AttributeDefinition] =
     List(userId, tags, longitude, latitude, price).asJava
@@ -45,6 +48,16 @@ object ProductTypeDrafts {
 
   private def tags: AttributeDefinition = TextAttributeDefinitionBuilder
     .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), TextInputHint.SINGLE_LINE)
+    .isRequired(true)
+    .build()
+
+  private def mustTags: AttributeDefinition = TextAttributeDefinitionBuilder
+    .of("mustTags", LocalizedStrings.of(Locale.ENGLISH, "mustTags"), TextInputHint.SINGLE_LINE)
+    .isRequired(true)
+    .build()
+
+  private def shouldTags: AttributeDefinition = TextAttributeDefinitionBuilder
+    .of("shouldTags", LocalizedStrings.of(Locale.ENGLISH, "shouldTags"), TextInputHint.SINGLE_LINE)
     .isRequired(true)
     .build()
 
