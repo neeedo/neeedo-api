@@ -20,7 +20,8 @@ class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchCl
   //TODO use from and size
   def matchDemand(from: From, pageSize: PageSize, demand: Demand): Future[MatchingResult] = {
     getOfferIdsFromEs(from, pageSize, demand).flatMap {
-      esResult => {
+      searchResponse => {
+        val esResult = searchResponseToEsMatchingResult(searchResponse)
         val predicate = ProductQuery.model().id().isIn(esResult.results.map(_.value).asJava)
         val sphereQuery = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
 
@@ -46,11 +47,11 @@ class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchCl
     new TermsFilterBuilder("tags", mustTags.asJava)
 
   //TODO use from and size
-  def getOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[EsMatchingResult] = {
+  def getOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[SearchResponse] = {
     val indexName = IndexName(Configloader.getString("offer.typeName"))
     val typeName = indexName.toTypeName
 
-    val result: Future[SearchResponse] = elasticsearch.client
+    elasticsearch.client
       .prepareSearch(indexName.value)
       .setQuery(
         new FilteredQueryBuilder(
@@ -59,18 +60,17 @@ class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchCl
         )
       )
       .execute()
-
-    result.map {
-      searchResponse => {
-        val list = searchResponse.getHits.getHits.map {
-          hit => OfferId(hit.getId)
-        }.toList
-        val totalHits = searchResponse.getHits.getTotalHits
-
-        EsMatchingResult(totalHits, list)
-      }
-    }
   }
+
+  def searchResponseToEsMatchingResult(searchResponse: SearchResponse): EsMatchingResult = {
+    val list = searchResponse.getHits.getHits.map {
+      hit => OfferId(hit.getId)
+    }.toList
+    val totalHits = searchResponse.getHits.getTotalHits
+
+    EsMatchingResult(totalHits, list)
+  }
+
 
   def matchDemands(): Future[List[Demand]] = {
     val query: QueryDsl[Product] = ProductQuery.of().byProductType(productTypes.demand)
