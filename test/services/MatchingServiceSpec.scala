@@ -41,14 +41,14 @@ class MatchingServiceSpec extends Specification with Mockito {
         new TermsQueryBuilder("tags", Set("bla", "blub").asJava).minimumShouldMatch("10%").toString
     }
 
-    "matchDemand must return empty MatchingResult when es and sphere are answering with empty results" in {
-      val sphereClient = mock[SphereClient]
-      val elasticsearch = mock[ElasticsearchClient]
-      val matchingService = new MatchingService(sphereClient, elasticsearch, MockProductTypes)
-      val from = From(0)
-      val size = PageSize(0)
-
-      matchingService.matchDemand(from, size, TestData.demand) mustEqual MatchingResult(0, from, size, List.empty[Card])
-    }
+//    "matchDemand must return empty MatchingResult when es and sphere are answering with empty results" in {
+//      val sphereClient = mock[SphereClient]
+//      val elasticsearch = mock[ElasticsearchClient]
+//      val matchingService = new MatchingService(sphereClient, elasticsearch, MockProductTypes)
+//      val from = From(0)
+//      val size = PageSize(0)
+//
+//      matchingService.matchDemand(from, size, TestData.demand) mustEqual MatchingResult(0, from, size, List.empty[Card])
+//    }
   }
 }
