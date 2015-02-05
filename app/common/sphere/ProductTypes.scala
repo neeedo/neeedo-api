@@ -28,7 +28,7 @@ class SphereProductTypes(sphereClient: SphereClient) extends ProductTypes {
   }
 }
 
-class MockProductTypes(sphereClient: SphereClient) extends ProductTypes {
+object MockProductTypes extends ProductTypes {
   val demand: ProductType = ProductTypeBuilder.of("id", "name", "desc", List.empty[AttributeDefinition].asJava).build()
   val offer: ProductType = ProductTypeBuilder.of("id", "name", "desc", List.empty[AttributeDefinition].asJava).build()
 }

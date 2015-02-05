@@ -32,6 +32,6 @@ trait WireDependencies {
   lazy val productTestDataMigration = wire[ProductTestDataMigrations]
 
   // Common
-  lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) wire[MockProductTypes]
+  lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) MockProductTypes
   else wire[SphereProductTypes]
 }

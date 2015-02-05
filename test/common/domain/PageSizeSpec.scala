@@ -4,15 +4,15 @@ import org.specs2.mutable.Specification
 import play.api.test.WithApplication
 import test.TestData
 
-class VersionSpec extends Specification {
+class PageSizeSpec extends Specification {
 
-  "Version" should {
+  "PageSize" should {
     "must be correctly applied from pathbinder" in new WithApplication {
-      Version.pathBinder.bind("key1", TestData.version.value.toString) mustEqual Right(TestData.version)
+      PageSize.pathBinder.bind("key1", "0") mustEqual Right(PageSize(0))
     }
 
     "must be correctly unapplied from pathbinder" in new WithApplication {
-      Version.pathBinder.unbind("key", TestData.version) mustEqual TestData.version.value.toString
+      PageSize.pathBinder.unbind("key", PageSize(0)) mustEqual "0"
     }
   }
 }
