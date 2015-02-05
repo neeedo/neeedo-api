@@ -11,9 +11,7 @@ object MatchingResult {
         "total" -> m.hits,
         "from" -> m.from.value,
         "pageSize" -> m.pageSize.value,
-        "matching" -> Json.arr(
-          m.results.map(Json.toJson(_))
-        )
+        "matching" -> m.results.map(Json.toJson(_))
       )
     )
   }

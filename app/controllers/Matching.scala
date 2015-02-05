@@ -16,7 +16,6 @@ class Matching(matchingService: MatchingService) extends Controller {
     }
   }
 
-  //TODO receive fram and pagesize from url
   def matchDemand(from: From, pageSize: PageSize) = Action.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[Demand] match {
