@@ -7,8 +7,8 @@ import common.sphere.{ProductTypes, SphereClient}
 import io.sphere.sdk.products.Product
 import io.sphere.sdk.products.queries.ProductQuery
 import io.sphere.sdk.queries.{PagedQueryResult, QueryDsl}
-import model.{OfferId, Offer, Demand}
-import org.elasticsearch.action.search.SearchResponse
+import model.{Card, OfferId, Offer, Demand}
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.index.query._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -48,18 +48,31 @@ class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchCl
 
   //TODO use from and size
   def getOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[SearchResponse] = {
-    val indexName = IndexName(Configloader.getString("offer.typeName"))
-    val typeName = indexName.toTypeName
+    val query = buildQuery(demand, from, pageSize)
+    query.execute()
+  }
 
-    elasticsearch.client
-      .prepareSearch(indexName.value)
-      .setQuery(
-        new FilteredQueryBuilder(
-          getShouldTagsQuery(demand.shouldTags),
-          getMustTagsFilter(demand.mustTags)
-        )
-      )
-      .execute()
+  def buildQuery(card: Card, from: From, pageSize: PageSize): SearchRequestBuilder = {
+    card match {
+      case d: Demand =>
+        val indexName = IndexName(Configloader.getString("offer.typeName"))
+        val typeName = indexName.toTypeName
+        elasticsearch.client
+          .prepareSearch(indexName.value)
+          .setQuery(
+            new FilteredQueryBuilder(
+              getShouldTagsQuery(d.shouldTags),
+              getMustTagsFilter(d.mustTags)
+            )
+          )
+      case o: Offer =>
+        //TODO match against offers
+        val indexName = IndexName(Configloader.getString("demand.typeName"))
+        val typeName = indexName.toTypeName
+        elasticsearch.client
+          .prepareSearch(indexName.value)
+          .setQuery(getShouldTagsQuery(o.tags))
+    }
   }
 
   def searchResponseToEsMatchingResult(searchResponse: SearchResponse): EsMatchingResult = {
