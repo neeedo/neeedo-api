@@ -1,12 +1,15 @@
 package services
 
-import common.domain.{IndexName, MatchingResult, From, PageSize}
+import common.domain._
 import common.elasticsearch.{ElasticsearchClientFactory, ElasticsearchClient}
 import common.sphere.{MockProductTypes, SphereClient}
-import model.Card
-import org.elasticsearch.action.search.SearchResponse
+import model.{OfferId, Card}
+import org.elasticsearch.action.search.{ShardSearchFailure, SearchResponse}
+import org.elasticsearch.common.bytes.{BytesArray, BytesReference}
+import org.elasticsearch.common.text.StringText
 import org.elasticsearch.index.query.{FilteredQueryBuilder, TermsFilterBuilder, TermsQueryBuilder, MatchAllQueryBuilder}
-import org.elasticsearch.search.internal.InternalSearchResponse
+import org.elasticsearch.search.SearchShardTarget
+import org.elasticsearch.search.internal.{InternalSearchHits, InternalSearchHit, InternalSearchResponse}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import test.{TestApplications, TestData}
@@ -62,7 +65,7 @@ class MatchingServiceSpec extends Specification with Mockito {
     }
 
     "buildQuery must return valid SearchRequestBuilder for valid offers" in
-      TestApplications.loggingOffApp(Map("offer.typeName" -> "demand")){
+      TestApplications.loggingOffApp(Map("offer.typeName" -> "offer")){
 
         val sphereClient = mock[SphereClient]
         val elasticSearch = ElasticsearchClientFactory.instance
@@ -72,9 +75,31 @@ class MatchingServiceSpec extends Specification with Mockito {
 
         matchingService.buildQuery(TestData.offer, from, size).toString mustEqual
           elasticSearch.client
-            .prepareSearch("demand")
+            .prepareSearch("offer")
             .setQuery(new TermsQueryBuilder("tags", TestData.offer.tags.asJava).minimumShouldMatch("10%"))
             .toString
+      }
+
+    "SearchResponseToEsMatchingResult must return valid EsMatching object for searchresponse" in
+      TestApplications.loggingOffApp(Map("offer.typeName" -> "offer")){
+
+        val shardTarget: SearchShardTarget = new SearchShardTarget("1", "offer", 1)
+        val shardFailures = ShardSearchFailure.EMPTY_ARRAY
+        val source: BytesReference = new BytesArray("{}")
+        val hit: InternalSearchHit = new InternalSearchHit(1, "docId", new StringText("offer"), null)
+        hit.shardTarget(shardTarget)
+        hit.sourceRef(source)
+
+        val hits: Array[InternalSearchHit] = Array(hit)
+        val internalSearchHits = new InternalSearchHits(hits, 1, 1.0F)
+        val internalSearchResponse = new InternalSearchResponse(internalSearchHits, null, null, null, false, false)
+        val searchResponse = new SearchResponse(internalSearchResponse, "scrollId", 1, 1, 1000, shardFailures)
+
+        val sphereClient = mock[SphereClient]
+        val elasticSearch = ElasticsearchClientFactory.instance
+        val matchingService = new MatchingService(sphereClient, elasticSearch, MockProductTypes)
+
+        matchingService.searchResponseToEsMatchingResult(searchResponse) mustEqual EsMatchingResult(1, List(OfferId("docId")))
       }
   }
 }
