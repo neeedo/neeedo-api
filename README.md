@@ -37,57 +37,103 @@ sbt run
 API-Documentation
 ----------
 - [Status](#status)
+- [Matching](#matching)
+    - [Get all offers for one demand](#get-all-offers-for-one-demand)
+        - [Resource](#resource)
+        - [URL Parameters](#url-parameters)
+        - [Response](#response)
+        - [Example](#example)
 - [Demands](#demands)
 	- [Query all Demands](#query-all-demands)
-		- [Resource](#resource)
-		- [Response](#response)
-		- [Example](#example)
-	- [Query single Demand](#query-single-demand)
 		- [Resource](#resource-1)
-		- [URL Parameters](#url-parameters)
 		- [Response](#response-1)
-	- [Create Demand](#create-demand)
+		- [Example](#example-1)
+	- [Query single Demand](#query-single-demand)
 		- [Resource](#resource-2)
-		- [Body](#body)
-		- [Response](#response-2)
-		- [Example](#example)
-	- [Update Demand](#update-demand)
-		- [Resource](#resource-3)
 		- [URL Parameters](#url-parameters-1)
+		- [Response](#response-2)
+	- [Create Demand](#create-demand-1)
+		- [Resource](#resource-3)
 		- [Body](#body-1)
 		- [Response](#response-3)
-		- [Example](#example-2)
-	- [Delete Demand](#delete-demand)
+		- [Example](#example-1)
+	- [Update Demand](#update-demand)
 		- [Resource](#resource-4)
 		- [URL Parameters](#url-parameters-2)
+		- [Body](#body-2)
 		- [Response](#response-4)
 		- [Example](#example-3)
-- [Offers](#offers)
-	- [Query single Offer](#query-single-offer)
+	- [Delete Demand](#delete-demand)
 		- [Resource](#resource-5)
 		- [URL Parameters](#url-parameters-3)
 		- [Response](#response-5)
-	- [Create Offer](#create-offer)
-		- [Resource](#resource-6)
-		- [Body](#body)
-		- [Response](#response-6)
 		- [Example](#example-4)
-	- [Update Offer](#update-offer)
-		- [Resource](#resource-7)
+- [Offers](#offers)
+	- [Query single Offer](#query-single-offer)
+		- [Resource](#resource-6)
 		- [URL Parameters](#url-parameters-4)
-		- [Body](#body-1)
+		- [Response](#response-6)
+	- [Create Offer](#create-offer)
+		- [Resource](#resource-7)
+		- [Body](#body-3)
 		- [Response](#response-7)
 		- [Example](#example-5)
-	- [Delete Offer](#delete-offer)
+	- [Update Offer](#update-offer)
 		- [Resource](#resource-8)
-		- [URL Parameters](#url-parameters-6)
-		- [Response](#response-8)
+		- [URL Parameters](#url-parameters-5)
+		- [Body](#body-4)
+		- [Response](#response-7)
 		- [Example](#example-6)
+	- [Delete Offer](#delete-offer)
+		- [Resource](#resource-9)
+		- [URL Parameters](#url-parameters-7)
+		- [Response](#response-9)
+		- [Example](#example-7)
 
 # Status
 The status will be reported under `http://178.62.252.23:9000/status`.
 Currently responds 200 OK if application is online.
-	
+
+# Matching
+
+## Get all offers for one demand
+
+### Resource
+GET `http://178.62.252.23:9000/matching/demand/{from}/{pageSize}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type | Description |
+| ---- | --------- | ---------- | ----------- |
+| from | Mandatory | Integer    | Offset value for paging(not yet implemented just pass a number) |
+| pageSize | Mandatory | Integer    | Page size for paging (not yet implemented just pass a number) |
+
+### Body
+The request body must contain a valid DemandDraft json object
+
+    {
+        "id" : "c1ef9724-935e-4455-854e-96b99eec555d",
+        "version" : 1,
+        "userId" : "1",
+        "mustTags" : ["iphone"],
+        "shouldTags" : ["neuwertig","schwarz"],
+        "location" : {
+            "lat" : 35.92516,
+            "lon" : 12.37528
+        },
+        "distance" : 30,
+        "price" : {
+            "min" : 100.0,
+            "max" : 340.0
+        }
+    }
+
+### Response
+200 Ok
+
+### Example
+    curl -XPOST -H "Content-Type: application/json" -d '{"id":"c1ef9724-935e-4455-854e-96b99eec555d","version":1,"userId":"1","mustTags":["iphone"],"shouldTags":["neuwertig","schwarz"],"location":{"lat":35.92516,"lon":12.37528},"distance":30,"price":{"min":100.0,"max":340.0}}' http://localhost:9000/matching/demand/0/0 -v
+
 # Demands
 
 ## Query all Demands
