@@ -26,14 +26,6 @@ import scala.concurrent.Future
 class MatchingServiceSpec extends Specification with Mockito {
 
   "MatchingService & EsMatchingService" should {
-    val productVariant = ProductVariantBuilder.of(1).attributes(TestData.offerProductAttributeList).build()
-
-    val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.offer).build()
-    val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
-
-    val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
-    val offerProduct = ProductBuilder.of(productType, masterData).id(TestData.offerId.value).build()
-
 
     "getShouldTagsQuery must return matchAll Query for empty shouldTags" in TestApplications.loggingOffApp() {
       val elasticSearch = mock[ElasticsearchClient]
@@ -115,6 +107,11 @@ class MatchingServiceSpec extends Specification with Mockito {
       TestApplications.loggingOffApp(Map("offer.typeName" -> "offer")) {
         val from = From(0)
         val size = PageSize(10)
+
+        val productVariant = ProductVariantBuilder.of(1).attributes(TestData.offerProductAttributeList).build()
+        val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
+        val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+        val offerProduct = ProductBuilder.of(MockProductTypes.offer, masterData).id(TestData.offerId.value).build()
 
         val sphereClient = mock[SphereClient]
         val predicate = ProductQuery.model().id().isIn(List(TestData.offerId.value).asJava)
