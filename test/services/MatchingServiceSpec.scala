@@ -35,14 +35,14 @@ class MatchingServiceSpec extends Specification with Mockito {
     val offerProduct = ProductBuilder.of(productType, masterData).id(TestData.offerId.value).build()
 
 
-    "getShouldTagsQuery must return matchAll Query for empty shouldTags" in {
+    "getShouldTagsQuery must return matchAll Query for empty shouldTags" in TestApplications.loggingOffApp() {
       val elasticSearch = mock[ElasticsearchClient]
       val esMatchingService = new EsMatchingService(elasticSearch)
 
       esMatchingService.getShouldTagsQuery(Set.empty[String]).toString mustEqual new MatchAllQueryBuilder().toString
     }
 
-    "getShouldTagsQuery must return terms Query for shouldTags with 10% minimum should match" in {
+    "getShouldTagsQuery must return terms Query for shouldTags with 10% minimum should match" in TestApplications.loggingOffApp() {
       val elasticSearch = mock[ElasticsearchClient]
       val esMatchingService = new EsMatchingService(elasticSearch)
 
@@ -50,7 +50,7 @@ class MatchingServiceSpec extends Specification with Mockito {
         new TermsQueryBuilder("tags", Set("bla", "blub").asJava).minimumShouldMatch("10%").toString
     }
 
-    "getMustTagFilter must return terms Filter for mustTags" in {
+    "getMustTagFilter must return terms Filter for mustTags" in TestApplications.loggingOffApp() {
       val elasticSearch = mock[ElasticsearchClient]
       val esMatchingService = new EsMatchingService(elasticSearch)
 
