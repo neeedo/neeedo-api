@@ -20,7 +20,7 @@ object DemandDraft {
 	implicit val demandReads: Reads[DemandDraft] = (
 		(JsPath \ "userId").read[String] and
 		(JsPath \ "mustTags").read[Set[String]] and
-		(JsPath \ "mustTags").read[Set[String]] and
+		(JsPath \ "shouldTags").read[Set[String]] and
 		(JsPath \ "location" \ "lat").read[Double] and
 		(JsPath \ "location" \ "lon").read[Double] and
 		(JsPath \ "distance").read[Int] and

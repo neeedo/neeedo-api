@@ -17,6 +17,7 @@ object TestData {
   val version = Version(1L)
   val userId = UserId("testUserId")
   val tags = Set("TV Regal", "Oppli", "Birkenoptik")
+  val shouldTags = Set("Buche", "Kiefer", "Schwarz")
   val location = Location( Longitude(52.5075419), Latitude(13.4251364) )
   val distance = Distance(10000)
   val price = Price(50)
@@ -28,7 +29,7 @@ object TestData {
     version,
     userId,
     tags,
-    tags,
+    shouldTags,
     location,
     distance,
     priceMin,
@@ -39,7 +40,7 @@ object TestData {
     "version" -> version.value,
     "userId" -> userId.value,
     "mustTags" -> tags,
-    "shouldTags" -> tags,
+    "shouldTags" -> shouldTags,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
@@ -54,7 +55,7 @@ object TestData {
   val demandDraft = DemandDraft(
     userId,
     tags,
-    tags,
+    shouldTags,
     location,
     distance,
     priceMin,
@@ -63,7 +64,7 @@ object TestData {
   val demandDraftJson: JsObject = Json.obj(
     "userId" -> userId.value,
     "mustTags" -> tags,
-    "shouldTags" -> tags,
+    "shouldTags" -> shouldTags,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
@@ -78,7 +79,7 @@ object TestData {
   val demandProductAttributeList = List(
     Attribute.of("userId", userId.value),
     Attribute.of("mustTags", tags.mkString(";")),
-    Attribute.of("shouldTags", tags.mkString(";")),
+    Attribute.of("shouldTags", shouldTags.mkString(";")),
     Attribute.of("longitude", location.lon.value),
     Attribute.of("latitude", location.lat.value),
     Attribute.of("distance", distance.value),
