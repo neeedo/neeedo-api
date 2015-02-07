@@ -1,18 +1,18 @@
 package common.elasticsearch
 
-import common.domain.{IndexName, TypeName}
+import common.domain.{PageSize, From, IndexName, TypeName}
 import common.helper.Configloader
+import model.{Offer, Card, Demand}
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.client.Client
-import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
-import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.index.query.QueryBuilder
+import org.elasticsearch.index.query._
 import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
 import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
 import scala.concurrent.Future
+
 
 sealed trait ElasticsearchClient {
 

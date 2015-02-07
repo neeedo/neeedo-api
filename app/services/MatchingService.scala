@@ -12,16 +12,15 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.index.query._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
 import scala.collection.JavaConverters._
+import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
 
-class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchClient, productTypes: ProductTypes) {
+class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService, productTypes: ProductTypes) {
 
   //TODO use from and size
   def matchDemand(from: From, pageSize: PageSize, demand: Demand): Future[MatchingResult] = {
-    getOfferIdsFromEs(from, pageSize, demand).flatMap {
-      searchResponse => {
-        val esResult = searchResponseToEsMatchingResult(searchResponse)
+    esMatching.matchOfferIdsFromEs(from, pageSize, demand).flatMap {
+      esResult => {
         val predicate = ProductQuery.model().id().isIn(esResult.results.map(_.value).asJava)
         val sphereQuery = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
 
@@ -37,19 +36,37 @@ class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchCl
       }
     }
   }
+  //TODO use from and size
 
+  def matchDemands(): Future[List[Demand]] = {
+    val query: QueryDsl[Product] = ProductQuery.of().byProductType(productTypes.demand)
+    val result: Future[PagedQueryResult[Product]] = sphereClient.execute(query)
+
+    result.map(queryResult => queryResult.getResults.asScala.toList.map(Demand.productToDemand).flatten)
+  }
+}
+
+class EsMatchingService(elasticsearch: ElasticsearchClient) {
   def getShouldTagsQuery(shouldTags: Set[String]) : QueryBuilder = {
     if (shouldTags.isEmpty) new MatchAllQueryBuilder()
     else new TermsQueryBuilder("tags", shouldTags.asJava).minimumShouldMatch("10%")
   }
 
+  def searchResponseToEsMatchingResult(searchResponse: SearchResponse): EsMatchingResult = {
+    val list = searchResponse.getHits.getHits.map {
+      hit => OfferId(hit.getId)
+    }.toList
+    val totalHits = searchResponse.getHits.getTotalHits
+
+    EsMatchingResult(totalHits, list)
+  }
+
   def getMustTagsFilter(mustTags: Set[String]): FilterBuilder =
     new TermsFilterBuilder("tags", mustTags.asJava)
 
-  //TODO use from and size
-  def getOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[SearchResponse] = {
+  def matchOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[EsMatchingResult] = {
     val query = buildQuery(demand, from, pageSize)
-    query.execute()
+    query.execute().map(searchResponseToEsMatchingResult)
   }
 
   def buildQuery(card: Card, from: From, pageSize: PageSize): SearchRequestBuilder = {
@@ -73,22 +90,5 @@ class MatchingService(sphereClient: SphereClient, elasticsearch: ElasticsearchCl
           .prepareSearch(indexName.value)
           .setQuery(getShouldTagsQuery(o.tags))
     }
-  }
-
-  def searchResponseToEsMatchingResult(searchResponse: SearchResponse): EsMatchingResult = {
-    val list = searchResponse.getHits.getHits.map {
-      hit => OfferId(hit.getId)
-    }.toList
-    val totalHits = searchResponse.getHits.getTotalHits
-
-    EsMatchingResult(totalHits, list)
-  }
-
-
-  def matchDemands(): Future[List[Demand]] = {
-    val query: QueryDsl[Product] = ProductQuery.of().byProductType(productTypes.demand)
-    val result: Future[PagedQueryResult[Product]] = sphereClient.execute(query)
-
-    result.map(queryResult => queryResult.getResults.asScala.toList.map(Demand.productToDemand).flatten)
   }
 }
