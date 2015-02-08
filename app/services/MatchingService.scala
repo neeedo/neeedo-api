@@ -39,7 +39,8 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
   //TODO use from and size
 
   def matchDemands(): Future[List[Demand]] = {
-    val query: QueryDsl[Product] = ProductQuery.of().byProductType(productTypes.demand)
+    //TODO remove limit parameter with clever solution
+    val query: QueryDsl[Product] = ProductQuery.of().byProductType(productTypes.demand).withLimit(500)
     val result: Future[PagedQueryResult[Product]] = sphereClient.execute(query)
 
     result.map(queryResult => queryResult.getResults.asScala.toList.map(Demand.productToDemand).flatten)
