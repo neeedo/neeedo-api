@@ -23,14 +23,14 @@ class ProductTypeEsMigrationsSpec extends Specification with Mockito {
       val offerIndexRequestBuilder = elasticsearch.client.admin().indices().prepareCreate("offer").setSettings(ImmutableSettings.settingsBuilder().put("number_of_shards", 5).put("number_of_replicas", 0).build()).addMapping("offer", "")
       esMock.buildIndexRequest(IndexName("demand"), EsMapping(TypeName("demand"), "migrations/demand-mapping.json")) returns demandIndexRequestBuilder
       esMock.buildIndexRequest(IndexName("offer"), EsMapping(TypeName("offer"), "migrations/offer-mapping.json")) returns offerIndexRequestBuilder
-      esMock.createIndex(demandIndexRequestBuilder) returns Future.successful(true)
-      esMock.createIndex(offerIndexRequestBuilder) returns Future.successful(true)
+      esMock.createIndex(IndexName("demand"), demandIndexRequestBuilder) returns Future.successful(true)
+      esMock.createIndex(IndexName("offer"), offerIndexRequestBuilder) returns Future.successful(true)
 
       val productTypeEsMigrations = new ProductTypeEsMigrations(esMock)
       Await.result(productTypeEsMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
 
-      there was one (esMock).createIndex(demandIndexRequestBuilder)
-      there was one (esMock).createIndex(offerIndexRequestBuilder)
+      there was one (esMock).createIndex(IndexName("demand"), demandIndexRequestBuilder)
+      there was one (esMock).createIndex(IndexName("offer"), offerIndexRequestBuilder)
     }
   }
 }

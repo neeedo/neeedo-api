@@ -16,11 +16,11 @@ class ProductTypeEsMigrations(elasticsearch: ElasticsearchClient) extends Migrat
     val offerIndex: IndexName = IndexName(Configloader.getString("offer.typeName"))
 
     for {
-      demand <- elasticsearch.createIndex(elasticsearch.buildIndexRequest(
+      demand <- elasticsearch.createIndex(demandIndex, elasticsearch.buildIndexRequest(
         demandIndex, EsMapping(demandIndex.toTypeName, "migrations/demand-mapping.json")))
-      offer <- elasticsearch.createIndex(elasticsearch.buildIndexRequest(
+      offer <- elasticsearch.createIndex(offerIndex, elasticsearch.buildIndexRequest(
         offerIndex, EsMapping(offerIndex.toTypeName, "migrations/offer-mapping.json")))
-    } yield(demand, offer)
+    } yield (demand, offer)
   }
 
 

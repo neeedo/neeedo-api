@@ -3,6 +3,7 @@ package common.elasticsearch
 import common.domain.{IndexName, TypeName}
 import common.helper.Configloader
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
+import org.elasticsearch.action.admin.indices.exists.indices.{IndicesExistsResponse, IndicesExistsRequest}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
@@ -25,7 +26,14 @@ sealed trait ElasticsearchClient {
     client.prepareIndex(esIndex.value, esType.value).setSource(doc.toString()).setId(id).execute()
   def search(esIndex: IndexName, esType: TypeName, query: QueryBuilder): Future[SearchResponse] =
     client.prepareSearch(esIndex.value).setTypes(esType.value).setQuery(query).execute()
-  def createIndex(indexRequest: CreateIndexRequestBuilder): Future[Boolean] = indexRequest.execute().map(_.isAcknowledged)
+  def createIndex(indexName: IndexName, indexRequest: CreateIndexRequestBuilder): Future[Boolean] = {
+    val queryResult: Future[IndicesExistsResponse] = client.admin().indices().prepareExists(indexName.value).execute()
+    queryResult.flatMap {
+      result =>
+        if (result.isExists) Future.successful(false)
+        else indexRequest.execute().map(_.isAcknowledged)
+    }
+  }
   def buildIndexRequest(index: IndexName, mapping: EsMapping): CreateIndexRequestBuilder = {
     client
       .admin()
@@ -56,7 +64,7 @@ sealed trait ElasticsearchClient {
 class LocalEsClient extends ElasticsearchClient {
   val nodeSettings = ImmutableSettings.settingsBuilder()
     .classLoader(classOf[Settings].getClassLoader)
-    .put("path.data", "target/es-data/")
+    .put("path.data", "resources/es-data/")
     .build()
 
   lazy val node: Node = NodeBuilder.nodeBuilder().local(true).settings(nodeSettings).node()
