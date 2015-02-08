@@ -6,6 +6,10 @@ scalaVersion := "2.11.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
+resourceDirectory in Compile := baseDirectory.value / "resources"
+
+resourceDirectory in Test := baseDirectory.value / "test"
+
 libraryDependencies ++= Seq(
   "org.elasticsearch" % "elasticsearch" % "1.4.2",
   "com.softwaremill.macwire" %% "macros" % "0.7.3",
@@ -22,3 +26,4 @@ initialize := {
       sys.error("Java 8 is required for this project.")
     }
 }
+

@@ -1,0 +1,32 @@
+{
+  "properties" : {
+    "distance": {
+      "type": "long"
+    },
+    "id": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "location": {
+      "properties" : {
+        "location" : {
+          "type": "geo_point"
+        }
+      }
+    },
+    "tags": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "price" : {
+      "type":"double"
+    },
+    "userId": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "version": {
+      "type": "long"
+    }
+  }
+}

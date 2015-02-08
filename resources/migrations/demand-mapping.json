@@ -1,0 +1,43 @@
+{
+  "properties": {
+    "distance": {
+      "type": "long"
+    },
+    "id": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "location": {
+      "properties": {
+        "location": {
+          "type": "geo_point"
+        }
+      }
+    },
+    "mustTags": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "shouldTags": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "price": {
+      "properties": {
+        "max": {
+          "type": "double"
+        },
+        "min": {
+          "type": "double"
+        }
+      }
+    },
+    "userId": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "version": {
+      "type": "long"
+    }
+  }
+}

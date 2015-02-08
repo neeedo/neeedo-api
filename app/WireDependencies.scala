@@ -1,7 +1,7 @@
 import common.elasticsearch.ElasticsearchClientFactory
 import common.sphere.{MockProductTypes, SphereProductTypes, ProductTypes, SphereClientFactory}
 import controllers._
-import migrations.{ProductTestDataMigrations, ProductTypeMigrations}
+import migrations.{ProductTypeEsMigrations, ProductTestDataMigrations, ProductTypeMigrations}
 import play.api.Play
 import services._
 import play.api.Mode
@@ -30,6 +30,7 @@ trait WireDependencies {
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
+  lazy val productTypeEsMigration = wire[ProductTypeEsMigrations]
   lazy val productTestDataMigration = wire[ProductTestDataMigrations]
 
   // Common

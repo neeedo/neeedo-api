@@ -1,10 +1,10 @@
 package common.elasticsearch
 
-import common.domain.{PageSize, From, IndexName, TypeName}
+import common.domain.{IndexName, TypeName}
 import common.helper.Configloader
-import model.{Offer, Card, Demand}
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
 import org.elasticsearch.index.query._
@@ -12,6 +12,7 @@ import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
 import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 sealed trait ElasticsearchClient {
@@ -24,6 +25,21 @@ sealed trait ElasticsearchClient {
     client.prepareIndex(esIndex.value, esType.value).setSource(doc.toString()).setId(id).execute()
   def search(esIndex: IndexName, esType: TypeName, query: QueryBuilder): Future[SearchResponse] =
     client.prepareSearch(esIndex.value).setTypes(esType.value).setQuery(query).execute()
+  def createIndex(indexRequest: CreateIndexRequestBuilder): Future[Boolean] = indexRequest.execute().map(_.isAcknowledged)
+  def buildIndexRequest(index: IndexName, mapping: EsMapping): CreateIndexRequestBuilder = {
+    client
+      .admin()
+      .indices()
+      .prepareCreate(index.value)
+      .setSettings(
+        ImmutableSettings.settingsBuilder()
+          .put("number_of_shards", 5)
+          .put("number_of_replicas", 0)
+          .build()
+      )
+      .addMapping(mapping.name.value, mapping.value)
+  }
+
 
   def readHostsFromConfig: List[HostWithPort] = {
     Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil).map {
