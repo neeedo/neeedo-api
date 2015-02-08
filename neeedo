@@ -3,8 +3,8 @@
 # Neeedo Startscript
 # description: Script to start/stop/restart play app
 
-SCW_HOME=/home/deploy/api
-PID_FILE=/home/deploy/RUNNING_PID
+SCW_HOME=~/api
+PID_FILE=~/RUNNING_PID
 LOCK_FILE=$SCW_HOME/lock
 OUT_FILE=$SCW_HOME/logs/application.log
 
