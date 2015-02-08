@@ -6,9 +6,9 @@ scalaVersion := "2.11.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-resourceDirectory in Compile := baseDirectory.value / "resources"
+unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
 
-resourceDirectory in Test := baseDirectory.value / "test"
+unmanagedResourceDirectories in Test += baseDirectory.value / "test"
 
 libraryDependencies ++= Seq(
   "org.elasticsearch" % "elasticsearch" % "1.4.2",
