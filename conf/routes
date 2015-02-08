@@ -11,18 +11,19 @@ GET            /demands/:id                 @controllers.Demands.getDemand(id: m
 POST           /demands                     @controllers.Demands.createDemand()
 PUT            /demands/:id/:version        @controllers.Demands.updateDemand(id: model.DemandId, version: common.domain.Version)
 DELETE         /demands/:id/:version        @controllers.Demands.deleteDemand(id: model.DemandId, version: common.domain.Version)
-OPTIONS        /demands                     @controllers.Documentation.showDocumentation()
+OPTIONS        /demands                     @controllers.Static.deliverCorsHeaders()
 
 # Offers
 GET            /offers/:id                  @controllers.Offers.getOffer(id: model.OfferId)
 POST           /offers                      @controllers.Offers.createOffer()
 PUT            /offers/:id/:version         @controllers.Offers.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.Offers.deleteOffer(id: model.OfferId, version: common.domain.Version)
-OPTIONS        /offers                      @controllers.Documentation.showDocumentation()
+OPTIONS        /offers                      @controllers.Static.deliverCorsHeaders()
 
 # Matching
 GET            /matching/demands            @controllers.Matching.matchDemands()
 POST           /matching/demand/:from/:size @controllers.Matching.matchDemand(from: common.domain.From, size: common.domain.PageSize)
+OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeaders()
 
 # Stub Demands
 # GET            /stub/demands                @controllers.DemandsStub.listDemands()
