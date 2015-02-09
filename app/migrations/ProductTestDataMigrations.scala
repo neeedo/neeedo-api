@@ -9,7 +9,7 @@ import io.sphere.sdk.queries.PagedQueryResult
 import io.sphere.sdk.products.Product
 import services.{DemandService, OfferService}
 import scala.concurrent.Future
-import common.helper.ImplicitConversions.optionalToOption
+import common.helper.ImplicitConversions.OptionConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ProductTestDataMigrations(sphereClient: SphereClient, demandService: DemandService, offerService: OfferService) extends Migration {
@@ -20,7 +20,7 @@ class ProductTestDataMigrations(sphereClient: SphereClient, demandService: Deman
       val queryResult: Future[PagedQueryResult[Product]] = sphereClient.execute(ProductQuery.of())
       val option: Future[Unit] = queryResult.flatMap {
         res =>
-          val result: Option[Product] = res.head()
+          val result: Option[Product] = res.head().asScala
 
           result match {
           case Some(product) =>

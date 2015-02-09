@@ -13,7 +13,7 @@ import org.elasticsearch.index.query._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.collection.JavaConverters._
-import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
+import common.helper.ImplicitConversions.ActionListenableFutureConverter
 
 class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService, productTypes: ProductTypes) {
 
@@ -36,7 +36,6 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
       }
     }
   }
-  //TODO use from and size
 
   def matchDemands(): Future[List[Demand]] = {
     //TODO remove limit parameter with clever solution
@@ -67,7 +66,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient) {
 
   def matchOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[EsMatchingResult] = {
     val query = buildQuery(demand, from, pageSize)
-    query.execute().map(searchResponseToEsMatchingResult)
+    query.execute().asScala.map(searchResponseToEsMatchingResult)
   }
 
   def buildQuery(card: Card, from: From, pageSize: PageSize): SearchRequestBuilder = {

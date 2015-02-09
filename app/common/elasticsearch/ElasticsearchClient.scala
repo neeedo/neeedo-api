@@ -3,7 +3,7 @@ package common.elasticsearch
 import common.domain.{IndexName, TypeName}
 import common.helper.Configloader
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.exists.indices.{IndicesExistsResponse, IndicesExistsRequest}
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
@@ -11,7 +11,7 @@ import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
 import org.elasticsearch.index.query._
 import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
-import common.helper.ImplicitConversions.convertListenableActionFutureToScalaFuture
+import common.helper.ImplicitConversions._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -23,17 +23,35 @@ sealed trait ElasticsearchClient {
   def createElasticsearchClient(): Client
 
   def indexDocument(id: String, esIndex: IndexName, esType: TypeName, doc: JsValue): Future[IndexResponse] =
-    client.prepareIndex(esIndex.value, esType.value).setSource(doc.toString()).setId(id).execute()
+    client
+      .prepareIndex(esIndex.value, esType.value)
+      .setSource(doc.toString())
+      .setId(id)
+      .execute()
+      .asScala
+
   def search(esIndex: IndexName, esType: TypeName, query: QueryBuilder): Future[SearchResponse] =
-    client.prepareSearch(esIndex.value).setTypes(esType.value).setQuery(query).execute()
+    client
+      .prepareSearch(esIndex.value)
+      .setTypes(esType.value)
+      .setQuery(query)
+      .execute()
+      .asScala
+
   def createIndex(indexName: IndexName, indexRequest: CreateIndexRequestBuilder): Future[Boolean] = {
-    val queryResult: Future[IndicesExistsResponse] = client.admin().indices().prepareExists(indexName.value).execute()
-    queryResult.flatMap {
-      result =>
-        if (result.isExists) Future.successful(false)
-        else indexRequest.execute().map(_.isAcknowledged)
-    }
+    client
+      .admin()
+      .indices()
+      .prepareExists(indexName.value)
+      .execute()
+      .asScala
+      .flatMap {
+        result =>
+          if (result.isExists) Future.successful(false)
+          else indexRequest.execute().asScala.map(_.isAcknowledged)
+        }
   }
+
   def buildIndexRequest(index: IndexName, mapping: EsMapping): CreateIndexRequestBuilder = {
     client
       .admin()

@@ -81,7 +81,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
 
     futureProductOption.map {
       productOptional: Optional[Product] =>
-        val option: Option[Product] = productOptional
+        val option: Option[Product] = productOptional.asScala
         option match {
           case Some(product) => Offer.productToOffer(product)
           case _ => Option.empty[Offer]

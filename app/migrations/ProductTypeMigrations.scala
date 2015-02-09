@@ -26,7 +26,7 @@ class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
   def createType(typeDraft: ProductTypeDraft): Future[Unit] = {
     val typeName = typeDraft.getName
     val queryResult: Future[PagedQueryResult[ProductType]] = sphereClient.execute(ProductTypeQuery.of().byName(typeName))
-    val option: Future[Option[ProductType]] = queryResult.map(res => res.head())
+    val option: Future[Option[ProductType]] = queryResult.map(res => res.head().asScala)
 
     option.flatMap {
       case None =>

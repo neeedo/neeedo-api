@@ -83,7 +83,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
     futureProductOption.map {
       productOptional: Optional[Product] =>
-        val option: Option[Product] = productOptional
+        val option: Option[Product] = productOptional.asScala
         option match {
           case Some(product) => Demand.productToDemand(product)
           case _ => Option.empty[Demand]
