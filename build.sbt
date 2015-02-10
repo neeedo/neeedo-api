@@ -8,6 +8,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
 
+excludeFilter in (Compile, unmanagedResources) := "es-data"
+
 unmanagedResourceDirectories in Test += baseDirectory.value / "test"
 
 libraryDependencies ++= Seq(

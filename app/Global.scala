@@ -13,7 +13,7 @@ import scala.concurrent.duration.FiniteDuration
 
 object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Macwire  {
   import MacwireMacros._
-  val wired = wiredInModule(new WireDependencies {})
+  lazy val wired = wiredInModule(new WireDependencies {})
 
   override def getControllerInstance[A](controllerClass: Class[A]): A = {
     wired.lookupSingleOrThrow(controllerClass)
@@ -24,10 +24,10 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
   }
 
   override def onStart(app: Application): Unit = {
-    if (Play.current.mode != Mode.Test) migrations
+    if (Play.current.mode != Mode.Test) migrations()
   }
 
-  def migrations = {
+  def migrations() = {
     MigrationsLogger.info("### Migrations started ###")
     Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))

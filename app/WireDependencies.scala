@@ -10,8 +10,8 @@ trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
 
   //Clients
-  lazy val sphereClient = SphereClientFactory()
-  lazy val elasticsearchClient = ElasticsearchClientFactory()
+  val sphereClient = SphereClientFactory()
+  val elasticsearchClient = ElasticsearchClientFactory()
 
   // Services
   lazy val demandService = wire[DemandService]
