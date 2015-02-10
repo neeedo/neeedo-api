@@ -1,5 +1,7 @@
 package common.elasticsearch
 
+import java.util.concurrent.TimeUnit
+
 import common.domain.{IndexName, TypeName}
 import common.helper.Configloader
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
@@ -8,6 +10,7 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
+import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query._
 import org.elasticsearch.node.{Node, NodeBuilder}
 import play.api.libs.json.JsValue
@@ -51,6 +54,17 @@ sealed trait ElasticsearchClient {
           else indexRequest.execute().asScala.map(_.isAcknowledged)
         }
   }
+
+  def waitForGreenStatus =
+    client
+      .admin()
+      .cluster()
+      .prepareHealth()
+      .setWaitForGreenStatus()
+      .setTimeout(new TimeValue(20, TimeUnit.SECONDS))
+      .execute()
+      .asScala
+      .map(res => !res.isTimedOut)
 
   def buildIndexRequest(index: IndexName, mapping: EsMapping): CreateIndexRequestBuilder = {
     client

@@ -14,13 +14,19 @@ class ProductTypeEsMigrations(elasticsearch: ElasticsearchClient) extends Migrat
 
     val demandIndex: IndexName = IndexName(Configloader.getString("demand.typeName"))
     val offerIndex: IndexName = IndexName(Configloader.getString("offer.typeName"))
-
-    for {
-      demand <- elasticsearch.createIndex(demandIndex, elasticsearch.buildIndexRequest(
-        demandIndex, EsMapping(demandIndex.toTypeName, "migrations/demand-mapping.json")))
-      offer <- elasticsearch.createIndex(offerIndex, elasticsearch.buildIndexRequest(
-        offerIndex, EsMapping(offerIndex.toTypeName, "migrations/offer-mapping.json")))
-    } yield (demand, offer)
+    elasticsearch.waitForGreenStatus.flatMap(green => {
+      if (green) {
+        MigrationsLogger.info("# Elasticsearch cluster status is green")
+        for {
+          demand <- elasticsearch.createIndex(demandIndex, elasticsearch.buildIndexRequest(
+            demandIndex, EsMapping(demandIndex.toTypeName, "migrations/demand-mapping.json")))
+          offer <- elasticsearch.createIndex(offerIndex, elasticsearch.buildIndexRequest(
+            offerIndex, EsMapping(offerIndex.toTypeName, "migrations/offer-mapping.json")))
+        } yield {
+          (demand, offer)
+        }
+      } else Future.successful(MigrationsLogger.info("# Elasticsearch cluster is not green, aborting Migration"))
+    })
   }
 
 
