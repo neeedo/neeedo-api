@@ -23,7 +23,7 @@ object OfferDraft {
     (uid, tags, lat, lon, price) =>
       OfferDraft(
         UserId(uid),
-        tags.map(x => x.trim),
+        tags.map(x => x.trim).filter(!_.equals("")),
         Location(
           Longitude(lon),
           Latitude(lat)

@@ -24,6 +24,7 @@ OPTIONS        /offers                      @controllers.Static.deliverCorsHeade
 GET            /matching/demands            @controllers.Matching.matchDemands()
 POST           /matching/demand/:from/:size @controllers.Matching.matchDemand(from: common.domain.From, size: common.domain.PageSize)
 OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeaders()
+OPTIONS        /matching/demand/0/0         @controllers.Static.deliverCorsHeaders()
 
 # Stub Demands
 # GET            /stub/demands                @controllers.DemandsStub.listDemands()

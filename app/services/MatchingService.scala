@@ -21,17 +21,21 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
   def matchDemand(from: From, pageSize: PageSize, demand: Demand): Future[MatchingResult] = {
     esMatching.matchOfferIdsFromEs(from, pageSize, demand).flatMap {
       esResult => {
-        val predicate = ProductQuery.model().id().isIn(esResult.results.map(_.value).asJava)
-        val sphereQuery = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
+        if (esResult.results.nonEmpty) {
+          val predicate = ProductQuery.model().id().isIn(esResult.results.map(_.value).asJava)
+          val sphereQuery = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
 
-        sphereClient.execute(sphereQuery).map {
-          queryResult =>
-            MatchingResult(
-              esResult.hits,
-              from,
-              pageSize,
-              queryResult.getResults.asScala.toList.map(Offer.productToOffer).flatten
-            )
+          sphereClient.execute(sphereQuery).map {
+            queryResult =>
+              MatchingResult(
+                esResult.hits,
+                from,
+                pageSize,
+                queryResult.getResults.asScala.toList.map(Offer.productToOffer).flatten
+              )
+          }
+        } else {
+          Future.successful(MatchingResult(0L, from, pageSize, List.empty[Offer]))
         }
       }
     }

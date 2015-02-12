@@ -45,8 +45,8 @@ object Demand extends ModelUtils {
         DemandId(id),
         Version(version),
         UserId(uid),
-        mustTags.map(x => x.trim),
-        shouldTags.map(x => x.trim),
+        mustTags.map(x => x.trim).filter(_ != ""),
+        shouldTags.map(x => x.trim).filter(_ != ""),
         Location( Longitude(lon), Latitude(lat) ),
         Distance(distance),
         Price(priceMin),
@@ -124,7 +124,7 @@ object Offer extends ModelUtils {
         OfferId(id),
         Version(version),
         UserId(uid),
-        tags.map(x => x.trim),
+        tags.map(x => x.trim).filter(_ != ""),
         Location(
           Longitude(lon),
           Latitude(lat)
