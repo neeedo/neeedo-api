@@ -17,7 +17,9 @@ object TestData {
   val version = Version(1L)
   val userId = UserId("testUserId")
   val tags = Set("TV Regal", "Oppli", "Birkenoptik")
+  val tagsWithWhitespaces = Set("  TV Regal", "Oppli   ", " Birkenoptik")
   val shouldTags = Set("Buche", "Kiefer", "Schwarz")
+  val shouldTagsWithWhitespaces = Set(" Buche", "Kiefer  ", "  Schwarz")
   val location = Location( Longitude(52.5075419), Latitude(13.4251364) )
   val distance = Distance(10000)
   val price = Price(50)
@@ -52,6 +54,23 @@ object TestData {
     )
   )
 
+  val demandJsonWithWhitespaces: JsObject = Json.obj(
+    "id" -> demandId.value,
+    "version" -> version.value,
+    "userId" -> userId.value,
+    "mustTags" -> tagsWithWhitespaces,
+    "shouldTags" -> shouldTagsWithWhitespaces,
+    "location" -> Json.obj(
+      "lat" -> location.lat.value,
+      "lon" -> location.lon.value
+    ),
+    "distance" -> distance.value,
+    "price" -> Json.obj(
+      "min" -> priceMin.value,
+      "max" -> priceMax.value
+    )
+  )
+
   val demandDraft = DemandDraft(
     userId,
     tags,
@@ -65,6 +84,21 @@ object TestData {
     "userId" -> userId.value,
     "mustTags" -> tags,
     "shouldTags" -> shouldTags,
+    "location" -> Json.obj(
+      "lat" -> location.lat.value,
+      "lon" -> location.lon.value
+    ),
+    "distance" -> distance.value,
+    "price" -> Json.obj(
+      "min" -> priceMin.value,
+      "max" -> priceMax.value
+    )
+  )
+
+  val demandDraftJsonWithWhitespaces: JsObject = Json.obj(
+    "userId" -> userId.value,
+    "mustTags" -> tagsWithWhitespaces,
+    "shouldTags" -> shouldTagsWithWhitespaces,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
@@ -107,6 +141,18 @@ object TestData {
     "price" -> price.value
   )
 
+  val offerJsonWithWhitespaces: JsObject = Json.obj(
+    "id" -> offerId.value,
+    "version" -> version.value,
+    "userId" -> userId.value,
+    "tags" -> tagsWithWhitespaces,
+    "location" -> Json.obj(
+      "lat" -> location.lat.value,
+      "lon" -> location.lon.value
+    ),
+    "price" -> price.value
+  )
+
   val offerDraft = OfferDraft(
     userId,
     tags,
@@ -116,6 +162,16 @@ object TestData {
   val offerDraftJson: JsObject = Json.obj(
     "userId" -> userId.value,
     "tags" -> tags,
+    "location" -> Json.obj(
+      "lat" -> location.lat.value,
+      "lon" -> location.lon.value
+    ),
+    "price" -> price.value
+  )
+
+  val offerDraftJsonWithWhitespaces: JsObject = Json.obj(
+    "userId" -> userId.value,
+    "tags" -> tagsWithWhitespaces,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
       "lon" -> location.lon.value

@@ -12,6 +12,10 @@ class OfferDraftSpec extends Specification {
       TestData.offerDraftJson.as[OfferDraft] must beEqualTo(TestData.offerDraft)
     }
 
+    "tag list must be trimmed" in new WithApplication {
+      TestData.offerDraftJsonWithWhitespaces.as[OfferDraft] must beEqualTo(TestData.offerDraft)
+    }
+
     "object should be correctly parsed into json" in new WithApplication {
       Json.toJson(TestData.offerDraft) must beEqualTo(TestData.offerDraftJson)
     }

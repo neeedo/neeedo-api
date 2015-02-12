@@ -20,6 +20,7 @@ class DemandSpec extends Specification {
   val demandId = TestData.demandId
   val demand = TestData.demand
   val demandJson = TestData.demandJson
+  val demandJsonWithWhiteSpaces = TestData.demandJsonWithWhitespaces
   val validProductAttributeList = TestData.demandProductAttributeList
 
   val invalidProductAttributeList = List(
@@ -63,6 +64,9 @@ class DemandSpec extends Specification {
       Demand.productToDemand(invalidProduct) mustEqual None
     }
 
+    "trailing whitespaces in taglists must be trimmed" in TestApplications.loggingOffApp() {
+      demandJsonWithWhiteSpaces.as[Demand] must beEqualTo(demand)
+    }
   }
 
   "DemandId" should {

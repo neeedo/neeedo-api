@@ -21,7 +21,15 @@ object OfferDraft {
     (JsPath \ "price").read[Double]
   ) {
     (uid, tags, lat, lon, price) =>
-      OfferDraft(UserId(uid), tags, Location(Longitude(lon), Latitude(lat)), Price(price))
+      OfferDraft(
+        UserId(uid),
+        tags.map(x => x.trim),
+        Location(
+          Longitude(lon),
+          Latitude(lat)
+        ),
+        Price(price)
+      )
   }
 
   implicit val offerWrites = new Writes[OfferDraft] {

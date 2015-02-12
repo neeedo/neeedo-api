@@ -45,8 +45,8 @@ object Demand extends ModelUtils {
         DemandId(id),
         Version(version),
         UserId(uid),
-        mustTags,
-        shouldTags,
+        mustTags.map(x => x.trim),
+        shouldTags.map(x => x.trim),
         Location( Longitude(lon), Latitude(lat) ),
         Distance(distance),
         Price(priceMin),
@@ -119,8 +119,18 @@ object Offer extends ModelUtils {
       (JsPath \ "location" \ "lon").read[Double] and
       (JsPath \ "price").read[Double]
     ) {
-    (id, version, uid, tags, lat, lon, price) => Offer(OfferId(id), Version(version), UserId(uid), tags, Location(Longitude(lon), Latitude(lat)),
-      Price(price))
+    (id, version, uid, tags, lat, lon, price) =>
+      Offer(
+        OfferId(id),
+        Version(version),
+        UserId(uid),
+        tags.map(x => x.trim),
+        Location(
+          Longitude(lon),
+          Latitude(lat)
+        ),
+        Price(price)
+      )
   }
 
   implicit val offerWrites = new Writes[Offer] {

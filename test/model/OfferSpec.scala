@@ -19,6 +19,7 @@ class OfferSpec extends Specification {
 
   val offerId = TestData.offerId
   val offerJson: JsObject = TestData.offerJson
+  val offerJsonWithWhitespaces: JsObject = TestData.offerJsonWithWhitespaces
   val offer = TestData.offer
   val validProductAttributeList = TestData.offerProductAttributeList
 
@@ -56,6 +57,10 @@ class OfferSpec extends Specification {
 
     "productToOffer must return None objects for invalid offer products" in TestApplications.loggingOffApp() {
       Offer.productToOffer(invalidProduct) mustEqual None
+    }
+
+    "trailing whitespaces in taglist must be trimmed" in TestApplications.loggingOffApp() {
+      offerJsonWithWhitespaces.as[Offer] must beEqualTo(offer)
     }
   }
 

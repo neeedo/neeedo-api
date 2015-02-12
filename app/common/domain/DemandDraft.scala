@@ -30,8 +30,8 @@ object DemandDraft {
 		(uid, mustTags, shouldTags, lat, lon, distance, priceMin, priceMax) =>
 			DemandDraft(
         UserId(uid),
-        mustTags,
-        shouldTags,
+        mustTags.map(x => x.trim),
+        shouldTags.map(x => x.trim),
         Location( Longitude(lon), Latitude(lat) ),
         Distance(distance),
         Price(priceMin),
