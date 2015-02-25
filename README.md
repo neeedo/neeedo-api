@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/HTW-Projekt-2014-Commercetools/api.svg?branch=master)](https://travis-ci.org/HTW-Projekt-2014-Commercetools/api)
+[![Build Status](https://travis-ci.org/neeedo/neeedo-api.svg)](https://travis-ci.org/neeedo/neeedo-api)
 
 [![Dependency Status](https://www.versioneye.com/user/projects/54bfae036c0035c592000069/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54bfae036c0035c592000069)
 
