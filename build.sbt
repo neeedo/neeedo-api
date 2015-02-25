@@ -1,5 +1,6 @@
 import com.typesafe.sbt.SbtNativePackager._
 import NativePackagerKeys._
+import com.typesafe.sbt.packager.archetypes.ServerLoader.SystemV
 
 name := """neeedo-api"""
 
@@ -10,6 +11,8 @@ scalaVersion := "2.11.1"
 maintainer in Linux := "neeedo-team <neeedo@neeedo.com>"
 
 packageSummary in Linux := "neeedo api application"
+
+serverLoading in Linux := SystemV
 
 packageDescription := "neeedo api application"
 
