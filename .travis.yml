@@ -21,3 +21,4 @@ notifications:
 after_success:
 - codecov
 - ./sbt debian:packageBin
+- ./deploy.sh
