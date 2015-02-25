@@ -8,11 +8,11 @@ version := "1.0-SNAPSHOT"
 
 scalaVersion := "2.11.1"
 
-maintainer in Linux := "neeedo-team <neeedo@neeedo.com>"
+maintainer in Debian := "neeedo-team <neeedo@neeedo.com>"
 
-packageSummary in Linux := "neeedo api application"
+packageSummary in Debian := "neeedo api application"
 
-serverLoading in Linux := SystemV
+serverLoading in Debian := SystemV
 
 packageDescription := "neeedo api application"
 
