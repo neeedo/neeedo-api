@@ -1,8 +1,17 @@
-name := """api"""
+import com.typesafe.sbt.SbtNativePackager._
+import NativePackagerKeys._
+
+name := """neeedo-api"""
 
 version := "1.0-SNAPSHOT"
 
 scalaVersion := "2.11.1"
+
+maintainer in Linux := "neeedo-team <neeedo@neeedo.com>"
+
+packageSummary in Linux := "neeedo api application"
+
+packageDescription := "neeedo api application"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -28,4 +37,3 @@ initialize := {
       sys.error("Java 8 is required for this project.")
     }
 }
-

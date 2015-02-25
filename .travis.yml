@@ -19,4 +19,4 @@ notifications:
     notify: true
 after_success:
 - codecov
-- ./deploy.sh
+- ./sbt debian:packageBin
