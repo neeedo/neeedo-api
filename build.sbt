@@ -25,7 +25,7 @@ excludeFilter in (Compile, unmanagedResources) := "es-data"
 unmanagedResourceDirectories in Test += baseDirectory.value / "test"
 
 libraryDependencies ++= Seq(
-  "org.elasticsearch" % "elasticsearch" % "1.4.2",
+  "org.elasticsearch" % "elasticsearch" % "1.4.4",
   "com.softwaremill.macwire" %% "macros" % "0.7.3",
   "com.softwaremill.macwire" %% "runtime" % "0.7.3",
   "io.sphere.sdk.jvm" % "models" % "1.0.0-M9",
