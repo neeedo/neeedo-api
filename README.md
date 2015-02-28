@@ -2,9 +2,9 @@
 
 [![Dependency Status](https://www.versioneye.com/user/projects/54bfae036c0035c592000069/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54bfae036c0035c592000069)
 
-[![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/coverage.svg?branch=master)](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api?branch=master)
+[![codecov.io](https://codecov.io/github/neeedo/neeedo-api/coverage.svg?branch=master)](https://codecov.io/github/neeedo/neeedo-api?branch=master)
 
-![codecov.io](https://codecov.io/github/HTW-Projekt-2014-Commercetools/api/branch.svg?branch=master)
+![codecov.io](https://codecov.io/github/neeedo/neeedo-api/branch.svg?branch=master)
 
 Installation
 ----------
@@ -14,7 +14,7 @@ To run this project [Java JDK 1.8](http://www.oracle.com/technetwork/java/javase
 Checkout the project and create a `custom-application.conf`
 
 ```bash
-git clone git@github.com:HTW-Projekt-2014-Commercetools/api.git
+git clone https://github.com/neeedo/neeedo-api.git
 cd api
 cp conf/custom-application-dummy.conf conf/custom-application.conf
 ```
