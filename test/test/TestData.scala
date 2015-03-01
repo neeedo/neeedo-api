@@ -1,7 +1,6 @@
 package test
 
 import common.domain._
-import common.helper.Configloader
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.DefaultCurrencyUnits
 import io.sphere.sdk.utils.MoneyImpl

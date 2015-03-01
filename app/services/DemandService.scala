@@ -5,7 +5,7 @@ import java.util.{Optional, Locale}
 
 import com.github.slugify.Slugify
 import common.domain._
-import common.elasticsearch.ElasticsearchClient
+import common.elasticsearch.{EsIndices, ElasticsearchClient}
 import common.helper.Configloader
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
@@ -47,10 +47,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
-    val demandIndex = IndexName(Configloader.getString("demand.typeName"))
-    val demandType = demandIndex.toTypeName
-
-    elasticsearch.indexDocument(demand.id.value, demandIndex, demandType, Json.toJson(demand)).map {
+    elasticsearch.indexDocument(demand.id.value, EsIndices.demandIndexName, EsIndices.demandTypeName, Json.toJson(demand)).map {
       indexResponse => if (indexResponse.isCreated) DemandSaved
       else DemandSaveFailed
     } recover {
@@ -98,8 +95,28 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     } yield createDemand
   }
 
-
   def deleteDemand(demandId: DemandId, version: Version): Future[Option[Demand]] = {
+    for {
+    demandOption <- deleteDemandFromSphere(demandId: DemandId, version: Version)
+      es <- demandOption match {
+        case Some(demand) => deleteDemandFromEs(demandId)
+        case None => Future.successful(false)
+      }
+    } yield {
+      (demandOption, es) match {
+        case (None, false) =>
+          Logger.error("DeleteDemandFromSphere failed")
+          None
+        case (Some(demand), false) =>
+          Logger.error(s"DeleteDemandFromEs with Id: ${demand.id} failed.")
+          None
+        case _ =>
+          demandOption
+      }
+    }
+  }
+
+  def deleteDemandFromSphere(demandId: DemandId, version: Version): Future[Option[Demand]] = {
     val product: Versioned[Product] = Versioned.of(demandId.value, version.value)
     sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Demand.productToDemand).recover {
       // TODO besseres exception matching
@@ -107,6 +124,9 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
       case e: Exception => throw e
     }
   }
+
+  def deleteDemandFromEs(demandId: DemandId): Future[Boolean] =
+    elasticsearch.deleteDocument(demandId.value, EsIndices.demandIndexName, EsIndices.demandTypeName)
 
   def getProductById(id: DemandId): Future[Optional[Product]] =
     sphereClient.execute(ProductFetchById.of(id.value))

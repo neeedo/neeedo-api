@@ -55,6 +55,21 @@ sealed trait ElasticsearchClient {
         }
   }
 
+  def deleteDocument(id: String, indexName: IndexName, typeName: TypeName): Future[Boolean] = {
+    client
+      .prepareDelete(
+        indexName.value,
+        typeName.value,
+        id)
+      .execute()
+      .asScala
+      .map {
+      result => result.isFound
+    }.recover {
+      case _: Exception => false
+    }
+  }
+
   def waitForGreenStatus =
     client
       .admin()

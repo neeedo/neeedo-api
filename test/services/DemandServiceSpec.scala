@@ -29,12 +29,6 @@ class DemandServiceSpec extends Specification with Mockito {
   val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
   val productVariantDraft = ProductVariantDraftBuilder.of().attributes(productAttributeList).build()
 
-  val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
-  val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
-
-  val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
-  val product = ProductBuilder.of(productType, masterData).id(demandId.value).build()
-
   val demandIndex = IndexName("demand")
   val demandType = demandIndex.toTypeName
 
@@ -65,6 +59,12 @@ class DemandServiceSpec extends Specification with Mockito {
     }
 
     "createDemand must return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp() {
+      val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(demandId.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -81,6 +81,12 @@ class DemandServiceSpec extends Specification with Mockito {
     }
 
     "createDemand must return Future[Option[Demand]] if parameters are valid" in TestApplications.loggingOffApp() {
+      val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(demandId.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -111,7 +117,7 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (es).indexDocument(demandId.value, demandIndex, demandType, demandJson)
     }
 
-    "deleteDemand must return Option.empty[Product] when sphere execute throws CompletionException" in {
+    "deleteDemand must return Option.empty[Product] when sphere execute throws CompletionException" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -123,7 +129,13 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphere).execute(any)
     }
 
-    "getDemand by Id must return valid Demand if sphere returns valid Product" in {
+    "getDemand by Id must return valid Demand if sphere returns valid Product" in TestApplications.loggingOffApp() {
+      val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(demandId.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -150,6 +162,12 @@ class DemandServiceSpec extends Specification with Mockito {
     "updateDemand must return demand with valid parameters and call sphere twice" in
       TestApplications.configOffApp(Map("offer.typeName" -> demandIndex.value)) {
 
+      val productType: ProductType = ProductTypeBuilder.of("id", ProductTypeDrafts.demand).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, "socken bekleidung wolle") // Todo provide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(demandId.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -158,11 +176,13 @@ class DemandServiceSpec extends Specification with Mockito {
       productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
       es.indexDocument(demandId.value, demandIndex, demandType, demandJson) returns Future.successful(indexResponse)
+      es.deleteDocument(demandId.value, demandIndex, demandType) returns Future.successful(true)
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.updateDemand(demandId, demandVersion, demandDraft) must beEqualTo(Option(demand)).await
       there was two (sphere).execute(any)
       there was one (es).indexDocument(demandId.value, demandIndex, demandType, demandJson)
+      there was one (es).deleteDocument(demandId.value, demandIndex, demandType)
     }
   }
 }

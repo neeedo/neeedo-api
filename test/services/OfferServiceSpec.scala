@@ -2,7 +2,6 @@ package services
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
-import common.helper.Configloader
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.products.{ProductVariantBuilder, ProductVariantDraftBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductBuilder}
@@ -29,12 +28,6 @@ class OfferServiceSpec extends Specification with Mockito {
 
   val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
   val productVariantDraft = ProductVariantDraftBuilder.of().attributes(productAttributeList).build()
-
-  val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
-  val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
-
-  val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
-  val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
 
   val offerIndex = IndexName("offer")
   val offerType = offerIndex.toTypeName
@@ -67,6 +60,12 @@ class OfferServiceSpec extends Specification with Mockito {
     }
 
     "return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp() {
+      val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -83,6 +82,12 @@ class OfferServiceSpec extends Specification with Mockito {
     }
 
     "return Future[Option[Offer]] if parameters are valid" in TestApplications.loggingOffApp() {
+      val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -131,7 +136,13 @@ class OfferServiceSpec extends Specification with Mockito {
   }
 
   "getOfferById" should {
-    "return valid Offer if sphere returns valid Product" in {
+    "return valid Offer if sphere returns valid Product" in TestApplications.loggingOffApp() {
+      val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
+
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
+
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
@@ -159,7 +170,11 @@ class OfferServiceSpec extends Specification with Mockito {
   "updateOffer" should {
     "return Offer with valid parameters and call sphere twice" in
       TestApplications.configOffApp(Map("offer.typeName" -> offerIndex.value)) {
+      val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
+      val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
 
+      val masterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, productVariant).build()).build()
+      val product = ProductBuilder.of(productType, masterData).id(offer.id.value).build()
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
