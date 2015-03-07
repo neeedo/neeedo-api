@@ -7,6 +7,7 @@ import play.api.mvc.Results.Unauthorized
 import play.api.mvc.Results._
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object SecuredAction extends ActionBuilder[Request] {
 
@@ -54,14 +55,14 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
   def isUnsecure(request: Request[A]) = !request.secure
 
   def getCredentialsFromAuthHeader(authHeader: String): Option[UserCredentials] = {
+    def getToken(authHeader: String): Option[String] = authHeader.split(" ").drop(1).headOption
+
     getToken(authHeader).flatMap { encodedToken =>
       new String(Base64.decodeBase64(encodedToken.getBytes)).split(":").toList match {
         case List(username, password) => Some(UserCredentials(username, password))
         case _ => None
       }
     }
-
-    def getToken(authHeader: String): Option[String] = authHeader.split(" ").drop(1).headOption
   }
 
   case class UserCredentials(user: String, pw: String)
