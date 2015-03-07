@@ -26,6 +26,13 @@ POST           /matching/demand/:from/:size @controllers.Matching.matchDemand(fr
 OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeaders()
 OPTIONS        /matching/demand/0/0         @controllers.Static.deliverCorsHeaders()
 
+# Users
+GET            /users/:username             @controllers.Users.getUserByName(username: common.domain.Username)
+# GET            /users/:id                   @controllers.Users.getUserById(id: common.domain.UserId)
+POST           /users                       @controllers.Users.createUser()
+PUT            /users/:id/:version          @controllers.Users.updateUser(id: common.domain.UserId, version: common.domain.Version)
+DELETE         /users/:id/:version          @controllers.Users.deleteUser(id: common.domain.UserId, version: common.domain.Version)
+
 # Stub Demands
 # GET            /stub/demands                @controllers.DemandsStub.listDemands()
 # GET            /stub/demands/:id            @controllers.DemandsStub.getDemand(id: model.DemandId)

@@ -16,4 +16,5 @@ dist
 /.settings
 data
 conf/custom-application.conf
+conf/generated.keystore
 .DS_Store

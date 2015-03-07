@@ -27,6 +27,7 @@ trait WireDependencies {
   lazy val documentationController = wire[Documentation]
   lazy val matchingController = wire[Matching]
   lazy val staticController = wire[Static]
+  lazy val userController = wire[Users]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
