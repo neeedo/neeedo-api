@@ -35,7 +35,6 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
         val userCredentialsOption = getCredentialsFromAuthHeader(authHeader)
         userCredentialsOption.collect {
           case credentials => isAuthorized(credentials)
-          case _ => Future { false }
         }.map(_ => action(request))
       }
     }
