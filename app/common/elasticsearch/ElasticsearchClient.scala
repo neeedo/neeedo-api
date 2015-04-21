@@ -97,7 +97,7 @@ sealed trait ElasticsearchClient {
 
 
   def readHostsFromConfig: List[HostWithPort] = {
-    Configloader.getStringSeq("elasticsearch.hosts").getOrElse(Nil).map {
+    Configloader.getStringSeq("elasticsearch.hosts").map {
       s =>
         val hostsAndPorts = s.split(":").toList
         HostWithPort(
