@@ -11,8 +11,16 @@ import io.sphere.sdk.utils.MoneyImpl
 import scala.collection.JavaConverters._
 
 object ProductTypeDrafts {
-  val demand = ProductTypeDraft.of(Configloader.getStringOpt("demand.typeName").get, "desc", demandAttributes)
-  val offer = ProductTypeDraft.of(Configloader.getStringOpt("offer.typeName").get, "desc", offerAttributes)
+  val demand = ProductTypeDraft
+    .of(Configloader.getStringOpt("demand.typeName")
+      .getOrElse(throw new IllegalArgumentException("Can't access config-key demand.typeName. Make sure your configuration file is correct.")),
+      "desc",
+      demandAttributes)
+  val offer = ProductTypeDraft
+    .of(Configloader.getStringOpt("offer.typeName")
+      .getOrElse(throw new IllegalArgumentException("Can't access config-key offer.typeName. Make sure your configuration file is correct.")),
+      "desc",
+      offerAttributes)
 
   def buildDemandAttributes(demandDraft: DemandDraft) = List(
     Attribute.of("userId", demandDraft.uid.value),
