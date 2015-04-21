@@ -1,10 +1,11 @@
+package common.helper
+
 import common.elasticsearch.ElasticsearchClientFactory
-import common.sphere.{MockProductTypes, SphereProductTypes, ProductTypes, SphereClientFactory}
+import common.sphere.{MockProductTypes, ProductTypes, SphereClientFactory, SphereProductTypes}
 import controllers._
-import migrations.{ProductTypeEsMigrations, ProductTestDataMigrations, ProductTypeMigrations}
-import play.api.Play
+import migrations.{ProductTestDataMigrations, ProductTypeEsMigrations, ProductTypeMigrations}
+import play.api.{Mode, Play}
 import services._
-import play.api.Mode
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
@@ -18,6 +19,7 @@ trait WireDependencies {
   lazy val offerService = wire[OfferService]
   lazy val esMatchingService = wire[EsMatchingService]
   lazy val matchingService = wire[MatchingService]
+  lazy val userService = wire[UserService]
 
   // Controllers
   lazy val demandController = wire[Demands]

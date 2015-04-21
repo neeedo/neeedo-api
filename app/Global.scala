@@ -1,7 +1,7 @@
 import java.util.concurrent.TimeUnit
 
 import common.elasticsearch.ElasticsearchClientFactory
-import common.helper.CrossOriginFilter
+import common.helper.{Wirehelper, CrossOriginFilter}
 import common.logger.MigrationsLogger
 import migrations.{ProductTypeEsMigrations, ProductTestDataMigrations, ProductTypeMigrations}
 import play.api._
@@ -12,11 +12,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 
 object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Macwire  {
-  import MacwireMacros._
-  lazy val wired = wiredInModule(new WireDependencies {})
+
 
   override def getControllerInstance[A](controllerClass: Class[A]): A = {
-    wired.lookupSingleOrThrow(controllerClass)
+    Wirehelper().lookupSingleOrThrow(controllerClass)
   }
 
   override def onStop(app: Application): Unit = {
@@ -29,9 +28,9 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
 
   def migrations() = {
     MigrationsLogger.info("### Migrations started ###")
-    Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
-    Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
-    Await.result(wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    Await.result(Wirehelper().lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    Await.result(Wirehelper().lookupSingleOrThrow(classOf[ProductTypeEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    Await.result(Wirehelper().lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     MigrationsLogger.info("### Migrations done ###\n")
   }
 }
