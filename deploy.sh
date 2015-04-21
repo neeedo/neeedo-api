@@ -1,4 +1,4 @@
 #!/bin/bash
-scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/neeedo-api_1.0-SNAPSHOT_all.deb deployuser@178.62.252.23:~
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deployuser@178.62.252.23 "sudo dpkg -i --force-confold neeedo-api_1.0-SNAPSHOT_all.deb \
+scp -i docker -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/neeedo-api_1.0-SNAPSHOT_all.deb root@46.101.162.213:~
+ssh -i docker -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@46.101.162.213 "sudo dpkg -i --force-confold neeedo-api_1.0-SNAPSHOT_all.deb \
 exit"
