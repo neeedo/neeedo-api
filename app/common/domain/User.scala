@@ -2,7 +2,7 @@ package common.domain
 
 import play.api.mvc.PathBindable
 
-case class User(id: UserId)
+case class User(id: UserId, username: Username)
 case class UserId(value: String)
 object UserId {
   implicit def pathBinder: PathBindable[UserId] = new PathBindable[UserId] {

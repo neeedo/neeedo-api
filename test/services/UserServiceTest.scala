@@ -1,58 +1,119 @@
 package services
 
+import common.domain._
+import common.sphere.SphereClient
+import org.specs2.matcher.MatchResult
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 
+import scala.concurrent.Future
+
 class UserServiceTest extends Specification with Mockito {
 
-    "UserService.getUserByName" should {
-      "return non empty Future[Option[User]]" in {
-        // sphere success
-      }
-
-      "return empty Future[Option[User]]" in {
-        // sphere no user found
-      }
-
+  "UserService.getUserByName" should {
+    "return non empty Future[Option[User]]" in {
+      this.getUserByNameSuccessfully
     }
 
-    "UserService.createUser" should {
-      "return non empty Future[Option[User]]" in {
-        // sphere success
-      }
+    "return empty Future[Option[User]]" in {
+      this.failToGetUserByName
+    }
+  }
 
-      "return empty Future[Option[User]]" in {
-        // sphere failure
-      }
+  "UserService.createUser" should {
+    "return non empty Future[Option[User]]" in {
+      this.createUserSuccessfully
     }
 
-    "UserService.updateUser" should {
-      "return non empty Future[Option[User]]" in {
-        // sphere success
-      }
+    "return empty Future[Option[User]]" in {
+      this.failToCreateUser
+    }
+  }
 
-      "return empty Future[Option[User]]" in {
-        // sphere failure
-      }
+  "UserService.updateUser" should {
+    "return non empty Future[Option[User]]" in {
+      this.updateUserSuccessfully
     }
 
-    "UserService.deleteUser" should {
-      "return non empty Future[Option[User]]" in {
-        // sphere success
-      }
+    "return empty Future[Option[User]]" in {
+      this.failToUpdateUser
+    }
+  }
 
-      "return empty Future[Option[User]]" in {
-        // sphere throws completion exception
-      }
+  "UserService.deleteUser" should {
+    "return non empty Future[Option[User]]" in {
+      this.deleteUserSuccessfully
     }
 
-    "UserService.writeUserToSphere" should {
-      "return non empty Future[Option[User]]" in {
-        // sphere success
-      }
-
-      "return empty Future[Option[User]]" in {
-        // sphere throws completion exception
-      }
+    "return empty Future[Option[User]]" in {
+      this.failToDeleteUser
     }
+  }
+
+  "UserService.writeUserToSphere" should {
+    "return non empty Future[Option[User]]" in {
+      this.writeUserToSphereSuccessfully
+    }
+
+    "return empty Future[Option[User]]" in {
+      this.failToWriteUserToSphere
+    }
+  }
+
+  private def getUserByNameSuccessfully = {
+    val userDraft = UserDraft(Username("name"))
+    val userService = new UserService(mock[SphereClient])
+    val user = userService.createUser(userDraft)
+    userService.getUserByName(Username("name")) must beEqualTo(Option(user)).await
+  }
+
+  private def failToGetUserByName = {
+    val userService = new UserService(mock[SphereClient])
+    userService.getUserByName(Username("not found")) must beEqualTo(Option.empty[User]).await
+  }
+
+  private def createUserSuccessfully = {
+    val userDraft = UserDraft(Username("name"))
+    val userService = new UserService(mock[SphereClient])
+    val user = ???
+    userService.createUser(userDraft) must beEqualTo(Option(user))
+  }
+
+  private def failToCreateUser = {
+    val userDraft = UserDraft(Username("name"))
+    val userService = new UserService(mock[SphereClient])
+    userService.createUser(userDraft)
+    userService.createUser(userDraft) must beEqualTo(Option.empty[User])
+  }
+
+  private def updateUserSuccessfully = {
+    val userService = new UserService(mock[SphereClient])
+    userService.updateUser(Username("Not Found"))
+  }
+
+  private def failToUpdateUser = {
+    val userService = new UserService(mock[SphereClient])
+    userService.getUserByName(Username("Not Found"))
+  }
+
+  private def deleteUserSuccessfully = {
+    val userService = new UserService(mock[SphereClient])
+    userService.getUserByName(Username("Not Found"))
+  }
+
+  private def failToDeleteUser = {
+    val userService = new UserService(mock[SphereClient])
+    userService.getUserByName(Username("Not Found"))
+  }
+
+  private def writeUserToSphereSuccessfully = {
+    val userService = new UserService(mock[SphereClient])
+    userService.getUserByName(Username("Not Found"))
+  }
+
+  private def failToWriteUserToSphere = {
+    val userService = new UserService(mock[SphereClient])
+    userService.getUserByName(Username("Not Found"))
+  }
+
 }
