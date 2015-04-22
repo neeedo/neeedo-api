@@ -33,7 +33,7 @@ libraryDependencies ++= Seq(
   cache
 )
 
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint", "-Dhttps.port=9443")
 
 initialize := {
   val _ = initialize.value // run the previous initialization
