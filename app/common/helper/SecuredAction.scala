@@ -36,7 +36,6 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
     val userCredentialsOption = getCredentialsFromAuthHeader(authHeader)
     userCredentialsOption match {
       case Some(userCredentials) =>
-        println(userCredentials)
         isAuthorized(userCredentials).flatMap {
           result =>
             if (result) action(request)
