@@ -33,7 +33,7 @@ libraryDependencies ++= Seq(
   cache
 )
 
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint", "-Dhttps.port=9443")
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
 initialize := {
   val _ = initialize.value // run the previous initialization
@@ -41,3 +41,5 @@ initialize := {
       sys.error("Java 8 is required for this project.")
     }
 }
+
+bashScriptExtraDefines += "addApp -Dhttps.port=9443"
