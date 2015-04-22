@@ -42,4 +42,4 @@ initialize := {
     }
 }
 
-bashScriptExtraDefines += "addApp -Dhttps.port=9443"
+bashScriptExtraDefines += "addJava -Dhttps.port=9443"
