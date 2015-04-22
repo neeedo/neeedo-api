@@ -1,6 +1,6 @@
 package common.helper
 
-import common.domain.{Username, UserCredentials}
+import common.domain.{Usermail, Username, UserCredentials}
 import org.apache.commons.codec.binary.Base64
 import play.api.http.HeaderNames._
 import play.api.mvc.{Action, Result, Request, ActionBuilder}
@@ -26,19 +26,23 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
 
   def apply(request: Request[A]): Future[Result] = {
     if (isUnsecure(request)) redirectHttps(request)
-    else authorize(request) getOrElse requestAuthorization
+    else authorize(request)
   }
 
   def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = UserService.authorizeUser(userCredentials)
 
-  def authorize(request: Request[A]): Option[Future[Result]] = {
-    request.headers.get(AUTHORIZATION).flatMap {
-      authHeader: String => {
-        val userCredentialsOption = getCredentialsFromAuthHeader(authHeader)
-        userCredentialsOption.collect {
-          case credentials => isAuthorized(credentials)
-        }.map(_ => action(request))
-      }
+  def authorize(request: Request[A]): Future[Result] = {
+    val authHeader: String = request.headers.get(AUTHORIZATION).getOrElse("")
+    val userCredentialsOption = getCredentialsFromAuthHeader(authHeader)
+    userCredentialsOption match {
+      case Some(userCredentials) =>
+        println(userCredentials)
+        isAuthorized(userCredentials).flatMap {
+          result =>
+            if (result) action(request)
+            else Future.successful(Unauthorized)
+        }
+      case None => requestAuthorization
     }
   }
 
@@ -57,7 +61,7 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
 
     getToken(authHeader).flatMap { encodedToken =>
       new String(Base64.decodeBase64(encodedToken.getBytes)).split(":").toList match {
-        case List(username, password) => Some(UserCredentials(Username(username), password))
+        case List(mail, password) => Some(UserCredentials(Usermail(mail), password))
         case _ => None
       }
     }

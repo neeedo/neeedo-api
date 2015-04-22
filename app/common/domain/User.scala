@@ -1,8 +1,11 @@
 package common.domain
 
+import io.sphere.sdk.customers.Customer
 import play.api.mvc.PathBindable
 
-case class User(id: UserId, userCredentials: UserCredentials)
+case class User(user: Customer, password: String) {
+  def mail: Usermail = Usermail(user.getEmail)
+}
 case class UserId(value: String)
 object UserId {
   implicit def pathBinder: PathBindable[UserId] = new PathBindable[UserId] {
@@ -31,4 +34,5 @@ object Username {
 }
 
 case class Username(value: String) extends AnyVal
-case class UserCredentials(user: Username, pw: String)
+case class Usermail(value: String) extends AnyVal
+case class UserCredentials(mail: Usermail, pw: String)
