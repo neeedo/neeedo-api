@@ -4,11 +4,10 @@ scala:
 jdk:
 - oraclejdk8
 before_install:
-- openssl aes-256-cbc -K $encrypted_7197c0a990da_key -iv $encrypted_7197c0a990da_iv
-  -in deploykey.enc -out ~/.ssh/id_rsa -d
+- openssl aes-256-cbc -K $encrypted_797125c3a3a5_key -iv $encrypted_797125c3a3a5_iv -in docker.enc -out docker -d
 - sudo pip install codecov
 before_script:
-- chmod 600 ~/.ssh/id_rsa
+- chmod 600 docker
 script: ./sbt coverage test
 notifications:
   email: false

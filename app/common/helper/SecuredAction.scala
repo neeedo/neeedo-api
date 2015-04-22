@@ -1,10 +1,12 @@
 package common.helper
 
+import common.domain.{Username, UserCredentials}
 import org.apache.commons.codec.binary.Base64
 import play.api.http.HeaderNames._
 import play.api.mvc.{Action, Result, Request, ActionBuilder}
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc.Results._
+import services.UserService
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,7 +29,7 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
     else authorize(request) getOrElse requestAuthorization
   }
 
-  def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = Future.successful(true)
+  def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = UserService.authorizeUser(userCredentials)
 
   def authorize(request: Request[A]): Option[Future[Result]] = {
     request.headers.get(AUTHORIZATION).flatMap {
@@ -48,9 +50,6 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
     Future.successful(Unauthorized.withHeaders(WWW_AUTHENTICATE -> """Basic realm="Secured""""))
   }
 
-
-  def isValid(user: String, password: String): Boolean = true
-
   def isUnsecure(request: Request[A]) = !request.secure
 
   def getCredentialsFromAuthHeader(authHeader: String): Option[UserCredentials] = {
@@ -58,12 +57,10 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
 
     getToken(authHeader).flatMap { encodedToken =>
       new String(Base64.decodeBase64(encodedToken.getBytes)).split(":").toList match {
-        case List(username, password) => Some(UserCredentials(username, password))
+        case List(username, password) => Some(UserCredentials(Username(username), password))
         case _ => None
       }
     }
   }
-
-  case class UserCredentials(user: String, pw: String)
 }
 
