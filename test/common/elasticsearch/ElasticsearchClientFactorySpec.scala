@@ -7,7 +7,8 @@ import play.api.test.{FakeApplication, WithApplication}
 class ElasticsearchClientFactorySpec extends Specification {
   "ElasticsearchClientFactory" should {
     "returnClientForMode must return correct es client" in
-      new WithApplication(FakeApplication(additionalConfiguration = Map("elasticsearch.dev.useRemoteClient" -> false))) {
+      new WithApplication(FakeApplication(additionalConfiguration = Map("elasticsearch.dev.useRemoteClient" -> false,
+        "elasticsearch.hosts" -> "node1:9300,node2:9300"))) {
 
       ElasticsearchClientFactory.returnClientForMode(Mode.Test) must haveClass[LocalEsClient]
       ElasticsearchClientFactory.returnClientForMode(Mode.Dev) must haveClass[LocalEsClient]
@@ -15,7 +16,8 @@ class ElasticsearchClientFactorySpec extends Specification {
     }
 
     "returnClientForMode must return remote es client in dev when elasticsearch.dev.useRemoteClient is true" in
-      new WithApplication(FakeApplication(additionalConfiguration = Map("elasticsearch.dev.useRemoteClient" -> true))) {
+      new WithApplication(FakeApplication(additionalConfiguration = Map("elasticsearch.dev.useRemoteClient" -> true,
+        "elasticsearch.hosts" -> "node1:9300,node2:9300"))) {
 
         ElasticsearchClientFactory.returnClientForMode(Mode.Dev) must haveClass[RemoteEsClient]
     }
