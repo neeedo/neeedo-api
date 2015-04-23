@@ -16,10 +16,6 @@ serverLoading in Debian := SystemV
 
 packageDescription := "neeedo api application"
 
-daemonUser in Debian := "neeedo-api"
-
-daemonGroup in Debian := "neeedo-api"
-
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
