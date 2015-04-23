@@ -17,9 +17,9 @@ packageDescription := "neeedo api application"
 
 bashScriptExtraDefines += "addJava -Dhttps.port=9443"
 
-daemonUser in Linux := "neeedo-app"
+daemonUser in Linux := "neeedo-api"
 
-daemonGroup in Linux := "neeedo-app"
+daemonGroup in Linux := "neeedo-api"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
