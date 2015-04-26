@@ -1,6 +1,6 @@
 package common.helper
 
-import common.domain.{Usermail, Username, UserCredentials}
+import common.domain.{Email, UserCredentials}
 import org.apache.commons.codec.binary.Base64
 import play.api.http.HeaderNames._
 import play.api.mvc.{Action, Result, Request, ActionBuilder}
@@ -60,7 +60,7 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
 
     getToken(authHeader).flatMap { encodedToken =>
       new String(Base64.decodeBase64(encodedToken.getBytes)).split(":").toList match {
-        case List(mail, password) => Some(UserCredentials(Usermail(mail), password))
+        case List(email, password) => Some(UserCredentials(Email(email), password))
         case _ => None
       }
     }

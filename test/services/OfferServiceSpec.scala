@@ -4,9 +4,9 @@ import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.LocalizedStrings
-import io.sphere.sdk.products.{ProductVariantBuilder, ProductVariantDraftBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductBuilder}
-import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
-import io.sphere.sdk.products.queries.ProductFetchById
+import io.sphere.sdk.products._
+import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import java.util.{Optional, Locale}
 import java.util.concurrent.CompletionException
@@ -40,7 +40,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val service = new OfferService(es, sphere, productTypes)
 
       service.getProductById(offerId)
-      there was one (sphere).execute(ProductFetchById.of(offerId.value))
+      there was one (sphere).execute(ProductByIdFetch.of(offerId.value))
     }
   }
 
@@ -71,7 +71,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val productTypes = mock[ProductTypes]
 
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
-      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.successful(product)
+      sphere.execute(any[ProductDeleteCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
       es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.failed(new RuntimeException("test exception"))
 
@@ -127,7 +127,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.failed(new CompletionException(new Exception()))
+      sphere.execute(any[ProductDeleteCommand]) returns Future.failed(new CompletionException(new Exception()))
 
       val service = new OfferService(es, sphere, productTypes)
       service.deleteOffer(offerId, offerVersion) must beEqualTo(Option.empty[Product]).await
@@ -147,7 +147,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(ProductFetchById.of(offerId.value)) returns Future.successful(Optional.of(product))
+      sphere.execute(ProductByIdFetch.of(offerId.value)) returns Future.successful(Optional.of(product))
 
       val service = new OfferService(es, sphere, productTypes)
       service.getOfferById(offerId) must beEqualTo(Option(offer)).await
@@ -159,7 +159,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(ProductFetchById.of(offerId.value)) returns Future.successful(Optional.empty())
+      sphere.execute(ProductByIdFetch.of(offerId.value)) returns Future.successful(Optional.empty())
 
       val service = new OfferService(es, sphere, productTypes)
       service.getOfferById(offerId) must beEqualTo(Option.empty[Offer]).await

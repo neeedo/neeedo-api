@@ -134,5 +134,5 @@ class UserServiceTest extends Specification with Mockito {
 //  private def failToWriteUserToSphere = {
 //    val userService = new UserService(mock[SphereClient])
 //    userService.getUserByName(Username("Not Found"))
-  }
+//  }
 }

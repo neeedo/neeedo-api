@@ -42,6 +42,3 @@ object Username {
     override def unbind(key: String, username: Username): String = username.value.toString
   }
 }
-
-
-case class UserCredentials(email: Email, password: String)

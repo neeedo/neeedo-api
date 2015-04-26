@@ -9,8 +9,8 @@ import common.elasticsearch.ElasticsearchClient
 import common.helper.Configloader
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
-import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
-import io.sphere.sdk.products.queries.ProductFetchById
+import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder, Product}
 import model.{OfferId, Offer}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -98,7 +98,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
 
   def deleteOffer(id: OfferId, version: Version): Future[Option[Offer]] = {
     val product: Versioned[Product] = Versioned.of(id.value, version.value)
-    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Offer.productToOffer).recover {
+    sphereClient.execute(ProductDeleteCommand.of(product)).map(Offer.productToOffer).recover {
       // TODO enhance exception matching
       case e: CompletionException => Option.empty[Offer]
       case e: Exception => throw e
@@ -106,5 +106,5 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def getProductById(id: OfferId): Future[Optional[Product]] =
-    sphereClient.execute(ProductFetchById.of(id.value))
+    sphereClient.execute(ProductByIdFetch.of(id.value))
 }

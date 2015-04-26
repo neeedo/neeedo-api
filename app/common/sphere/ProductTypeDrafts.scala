@@ -5,7 +5,7 @@ import java.util.Locale
 import common.domain.{OfferDraft, DemandDraft}
 import common.helper.Configloader
 import io.sphere.sdk.attributes._
-import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
+import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.producttypes.ProductTypeDraft
 import io.sphere.sdk.utils.MoneyImpl
 import scala.collection.JavaConverters._
@@ -49,53 +49,57 @@ object ProductTypeDrafts {
   private def offerAttributes: java.util.List[AttributeDefinition] =
     List(userId, tags, longitude, latitude, price).asJava
 
-  private def userId: AttributeDefinition = TextAttributeDefinitionBuilder
-    .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextInputHint.SINGLE_LINE)
+  private def userId: AttributeDefinition = AttributeDefinitionBuilder
+    .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextType.of())
+    .isRequired(true)
+    .inputHint(TextInputHint.SINGLE_LINE)
+    .build()
+
+  private def tags: AttributeDefinition = AttributeDefinitionBuilder
+    .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), TextType.of())
+    .isRequired(true)
+    .inputHint(TextInputHint.SINGLE_LINE)
+    .build()
+
+  private def mustTags: AttributeDefinition = AttributeDefinitionBuilder
+    .of("mustTags", LocalizedStrings.of(Locale.ENGLISH, "mustTags"), TextType.of())
+    .isRequired(true)
+    .inputHint(TextInputHint.SINGLE_LINE)
+    .build()
+
+  private def shouldTags: AttributeDefinition = AttributeDefinitionBuilder
+    .of("shouldTags", LocalizedStrings.of(Locale.ENGLISH, "shouldTags"), TextType.of())
+    .isRequired(true)
+    .inputHint(TextInputHint.SINGLE_LINE)
+    .build()
+
+  private def longitude: AttributeDefinition = AttributeDefinitionBuilder
+    .of("longitude", LocalizedStrings.of(Locale.ENGLISH, "longitude"), NumberType.of())
     .isRequired(true)
     .build()
 
-  private def tags: AttributeDefinition = TextAttributeDefinitionBuilder
-    .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), TextInputHint.SINGLE_LINE)
+  private def latitude: AttributeDefinition = AttributeDefinitionBuilder
+    .of("latitude", LocalizedStrings.of(Locale.ENGLISH, "latitude"), NumberType.of())
     .isRequired(true)
     .build()
 
-  private def mustTags: AttributeDefinition = TextAttributeDefinitionBuilder
-    .of("mustTags", LocalizedStrings.of(Locale.ENGLISH, "mustTags"), TextInputHint.SINGLE_LINE)
-    .isRequired(true)
-    .build()
-
-  private def shouldTags: AttributeDefinition = TextAttributeDefinitionBuilder
-    .of("shouldTags", LocalizedStrings.of(Locale.ENGLISH, "shouldTags"), TextInputHint.SINGLE_LINE)
-    .isRequired(true)
-    .build()
-
-  private def longitude: AttributeDefinition = NumberAttributeDefinitionBuilder
-    .of("longitude", LocalizedStrings.of(Locale.ENGLISH, "longitude"))
-    .isRequired(true)
-    .build()
-
-  private def latitude: AttributeDefinition = NumberAttributeDefinitionBuilder
-    .of("latitude", LocalizedStrings.of(Locale.ENGLISH, "latitude"))
-    .isRequired(true)
-    .build()
-
-  private def distance: AttributeDefinition = NumberAttributeDefinitionBuilder
-    .of("distance", LocalizedStrings.of(Locale.ENGLISH, "distance"))
+  private def distance: AttributeDefinition = AttributeDefinitionBuilder
+    .of("distance", LocalizedStrings.of(Locale.ENGLISH, "distance"), NumberType.of())
     .isRequired(false)
     .build()
 
-  private def price: AttributeDefinition = MoneyAttributeDefinitionBuilder
-    .of("price", LocalizedStrings.of(Locale.ENGLISH, "price"))
+  private def price: AttributeDefinition = AttributeDefinitionBuilder
+    .of("price", LocalizedStrings.of(Locale.ENGLISH, "price"), MoneyType.of())
     .isRequired(false)
     .build()
 
-  private def priceMin: AttributeDefinition = MoneyAttributeDefinitionBuilder
-    .of("priceMin", LocalizedStrings.of(Locale.ENGLISH, "priceMin"))
+  private def priceMin: AttributeDefinition = AttributeDefinitionBuilder
+    .of("priceMin", LocalizedStrings.of(Locale.ENGLISH, "priceMin"), MoneyType.of())
     .isRequired(false)
     .build()
 
-  private def priceMax: AttributeDefinition = MoneyAttributeDefinitionBuilder
-    .of("priceMax", LocalizedStrings.of(Locale.ENGLISH, "priceMax"))
+  private def priceMax: AttributeDefinition = AttributeDefinitionBuilder
+    .of("priceMax", LocalizedStrings.of(Locale.ENGLISH, "priceMax"), MoneyType.of())
     .isRequired(false)
     .build()
 }

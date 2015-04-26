@@ -44,7 +44,7 @@ class UserService(sphereClient: SphereClient) {
       case Some(result) => Future.successful(result.password == md5(credentials.password))
         //Todo refactor into sep method
       case None =>
-        val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password, Optional.empty())
+        val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password)
         sphereClient
           .execute(signInQuery)
           .map {

@@ -6,12 +6,11 @@ import java.util.{Optional, Locale}
 import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.{EsIndices, ElasticsearchClient}
-import common.helper.Configloader
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
-import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
-import io.sphere.sdk.products.queries.ProductFetchById
+import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.products.queries.ProductByIdFetch
 import model.{Demand, DemandId}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -118,7 +117,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
 
   def deleteDemandFromSphere(demandId: DemandId, version: Version): Future[Option[Demand]] = {
     val product: Versioned[Product] = Versioned.of(demandId.value, version.value)
-    sphereClient.execute(ProductDeleteByIdCommand.of(product)).map(Demand.productToDemand).recover {
+    sphereClient.execute(ProductDeleteCommand.of(product)).map(Demand.productToDemand).recover {
       // TODO besseres exception matching
       case e: CompletionException => Option.empty[Demand]
       case e: Exception => throw e
@@ -129,5 +128,5 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     elasticsearch.deleteDocument(demandId.value, EsIndices.demandIndexName, EsIndices.demandTypeName)
 
   def getProductById(id: DemandId): Future[Optional[Product]] =
-    sphereClient.execute(ProductFetchById.of(id.value))
+    sphereClient.execute(ProductByIdFetch.of(id.value))
 }

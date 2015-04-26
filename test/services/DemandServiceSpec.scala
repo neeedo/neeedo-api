@@ -5,8 +5,8 @@ import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.products.{ProductVariantBuilder, ProductVariantDraftBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductBuilder}
-import io.sphere.sdk.products.commands.{ProductDeleteByIdCommand, ProductCreateCommand}
-import io.sphere.sdk.products.queries.ProductFetchById
+import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import java.util.{Optional, Locale}
 import java.util.concurrent.CompletionException
@@ -41,7 +41,7 @@ class DemandServiceSpec extends Specification with Mockito {
       val demandService = new DemandService(es, sphere, productTypes)
 
       demandService.getProductById(demandId)
-      there was one (sphere).execute(ProductFetchById.of(demandId.value))
+      there was one (sphere).execute(ProductByIdFetch.of(demandId.value))
     }
 
     "createDemand must return None if writing to sphere fails" in TestApplications.loggingOffApp() {
@@ -70,7 +70,7 @@ class DemandServiceSpec extends Specification with Mockito {
       val productTypes = mock[ProductTypes]
 
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
-      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.successful(product)
+      sphere.execute(any[ProductDeleteCommand]) returns Future.successful(product)
       productTypes.demand returns ProductTypeBuilder.of("demand", ProductTypeDrafts.demand).build()
       es.indexDocument(demandId.value, demandIndex, demandType, demandJson) returns Future.failed(new RuntimeException("test exception"))
 
@@ -122,7 +122,7 @@ class DemandServiceSpec extends Specification with Mockito {
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(any[ProductDeleteByIdCommand]) returns Future.failed(new CompletionException(new Exception()))
+      sphere.execute(any[ProductDeleteCommand]) returns Future.failed(new CompletionException(new Exception()))
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.deleteDemand(demandId, demandVersion) must beEqualTo(Option.empty[Product]).await
@@ -140,7 +140,7 @@ class DemandServiceSpec extends Specification with Mockito {
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(ProductFetchById.of(demandId.value)) returns Future.successful(Optional.of(product))
+      sphere.execute(ProductByIdFetch.of(demandId.value)) returns Future.successful(Optional.of(product))
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.getDemandById(demandId) must beEqualTo(Option(demand)).await
@@ -152,7 +152,7 @@ class DemandServiceSpec extends Specification with Mockito {
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(ProductFetchById.of(demandId.value)) returns Future.successful(Optional.empty())
+      sphere.execute(ProductByIdFetch.of(demandId.value)) returns Future.successful(Optional.empty())
 
       val demandService = new DemandService(es, sphere, productTypes)
       demandService.getDemandById(demandId) must beEqualTo(Option.empty[Demand]).await
