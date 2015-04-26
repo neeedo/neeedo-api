@@ -1,4 +1,4 @@
-import com.typesafe.sbt.packager.archetypes.ServerLoader.SystemV
+import com.typesafe.sbt.packager.archetypes.ServerLoader
 import com.typesafe.sbt.packager.debian.DebianPlugin
 
 name := """neeedo-api"""
@@ -11,7 +11,7 @@ maintainer in Debian := "neeedo-team <neeedo@neeedo.com>"
 
 packageSummary in Debian := "neeedo api application"
 
-serverLoading in Debian := SystemV
+serverLoading in Debian := ServerLoader.Upstart
 
 packageDescription := "neeedo api application"
 
