@@ -6,3 +6,7 @@ import play.api.LoggerLike
 object MigrationsLogger extends LoggerLike {
   override val logger: Logger = LoggerFactory.getLogger("Migrations")
 }
+
+object EsLogger extends LoggerLike {
+  override val logger: Logger = LoggerFactory.getLogger("Elasticsearch")
+}

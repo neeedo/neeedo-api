@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit
 
 import common.domain.{IndexName, TypeName}
 import common.helper.Configloader
+import common.logger.EsLogger
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Client
@@ -114,24 +114,31 @@ class LocalEsClient extends ElasticsearchClient {
     .put("path.data", "resources/es-data/")
     .build()
 
-  lazy val node: Node = NodeBuilder.nodeBuilder().local(true).settings(nodeSettings).node()
+  lazy val node: Node = {
+    EsLogger.info(s"Build Local NodeClient")
+    NodeBuilder.nodeBuilder().local(true).settings(nodeSettings).node()
+  }
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
 }
 
 class RemoteEsClient extends ElasticsearchClient {
   val clustername = Configloader.getStringOpt("elasticsearch.clustername").getOrElse("elasticsearch")
-  val hosts = readHostsFromConfig
-  lazy val node: Node = NodeBuilder.nodeBuilder()
-    .clusterName(clustername)
-    .settings(ImmutableSettings.settingsBuilder()
-      .classLoader(classOf[Settings].getClassLoader)
-      .put("discovery.zen.ping.unicast.hosts", hosts.mkString(","))
-      .put("node.name", "neeedo-client"))
-    .client(true)
-    .data(false)
-    .node()
+  val hosts = readHostsFromConfig.mkString(",")
+  lazy val node: Node = createNode
 
+  def createNode = {
+    EsLogger.info(s"Build NodeClient with Hosts: $hosts and clusternamer: $clustername")
+    NodeBuilder.nodeBuilder()
+      .clusterName(clustername)
+      .settings(ImmutableSettings.settingsBuilder()
+      .classLoader(classOf[Settings].getClassLoader)
+      .put("discovery.zen.ping.unicast.hosts", hosts)
+      .put("node.name", "neeedo-client"))
+      .client(true)
+      .data(false)
+      .node()
+  }
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
 }

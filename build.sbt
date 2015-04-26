@@ -11,15 +11,11 @@ maintainer in Debian := "neeedo-team <neeedo@neeedo.com>"
 
 packageSummary in Debian := "neeedo api application"
 
-serverLoading in Debian := ServerLoader.Upstart
+serverLoading in Linux := ServerLoader.Upstart
 
 packageDescription := "neeedo api application"
 
 bashScriptExtraDefines += "addJava -Dhttps.port=9443"
-
-daemonUser in Linux := "neeedo-api"
-
-daemonGroup in Linux := "neeedo-api"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
