@@ -11,7 +11,7 @@ maintainer in Debian := "neeedo-team <neeedo@neeedo.com>"
 
 packageSummary in Debian := "neeedo api application"
 
-serverLoading in Linux := ServerLoader.Upstart
+serverLoading in Linux := ServerLoader.SystemV
 
 packageDescription := "neeedo api application"
 
