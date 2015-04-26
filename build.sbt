@@ -15,8 +15,6 @@ serverLoading in Debian := SystemV
 
 packageDescription := "neeedo api application"
 
-bashScriptExtraDefines += "addJava -Dhttps.port=9443"
-
 lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
 unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
