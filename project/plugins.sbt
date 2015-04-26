@@ -8,3 +8,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.0.0")
 
 // code coverage
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.1")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.0")

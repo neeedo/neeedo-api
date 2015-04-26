@@ -1,6 +1,5 @@
-import com.typesafe.sbt.SbtNativePackager._
-import NativePackagerKeys._
 import com.typesafe.sbt.packager.archetypes.ServerLoader.SystemV
+import com.typesafe.sbt.packager.debian.DebianPlugin
 
 name := """neeedo-api"""
 
@@ -16,7 +15,7 @@ serverLoading in Debian := SystemV
 
 packageDescription := "neeedo api application"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
 unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
 

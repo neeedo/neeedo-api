@@ -1,34 +1,30 @@
 package services
 
+import java.security.MessageDigest
+import java.util.Optional
+
 import common.domain._
 import common.helper.Wirehelper
 import common.sphere.SphereClient
-import io.sphere.sdk.customers.queries.{CustomerByIdFetch, CustomerQuery}
 import io.sphere.sdk.customers.{CustomerDraft, CustomerName}
-import io.sphere.sdk.customers.commands.{CustomerCreateCommand, CustomerUpdateCommand}
+import io.sphere.sdk.customers.commands.{CustomerCreateCommand, CustomerSignInCommand}
 import scala.concurrent.Future
 import play.api.cache.Cache
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
 
+
 class UserService(sphereClient: SphereClient) {
 
-  def getUserByName(username: Username): Future[Option[User]] = Future.successful(None)
-
   def getUserByEmail(email: String) = Future.successful(None)
-
-  def getUserById(id: UserId) = {
-    val customerByIdFetch = CustomerByIdFetch.of(id.value)
-
-    sphereClient.execute(customerByIdFetch).map(User.customerToUser(_))
-  }
 
   def createUser(userDraft: UserDraft): Future[Option[User]] = {
     val customerName = CustomerName.ofFirstAndLastName("Peter", "Gerhard")
     val customerDraft = CustomerDraft.of(customerName, "peter.gerhard90@gmail.com", "peter")
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
 
-    sphereClient.execute(customerCreateCommand).map(User.customerToUser(_))
+//    sphereClient.execute(customerCreateCommand).map(c => User.fromCustomer(c.getCustomer))
+    Future.successful(None)
   }
 
   def updateUser(id: UserId, version: Version, userDraft: UserDraft): Future[Option[User]] = {
@@ -40,19 +36,27 @@ class UserService(sphereClient: SphereClient) {
     Future.successful(None)
   }
 
-  def authorizeUser(userCredentials: UserCredentials): Future[Boolean] = {
-    val cachedUser: Option[User] = Cache.getAs[User](s"user.${userCredentials.user.value}")
-    cachedUser match {
-      case Some(user) => Future.successful(user.userCredentials.pw == userCredentials.pw)
+  def authorizeUser(credentials: UserCredentials): Future[Boolean] = {
+    def md5(s: String): String = new String(MessageDigest.getInstance("MD5").digest(s.getBytes))
+
+    val cachedUserCredentials: Option[UserCredentials] = Cache.getAs[UserCredentials](s"userCredentials.${credentials.email.value}")
+    cachedUserCredentials match {
+      case Some(result) => Future.successful(result.password == md5(credentials.password))
+        //Todo refactor into sep method
       case None =>
-        getUserByName(userCredentials.user).map {
-          case Some(user) =>
-            if (user.userCredentials.pw == userCredentials.pw) {
-              Cache.set(s"user.${userCredentials.user.value}", user)
+        val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password, Optional.empty())
+        sphereClient
+          .execute(signInQuery)
+          .map {
+            res => {
+              Cache.set(s"userCredentials.${credentials.email.value}", UserCredentials(Email(res.getCustomer.getEmail), md5(credentials.password)))
+              true
             }
-            user.userCredentials.pw == userCredentials.pw
-          case None => false
-        }
+          }
+          .recover {
+            case e: Exception =>
+              false
+          }
     }
   }
 }

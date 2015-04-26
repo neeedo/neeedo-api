@@ -91,7 +91,7 @@ API-Documentation
 		- [Example](#example-7)
 
 # Status
-The status will be reported under `http://46.101.162.213:9000/status`.
+The status will be reported under `http://46.101.162.213/status`.
 Currently responds 200 OK if application is online.
 
 # Matching
@@ -99,7 +99,7 @@ Currently responds 200 OK if application is online.
 ## Get all offers for one demand
 
 ### Resource
-GET `http://46.101.162.213:9000/matching/demand/{from}/{pageSize}`
+GET `http://46.101.162.213/matching/demand/{from}/{pageSize}`
 
 ### URL Parameters
 
@@ -138,17 +138,17 @@ The request body must contain a valid DemandDraft json object
 
 ## Query all Demands
 ### Resource
-GET `http://46.101.162.213:9000/matching/demands`
+GET `http://46.101.162.213/matching/demands`
 
 ### Response
 200 Ok
 
 ### Example
-    curl -XGET http://46.101.162.213:9000/matching/demands -v
+    curl -XGET http://46.101.162.213/matching/demands -v
     
 ## Query single Demand
 ### Resource
-GET `http://46.101.162.213:9000/demands/{id}`
+GET `http://46.101.162.213/demands/{id}`
 
 ### URL Parameters
 
@@ -182,7 +182,7 @@ GET `http://46.101.162.213:9000/demands/{id}`
 
 ## Create Demand
 ### Resource
-POST `http://46.101.162.213:9000/demands`
+POST `http://46.101.162.213/demands`
 
 ### Body
 The request body must contain a valid DemandDraft json object
@@ -230,11 +230,11 @@ The request body must contain a valid DemandDraft json object
 
 ### Example
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","mustTags":["socken","bekleidung","wolle"],"shouldTags":["rot","weich","warm"],"location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://46.101.162.213:9000/demands -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","mustTags":["socken","bekleidung","wolle"],"shouldTags":["rot","weich","warm"],"location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://46.101.162.213/demands -v
 
 ## Update Demand
 ### Resource
-PUT `http://46.101.162.213:9000/demands/{id}/{version}`
+PUT `http://46.101.162.213/demands/{id}/{version}`
 
 ### URL Parameters
 
@@ -293,11 +293,11 @@ The request body must contain a valid DemandDraft json object
 
 ### Example
 
-    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","mustTags":["socken","bekleidung","wolle"], "shouldTags":["rot","weich","warm"],"location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://46.101.162.213:9000/demands/1/1 -v
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","mustTags":["socken","bekleidung","wolle"], "shouldTags":["rot","weich","warm"],"location":{"lat":13.534212,"lon":52.468562},"distance":30,"price":{"min":25.0,"max":77.0}}' http://46.101.162.213/demands/1/1 -v
 
 ## Delete Demand
 ### Resource
-DELETE `http://46.101.162.213:9000/demands/{id}/{version}`
+DELETE `http://46.101.162.213/demands/{id}/{version}`
 
 ### URL Parameters
 
@@ -315,13 +315,13 @@ DELETE `http://46.101.162.213:9000/demands/{id}/{version}`
 
 ### Example
 
-    curl -XDELETE http://46.101.162.213:9000/demands/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
+    curl -XDELETE http://46.101.162.213/demands/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
     
 # Offers
 
 ## Query single Offer
 ### Resource
-GET `http://46.101.162.213:9000/offers/{id}`
+GET `http://46.101.162.213/offers/{id}`
 
 ### URL Parameters
 
@@ -350,7 +350,7 @@ GET `http://46.101.162.213:9000/offers/{id}`
 
 ## Create Offer
 ### Resource
-POST `http://46.101.162.213:9000/offers`
+POST `http://46.101.162.213/offers`
 
 ### Body
 The request body must contain a valid OfferDraft json object
@@ -388,11 +388,11 @@ The request body must contain a valid OfferDraft json object
 
 ### Example
 
-    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://46.101.162.213:9000/offers -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://46.101.162.213/offers -v
 
 ## Update Offer
 ### Resource
-PUT `http://46.101.162.213:9000/offers/{id}/{version}`
+PUT `http://46.101.162.213/offers/{id}/{version}`
 
 ### URL Parameters
 
@@ -441,11 +441,11 @@ The request body must contain a valid OfferDraft json object
 
 ### Example
 
-    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://46.101.162.213:9000/offers/1/1 -v
+    curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://46.101.162.213/offers/1/1 -v
 
 ## Delete Demand
 ### Resource
-DELETE `http://46.101.162.213:9000/offers/{id}/{version}`
+DELETE `http://46.101.162.213/offers/{id}/{version}`
 
 ### URL Parameters
 
@@ -463,4 +463,4 @@ DELETE `http://46.101.162.213:9000/offers/{id}/{version}`
 
 ### Example
 
-    curl -XDELETE http://46.101.162.213:9000/offers/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
+    curl -XDELETE http://46.101.162.213/offers/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
