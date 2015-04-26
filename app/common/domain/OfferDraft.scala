@@ -3,8 +3,6 @@ package common.domain
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scala.util.Random
-
 case class OfferDraft(
   uid: UserId,
   tags: Set[String],

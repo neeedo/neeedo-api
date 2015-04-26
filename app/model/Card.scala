@@ -15,43 +15,43 @@ object Card {
   }
 }
 
-case class Demand(id: DemandId,
-                   version: Version,
-                   uid: UserId,
-                   mustTags: Set[String],
-                   shouldTags: Set[String],
-                   location: Location,
-                   distance: Distance,
-                   //TODO pricerange case class?
-                   priceMin: Price,
-                   priceMax: Price) extends Card
+case class Demand(
+  id: DemandId,
+  version: Version,
+  uid: UserId,
+  mustTags: Set[String],
+  shouldTags: Set[String],
+  location: Location,
+  distance: Distance,
+  priceMin: Price,
+  priceMax: Price) extends Card
 
 object Demand extends ModelUtils {
 
   implicit val demandReads: Reads[Demand] = (
     (JsPath \ "id").read[String] and
-      (JsPath \ "version").read[Long] and
-      (JsPath \ "userId").read[String] and
-      (JsPath \ "mustTags").read[Set[String]] and
-      (JsPath \ "shouldTags").read[Set[String]] and
-      (JsPath \ "location" \ "lat").read[Double] and
-      (JsPath \ "location" \ "lon").read[Double] and
-      (JsPath \ "distance").read[Int] and
-      (JsPath \ "price" \ "min").read[Double] and
-      (JsPath \ "price" \ "max").read[Double]
+    (JsPath \ "version").read[Long] and
+    (JsPath \ "userId").read[String] and
+    (JsPath \ "mustTags").read[Set[String]] and
+    (JsPath \ "shouldTags").read[Set[String]] and
+    (JsPath \ "location" \ "lat").read[Double] and
+    (JsPath \ "location" \ "lon").read[Double] and
+    (JsPath \ "distance").read[Int] and
+    (JsPath \ "price" \ "min").read[Double] and
+    (JsPath \ "price" \ "max").read[Double]
     ) {
     (id, version, uid, mustTags, shouldTags, lat, lon, distance, priceMin, priceMax) =>
-      Demand(
-        DemandId(id),
-        Version(version),
-        UserId(uid),
-        mustTags.map(x => x.trim).filter(_ != ""),
-        shouldTags.map(x => x.trim).filter(_ != ""),
-        Location( Longitude(lon), Latitude(lat) ),
-        Distance(distance),
-        Price(priceMin),
-        Price(priceMax)
-      )
+    Demand(
+      DemandId(id),
+      Version(version),
+      UserId(uid),
+      mustTags.map(x => x.trim).filter(_ != ""),
+      shouldTags.map(x => x.trim).filter(_ != ""),
+      Location( Longitude(lon), Latitude(lat) ),
+      Distance(distance),
+      Price(priceMin),
+      Price(priceMax)
+    )
   }
 
   implicit val demandWrites = new Writes[Demand] {
@@ -101,36 +101,36 @@ object Demand extends ModelUtils {
 }
 
 case class Offer(
-                  id: OfferId,
-                  version: Version,
-                  uid: UserId,
-                  tags: Set[String],
-                  location: Location,
-                  price: Price) extends Card
+  id: OfferId,
+  version: Version,
+  uid: UserId,
+  tags: Set[String],
+  location: Location,
+  price: Price) extends Card
 
 object Offer extends ModelUtils {
 
   implicit val offerReads: Reads[Offer] = (
     (JsPath \ "id").read[String] and
-      (JsPath \ "version").read[Long] and
-      (JsPath \ "userId").read[String] and
-      (JsPath \ "tags").read[Set[String]] and
-      (JsPath \ "location" \ "lat").read[Double] and
-      (JsPath \ "location" \ "lon").read[Double] and
-      (JsPath \ "price").read[Double]
+    (JsPath \ "version").read[Long] and
+    (JsPath \ "userId").read[String] and
+    (JsPath \ "tags").read[Set[String]] and
+    (JsPath \ "location" \ "lat").read[Double] and
+    (JsPath \ "location" \ "lon").read[Double] and
+    (JsPath \ "price").read[Double]
     ) {
     (id, version, uid, tags, lat, lon, price) =>
-      Offer(
-        OfferId(id),
-        Version(version),
-        UserId(uid),
-        tags.map(x => x.trim).filter(_ != ""),
-        Location(
-          Longitude(lon),
-          Latitude(lat)
-        ),
-        Price(price)
-      )
+    Offer(
+      OfferId(id),
+      Version(version),
+      UserId(uid),
+      tags.map(x => x.trim).filter(_ != ""),
+      Location(
+        Longitude(lon),
+        Latitude(lat)
+      ),
+      Price(price)
+    )
   }
 
   implicit val offerWrites = new Writes[Offer] {

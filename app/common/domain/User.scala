@@ -1,6 +1,8 @@
 package common.domain
 
 import io.sphere.sdk.customers.Customer
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import play.api.mvc.PathBindable
 
 
@@ -9,6 +11,30 @@ case class User(id: UserId, version: Version, username: Username, email: Email)
 object User {
   def fromCustomer(c: Customer): User =
     User(UserId(c.getId), Version(c.getVersion), Username(c.getFirstName), Email(c.getEmail))
+
+  implicit val userReads: Reads[User] = (
+    (JsPath \ "uid").read[String] and
+    (JsPath \ "version").read[Long] and
+    (JsPath \ "username").read[String] and
+    (JsPath \ "email").read[String]
+    ) {
+    (uid, version, username, email) =>
+      User(
+        UserId(uid),
+        Version(version),
+        Username(username),
+        Email(email)
+      )
+  }
+
+  implicit val userWrites = new Writes[User] {
+    def writes(u: User) = Json.obj(
+      "uid" -> u.id.value,
+      "version" -> u.version.value,
+      "username" -> u.username.value,
+      "email" -> u.email.value
+    )
+  }
 }
 
 

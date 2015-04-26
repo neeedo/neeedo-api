@@ -6,7 +6,7 @@ import java.util.Optional
 import common.domain._
 import common.helper.Wirehelper
 import common.sphere.SphereClient
-import io.sphere.sdk.customers.{CustomerDraft, CustomerName}
+import io.sphere.sdk.customers.{CustomerSignInResult, CustomerDraft, CustomerName}
 import io.sphere.sdk.customers.commands.{CustomerCreateCommand, CustomerSignInCommand}
 import scala.concurrent.Future
 import play.api.cache.Cache
@@ -19,12 +19,12 @@ class UserService(sphereClient: SphereClient) {
   def getUserByEmail(email: String) = Future.successful(None)
 
   def createUser(userDraft: UserDraft): Future[Option[User]] = {
-    val customerName = CustomerName.ofFirstAndLastName("Peter", "Gerhard")
-    val customerDraft = CustomerDraft.of(customerName, "peter.gerhard90@gmail.com", "peter")
+    val customerName = CustomerName.ofFirstAndLastName(userDraft.username.value, "NonEmpty")
+    val customerDraft = CustomerDraft.of(customerName, userDraft.email.value, userDraft.password)
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
 
-//    sphereClient.execute(customerCreateCommand).map(c => User.fromCustomer(c.getCustomer))
-    Future.successful(None)
+    for { result <- sphereClient.execute(customerCreateCommand) }
+      yield Option(User.fromCustomer(result.getCustomer))
   }
 
   def updateUser(id: UserId, version: Version, userDraft: UserDraft): Future[Option[User]] = {

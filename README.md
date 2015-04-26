@@ -89,6 +89,8 @@ API-Documentation
 		- [URL Parameters](#url-parameters-7)
 		- [Response](#response-9)
 		- [Example](#example-7)
+- [Users](#users)
+    - [Create User](#create-user)
 
 # Status
 The status will be reported under `http://46.101.162.213/status`.
@@ -443,7 +445,7 @@ The request body must contain a valid OfferDraft json object
 
     curl -XPUT -H "Content-Type: application/json" -d '{"userId":"1","tags":["socken","bekleidung","wolle"],"location":{"lat":13.534212,"lon":52.468562},"price":25.0}' http://46.101.162.213/offers/1/1 -v
 
-## Delete Demand
+## Delete Offer
 ### Resource
 DELETE `http://46.101.162.213/offers/{id}/{version}`
 
@@ -464,3 +466,38 @@ DELETE `http://46.101.162.213/offers/{id}/{version}`
 ### Example
 
     curl -XDELETE http://46.101.162.213/offers/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
+
+
+# Users
+## Create User
+### Resource
+POST `http://46.101.162.213/users`
+
+### Body
+The request body must contain a valid UserDraft json object
+
+    {
+        "username":"Test",
+        "email":"test@web.com",
+        "password":"12345"
+    }
+
+### Response
+201 Created
+
+    {
+        "user": {
+            "uid": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "version": 1,
+            "username":"Test",
+            "email":"test@web.com"
+        }
+    }
+
+400 Bad Request - Empty Body
+
+400 Bad Request - Invalid Json
+
+### Example
+
+    curl -XPOST -H "Content-Type: application/json" -d '{"username":"Test", "email":"test@gmail.com", "password":"test"}' http://46.101.162.213/users -v
