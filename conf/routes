@@ -27,7 +27,7 @@ OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeade
 OPTIONS        /matching/demand/0/0         @controllers.Static.deliverCorsHeaders()
 
 # Users
-GET            /users/mail/:mail            @controllers.Users.getUserByMail(mail: String)
+GET            /users/mail/:mail            @controllers.Users.getUserByMail(mail: common.domain.Email)
 # GET            /users/id/:id                @controllers.Users.getUserById(id: common.domain.UserId)
 POST           /users                       @controllers.Users.createUser()
 PUT            /users/:id/:version          @controllers.Users.updateUser(id: common.domain.UserId, version: common.domain.Version)

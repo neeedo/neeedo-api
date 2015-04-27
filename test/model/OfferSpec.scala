@@ -66,11 +66,11 @@ class OfferSpec extends Specification {
 
   "OfferId" should {
     "be correctly be created from an identifier" in new WithApplication {
-      OfferId.pathBinder.bind("key1", offerId.value) mustEqual Right(offerId)
+      OfferId.pathBindable.bind("key1", offerId.value) mustEqual Right(offerId)
     }
 
     "be correctly be transform into an identifier" in new WithApplication {
-      OfferId.pathBinder.unbind("key", offerId) mustEqual offerId.value
+      OfferId.pathBindable.unbind("key", offerId) mustEqual offerId.value
     }
   }
 }

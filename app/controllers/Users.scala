@@ -1,6 +1,6 @@
 package controllers
 
-import common.domain.{Version, UserDraft, UserId}
+import common.domain.{Email, Version, UserDraft, UserId}
 import common.helper.SecuredAction
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
@@ -12,7 +12,7 @@ import scala.concurrent.Future
 class Users(userService: UserService) extends Controller {
 
   // Todo enable secured actions, currently gives 301
-  def getUserByMail(mail: String) = SecuredAction.async {
+  def getUserByMail(mail: Email) = SecuredAction.async {
     userService.getUserByEmail(mail).map {
       case Some(user) => Ok(Json.toJson(user))
       case None => NotFound

@@ -7,14 +7,6 @@ import play.api.libs.json.Writes
 
 sealed trait Card
 
-object Card {
-  implicit val cardWriter = Writes[Card] {
-    case d: Demand => Demand.demandWrites.writes(d)
-    case o: Offer => Offer.offerWrites.writes(o)
-  }
-}
-
-
 case class Demand(
   id: DemandId,
   version: Version,
@@ -33,16 +25,16 @@ object Demand extends ModelUtils with DemandImplicits {
       Some(Demand(
           DemandId(product.getId),
           Version(product.getVersion),
-          UserId(readStringAttribute("userId")),
-          readStringAttribute("mustTags").split(";").toSet,
-          readStringAttribute("shouldTags").split(";").toSet,
+          UserId(readStringAttribute(product, "userId")),
+          readStringAttribute(product, "mustTags").split(";").toSet,
+          readStringAttribute(product, "shouldTags").split(";").toSet,
           Location(
-            Longitude(readDoubleAttribute("longitude")),
-            Latitude(readDoubleAttribute("latitude"))
+            Longitude(readDoubleAttribute(product, "longitude")),
+            Latitude(readDoubleAttribute(product, "latitude"))
           ),
-          Distance(readDoubleAttribute("distance").intValue()),
-          Price(readMoneyAttribute("priceMin").getNumber.doubleValue()),
-          Price(readMoneyAttribute("priceMax").getNumber.doubleValue())
+          Distance(readDoubleAttribute(product, "distance").intValue()),
+          Price(readMoneyAttribute(product, "priceMin").getNumber.doubleValue()),
+          Price(readMoneyAttribute(product, "priceMax").getNumber.doubleValue())
       ))
     } catch {
       case e: Exception =>
@@ -70,13 +62,13 @@ object Offer extends ModelUtils with OfferImplicits {
         Offer(
           OfferId(product.getId),
           Version(product.getVersion),
-          UserId(readStringAttribute("userId")),
-          readStringAttribute("tags").split(";").toSet,
+          UserId(readStringAttribute(product, "userId")),
+          readStringAttribute(product, "tags").split(";").toSet,
           Location(
-            Longitude(readDoubleAttribute("longitude")),
-            Latitude(readDoubleAttribute("latitude"))
+            Longitude(readDoubleAttribute(product, "longitude")),
+            Latitude(readDoubleAttribute(product, "latitude"))
           ),
-          Price(readMoneyAttribute("price").getNumber.doubleValue())
+          Price(readMoneyAttribute(product, "price").getNumber.doubleValue())
         )
       )
     } catch {

@@ -71,11 +71,11 @@ class DemandSpec extends Specification {
 
   "DemandId" should {
     "be correctly be created from an identifier" in new WithApplication {
-      DemandId.pathBinder.bind("key1", demandId.value) mustEqual Right(demandId)
+      DemandId.pathBindable.bind("key1", demandId.value) mustEqual Right(demandId)
     }
 
     "be correctly be transform into an identifier" in new WithApplication {
-      DemandId.pathBinder.unbind("key", demandId) mustEqual demandId.value
+      DemandId.pathBindable.unbind("key", demandId) mustEqual demandId.value
     }
   }
 
