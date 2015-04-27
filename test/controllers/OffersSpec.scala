@@ -16,10 +16,24 @@ import scala.concurrent.Future
 class OffersSpec extends Specification with Mockito {
   "Offers Controller" should {
 
-    val emptyBodyFakeRequest = new FakeRequest[AnyContent](
+    val emptyBodyCreateFakeRequest = new FakeRequest[AnyContent](
       Helpers.POST,
       "/",
       FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
+      AnyContentAsEmpty,
+      secure = true)
+
+    val emptyBodyDeleteFakeRequest = new FakeRequest[AnyContent](
+      Helpers.DELETE,
+      "/offer/1/1",
+      FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
+      AnyContentAsEmpty,
+      secure = true)
+
+    val emptyBodyUpdateFakeRequest = new FakeRequest[AnyContent](
+      Helpers.PUT,
+      "/offer/1/1",
+      FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken), "Content-Type" -> Seq("application/json"))),
       AnyContentAsEmpty,
       secure = true)
 
@@ -27,7 +41,7 @@ class OffersSpec extends Specification with Mockito {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
 
-      val res: Future[Result] = ctrl.createOffer()(emptyBodyFakeRequest)
+      val res: Future[Result] = ctrl.createOffer()(emptyBodyCreateFakeRequest)
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
@@ -45,7 +59,7 @@ class OffersSpec extends Specification with Mockito {
         ),
         "price" -> 100.0
       )
-      val fakeRequest = emptyBodyFakeRequest
+      val fakeRequest = emptyBodyCreateFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(offerDraftJson)
       val res: Future[Result] = ctrl.createOffer()(fakeRequest)
@@ -59,7 +73,7 @@ class OffersSpec extends Specification with Mockito {
       val ctrl = new Offers(offerService)
       val offerDraft = TestData.offerDraft
       offerService.createOffer(offerDraft) returns Future.successful(Option.empty)
-      val fakeRequest = emptyBodyFakeRequest
+      val fakeRequest = emptyBodyCreateFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(Json.toJson(offerDraft))
       val res: Future[Result] = ctrl.createOffer()(fakeRequest)
@@ -75,7 +89,7 @@ class OffersSpec extends Specification with Mockito {
       val offer = TestData.offer
       offerService.createOffer(offerDraft) returns Future.successful(Option(offer))
 
-      val fakeRequest = emptyBodyFakeRequest
+      val fakeRequest = emptyBodyCreateFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(Json.toJson(offerDraft))
       val res: Future[Result] = ctrl.createOffer()(fakeRequest)
@@ -110,16 +124,10 @@ class OffersSpec extends Specification with Mockito {
     "deleteOffer must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val deleteFakeRequest = new FakeRequest[AnyContent](
-        Helpers.DELETE,
-        "/offer/1/1",
-        FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
-        AnyContentAsEmpty,
-        secure = true)
       val offer = TestData.offer
       offerService.deleteOffer(OfferId("1"), Version(1L)) returns Future.successful(Option(offer))
 
-      val res: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(deleteFakeRequest)
+      val res: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyDeleteFakeRequest)
 
       Helpers.status(res) must equalTo(200)
     }
@@ -128,14 +136,8 @@ class OffersSpec extends Specification with Mockito {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
       offerService.deleteOffer(OfferId("1"), Version(1L)) returns Future.successful(Option.empty[Offer])
-      val deleteFakeRequest = new FakeRequest[AnyContent](
-        Helpers.DELETE,
-        "/offer/1/1",
-        FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
-        AnyContentAsEmpty,
-        secure = true)
 
-      val res: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(deleteFakeRequest)
+      val res: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyDeleteFakeRequest)
 
       Helpers.status(res) must equalTo(404)
     }
@@ -143,13 +145,7 @@ class OffersSpec extends Specification with Mockito {
     "deleteOffer must return 400 missing body for put requests without body" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
-      val deleteFakeRequest = new FakeRequest[AnyContent](
-        Helpers.DELETE,
-        "/offer/1/1",
-        FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
-        AnyContentAsEmpty,
-        secure = true)
-      val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(deleteFakeRequest)
+      val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(emptyBodyDeleteFakeRequest)
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
@@ -166,12 +162,7 @@ class OffersSpec extends Specification with Mockito {
         ),
         "price" -> 100.0
       )
-      val fakeRequest = new FakeRequest[AnyContent](
-        Helpers.PUT,
-        "/offer/1/1",
-        FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken), "Content-Type" -> Seq("application/json"))),
-        AnyContentAsJson(offerDraftJson),
-        secure = true)
+      val fakeRequest = emptyBodyUpdateFakeRequest.withBody[AnyContent](AnyContentAsJson(offerDraftJson))
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
@@ -182,12 +173,7 @@ class OffersSpec extends Specification with Mockito {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
       offerService.updateOffer(OfferId("1"), Version(1L), TestData.offerDraft) returns Future.successful(Option.empty)
-      val fakeRequest = new FakeRequest[AnyContent](
-        Helpers.PUT,
-        "/offer/1/1",
-        FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken), "Content-Type" -> Seq("application/json"))),
-        AnyContentAsJson(TestData.offerDraftJson),
-        secure = true)
+      val fakeRequest =  emptyBodyUpdateFakeRequest.withBody[AnyContent](AnyContentAsJson(TestData.offerDraftJson))
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
@@ -201,12 +187,7 @@ class OffersSpec extends Specification with Mockito {
       val offer = TestData.offer
       offerService.updateOffer(OfferId("1"), Version(1L), offerDraft) returns Future.successful(Option(offer))
 
-      val fakeRequest = new FakeRequest[AnyContent](
-        Helpers.PUT,
-        "/offer/1/1",
-        FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken), "Content-Type" -> Seq("application/json"))),
-        AnyContentAsJson(TestData.offerDraftJson),
-        secure = true)
+      val fakeRequest = emptyBodyUpdateFakeRequest.withBody[AnyContent](AnyContentAsJson(TestData.offerDraftJson))
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(fakeRequest)
 
       Helpers.status(res) must equalTo(200)
