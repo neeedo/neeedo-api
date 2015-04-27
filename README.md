@@ -469,6 +469,30 @@ DELETE `http://46.101.162.213/offers/{id}/{version}`
 
 
 # Users
+## Query single User by Email
+
+GET `http://46.101.162.213/users/mail/{mail}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| mail | Mandatory | alphanumeric |
+
+###Response
+200 Ok
+
+    {
+        "user":{
+            "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "version": 1
+            "username":"test",
+            "email":"test@web.de"
+        }
+    }
+
+404 - Not Found
+
 ## Create User
 ### Resource
 POST `http://46.101.162.213/users`
@@ -501,3 +525,70 @@ The request body must contain a valid UserDraft json object
 ### Example
 
     curl -XPOST -H "Content-Type: application/json" -d '{"username":"Test", "email":"test@gmail.com", "password":"test"}' http://46.101.162.213/users -v
+
+
+## Update User
+### Resource
+PUT `http://46.101.162.213/users/{id}/{version}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| id | Mandatory | alphanumeric |
+| version | Mandatory | numeric |
+
+
+### Body
+The request body must contain a valid UserDraft json object
+
+    {
+        "username":"Test",
+        "email":"updated@web.com",
+        "password", "password"
+    }
+
+
+### Response
+200 Ok
+
+    {
+        "user": {
+            "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "version": 2
+            "username":"Test",
+            "email":"updated@web.com"
+        }
+    }
+
+400 Bad Request - Missing body
+
+400 Bad Request - Cannot parse json
+
+404 Not Found - Entity was not found
+
+### Example
+
+    curl -XPUT -H "Content-Type: application/json" -d '{"username":"Test","email":"updated@web.com","password":"12345"}' http://46.101.162.213/users/1/1 -v
+
+## Delete Offer
+### Resource
+DELETE `http://46.101.162.213/usersd/{id}/{version}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| id | Mandatory | alphanumeric |
+| version | Mandatory | numeric |
+
+
+### Response
+
+200 Ok
+
+404 Not Found - Entity was not found
+
+### Example
+
+    curl -XDELETE http://46.101.162.213/users/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
