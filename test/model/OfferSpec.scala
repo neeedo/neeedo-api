@@ -34,17 +34,17 @@ class OfferSpec extends Specification {
       Json.toJson(offer) must beEqualTo(offerJson)
     }
 
-    "productToOffer must return valid Offer objects for offer products" in TestApplications.loggingOffApp() {
+    "fromProduct must return valid Offer objects for offer products" in TestApplications.loggingOffApp() {
       val validProductAttributeList = TestData.offerProductAttributeList
       val validProductVariant = ProductVariantBuilder.of(1).attributes(validProductAttributeList).build()
       val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
       val validMasterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, validProductVariant).build()).build()
       val validProduct = ProductBuilder.of(productType, validMasterData).id(offerId.value).build()
 
-      Offer.productToOffer(validProduct) mustEqual Option(offer)
+      Offer.fromProduct(validProduct) mustEqual Option(offer)
     }
 
-    "productToOffer must return None objects for invalid offer products" in TestApplications.loggingOffApp() {
+    "fromProduct must return None objects for invalid offer products" in TestApplications.loggingOffApp() {
       val invalidProductAttributeList = List(
         Attribute.of("userId", offer.uid.value),
         Attribute.of("tags", offer.tags),
@@ -56,7 +56,7 @@ class OfferSpec extends Specification {
       val invalidMasterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, invalidProductVariant).build()).build()
       val invalidProduct = ProductBuilder.of(productType, invalidMasterData).id(offerId.value).build()
 
-      Offer.productToOffer(invalidProduct) mustEqual None
+      Offer.fromProduct(invalidProduct) mustEqual None
     }
 
     "trailing whitespaces in taglist must be trimmed" in TestApplications.loggingOffApp() {

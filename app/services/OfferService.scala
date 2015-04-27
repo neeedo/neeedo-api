@@ -68,7 +68,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     val productDraft = ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()
 
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
-      product => Offer.productToOffer(product)
+      product => Offer.fromProduct(product)
     } recover {
       case e: Exception =>
         Logger.error(e.getMessage)
@@ -83,7 +83,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
       productOptional: Optional[Product] =>
         val option: Option[Product] = productOptional.asScala
         option match {
-          case Some(product) => Offer.productToOffer(product)
+          case Some(product) => Offer.fromProduct(product)
           case _ => Option.empty[Offer]
         }
     }
@@ -98,7 +98,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
 
   def deleteOffer(id: OfferId, version: Version): Future[Option[Offer]] = {
     val product: Versioned[Product] = Versioned.of(id.value, version.value)
-    sphereClient.execute(ProductDeleteCommand.of(product)).map(Offer.productToOffer).recover {
+    sphereClient.execute(ProductDeleteCommand.of(product)).map(Offer.fromProduct).recover {
       // TODO enhance exception matching
       case e: CompletionException => Option.empty[Offer]
       case e: Exception => throw e

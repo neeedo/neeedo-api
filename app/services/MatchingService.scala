@@ -31,7 +31,7 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
                 esResult.hits,
                 from,
                 pageSize,
-                queryResult.getResults.asScala.toList.map(Offer.productToOffer).flatten
+                queryResult.getResults.asScala.toList.map(Offer.fromProduct).flatten
               )
           }
         } else {
@@ -46,7 +46,7 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
     val query: QueryDsl[Product] = ProductQuery.of().byProductType(productTypes.demand).withLimit(500)
     val result: Future[PagedQueryResult[Product]] = sphereClient.execute(query)
 
-    result.map(queryResult => queryResult.getResults.asScala.toList.map(Demand.productToDemand).flatten)
+    result.map(queryResult => queryResult.getResults.asScala.toList.map(Demand.fromProduct).flatten)
   }
 }
 
