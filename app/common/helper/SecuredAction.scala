@@ -2,6 +2,7 @@ package common.helper
 
 import common.domain.{Email, UserCredentials}
 import org.apache.commons.codec.binary.Base64
+import play.api.{Mode, Play}
 import play.api.http.HeaderNames._
 import play.api.mvc.{Action, Result, Request, ActionBuilder}
 import play.api.mvc.Results.Unauthorized
@@ -29,7 +30,12 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
     else authorize(request)
   }
 
-  def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = UserService.authorizeUser(userCredentials)
+  def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = {
+    if (Play.current.mode == Mode.Test)
+      Future { userCredentials.email == Email("test") && userCredentials.password == "test" }
+    else
+      UserService.authorizeUser(userCredentials)
+  }
 
   def authorize(request: Request[A]): Future[Result] = {
     val authHeader: String = request.headers.get(AUTHORIZATION).getOrElse("")

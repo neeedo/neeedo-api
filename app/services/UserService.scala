@@ -34,8 +34,9 @@ class UserService(sphereClient: SphereClient) {
     val customerDraft = CustomerDraft.of(customerName, userDraft.email.value, userDraft.password)
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
 
-    for { result <- sphereClient.execute(customerCreateCommand) }
-      yield Option(User.fromCustomer(result.getCustomer))
+    for {
+      result <- sphereClient.execute(customerCreateCommand)
+    } yield Option(User.fromCustomer(result.getCustomer))
   }
 
   def updateUser(id: UserId, version: Version, userDraft: UserDraft): Future[Option[User]] = {

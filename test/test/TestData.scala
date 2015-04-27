@@ -10,6 +10,8 @@ import scala.collection.JavaConverters._
 
 object TestData {
 
+  val basicAuthToken = "Basic dGVzdDp0ZXN0"
+
   // Model
   val demandId = DemandId("testDemandId")
   val offerId = OfferId("testOfferId")

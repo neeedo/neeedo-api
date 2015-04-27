@@ -2,14 +2,36 @@ package services
 
 import common.domain._
 import common.sphere.SphereClient
-import io.sphere.sdk.customers.{Customer, CustomerSignInResult}
+import io.sphere.sdk.customers.{CustomerDraft, CustomerName, Customer, CustomerSignInResult}
 import io.sphere.sdk.customers.commands._
+import io.sphere.sdk.products.queries.ProductByIdFetch
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 
 import scala.concurrent.Future
 
 class UserServiceTest extends Specification with Mockito {
+
+  "UserService" should {
+    "createUser successfully" in {
+
+      val username: Username = Username("Blub")
+      val email: Email = Email("blub@blub.de")
+      val user = User(UserId("1"), Version(1L), username, email)
+      val pw: String = "pw123"
+      val userDraft = UserDraft(username, email, pw)
+      val customerName = CustomerName.ofFirstAndLastName(username.value, "NonEmpty")
+      val customerDraft = CustomerDraft.of(customerName, email.value, pw)
+      val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
+      val sphere = mock[SphereClient]
+      val userService = new UserService(sphere)
+
+      sphere.execute(customerCreateCommand) returns Future.successful(any[CustomerSignInResult])
+
+      userService.createUser(userDraft)
+      there was one (sphere).execute(customerCreateCommand)
+    }
+  }
 
 //  "UserService.getUserByName" should {
 //    "return non empty Future[Option[User]]" in {
