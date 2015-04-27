@@ -25,11 +25,13 @@ You can find them in your [SPHERE.IO](http://admin.sphere.io) backend account un
 ###How to run (Windows)
 *Make sure you have sbt intalled on your local maschine*
 ```bash
-sbt run
+sbt
+run -Dhttps.port=9443
 ```
 ###How to run (Unix)
 ```bash
-./sbt run
+./sbt
+run -Dhttps.port=9443
 ```
 
 API-Documentation
