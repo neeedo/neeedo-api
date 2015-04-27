@@ -16,9 +16,23 @@ import scala.concurrent.Future
 class OffersSpec extends Specification with Mockito {
   "Offers Controller" should {
 
+    val emptyBodyRequestWithWrongCredentials = new FakeRequest[AnyContent](
+      Helpers.POST,
+      "/offer",
+      FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq("Bla"))),
+      AnyContentAsEmpty,
+      secure = true)
+
+    val emptyBodyRequestWithoutSsl = new FakeRequest[AnyContent](
+      Helpers.POST,
+      "/offer",
+      FakeHeaders(),
+      AnyContentAsEmpty,
+      secure = false)
+
     val emptyBodyCreateFakeRequest = new FakeRequest[AnyContent](
       Helpers.POST,
-      "/",
+      "/offer",
       FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
       AnyContentAsEmpty,
       secure = true)
@@ -37,6 +51,32 @@ class OffersSpec extends Specification with Mockito {
       AnyContentAsEmpty,
       secure = true)
 
+    "offer controller must return 401 for wrong user credentials in secured actions" in TestApplications.loggingOffApp() {
+      val offerService = mock[OfferService]
+      val ctrl = new Offers(offerService)
+
+      val create: Future[Result] = ctrl.createOffer()(emptyBodyRequestWithWrongCredentials)
+      val delete: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyRequestWithWrongCredentials)
+      val update: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(emptyBodyRequestWithWrongCredentials)
+
+      Helpers.status(create) must equalTo(401)
+      Helpers.status(delete) must equalTo(401)
+      Helpers.status(update) must equalTo(401)
+    }
+
+    "offer controller must return 301 for non https request in secured actions" in TestApplications.loggingOffApp() {
+      val offerService = mock[OfferService]
+      val ctrl = new Offers(offerService)
+
+      val create: Future[Result] = ctrl.createOffer()(emptyBodyRequestWithoutSsl)
+      val delete: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyRequestWithoutSsl)
+      val update: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(emptyBodyRequestWithoutSsl)
+
+      Helpers.status(create) must equalTo(301)
+      Helpers.status(delete) must equalTo(301)
+      Helpers.status(update) must equalTo(301)
+    }
+
     "createOffer must return 400 missing body for post requests without body" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
@@ -46,7 +86,6 @@ class OffersSpec extends Specification with Mockito {
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
     }
-
 
     "createOffer must return 400 cannot parse json for post requests with invalid offerdraft" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
