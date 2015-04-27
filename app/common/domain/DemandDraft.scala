@@ -10,12 +10,13 @@ case class DemandDraft(
 	mustTags: Set[String],
   shouldTags: Set[String],
 	location: Location,
-	distance: Distance,
-	//TODO pricerange case class?
-	priceMin: Price,
-	priceMax: Price)
+distance: Distance,
+priceMin: Price,
+priceMax: Price)
 
 object DemandDraft {
+
+	def generateName(demandDraft: DemandDraft) = "Suche: " + demandDraft.mustTags.mkString(" ")
 
 	implicit val demandReads: Reads[DemandDraft] = (
 		(JsPath \ "userId").read[String] and
@@ -55,6 +56,4 @@ object DemandDraft {
 			)
 		)
 	}
-
-  def generateName(demandDraft: DemandDraft) = "Suche: " + demandDraft.mustTags.mkString(" ")
 }

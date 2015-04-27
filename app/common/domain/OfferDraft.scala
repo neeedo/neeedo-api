@@ -11,6 +11,8 @@ case class OfferDraft(
 
 object OfferDraft {
 
+  def generateName(offerDraft: OfferDraft) = "Biete: " + offerDraft.tags.mkString(" ")
+
   implicit val offerReads: Reads[OfferDraft] = (
     (JsPath \ "userId").read[String] and
     (JsPath \ "tags").read[Set[String]] and
@@ -41,6 +43,4 @@ object OfferDraft {
       "price" -> o.price.value
     )
   }
-
-  def generateName(offerDraft: OfferDraft) = "Biete: " + offerDraft.tags.mkString(" ")
 }
