@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/neeedo/neeedo-api.svg)](https://travis-ci.org/neeedo/neeedo-api)
 
-[![Dependency Status](https://www.versioneye.com/user/projects/54bfae036c0035c592000069/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54bfae036c0035c592000069)
-
 [![codecov.io](https://codecov.io/github/neeedo/neeedo-api/coverage.svg?branch=master)](https://codecov.io/github/neeedo/neeedo-api?branch=master)
 
 ![codecov.io](https://codecov.io/github/neeedo/neeedo-api/branch.svg?branch=master)
@@ -571,7 +569,7 @@ The request body must contain a valid UserDraft json object
 
     curl -XPUT -H "Content-Type: application/json" -d '{"username":"Test","email":"updated@web.com","password":"12345"}' http://46.101.162.213/users/1/1 -v
 
-## Delete Offer
+## Delete User
 ### Resource
 DELETE `http://46.101.162.213/usersd/{id}/{version}`
 
