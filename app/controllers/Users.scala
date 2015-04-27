@@ -12,7 +12,7 @@ import scala.concurrent.Future
 class Users(userService: UserService) extends Controller {
 
   // Todo enable secured actions, currently gives 301
-  def getUserByMail(mail: String) = Action.async {
+  def getUserByMail(mail: String) = SecuredAction.async {
     userService.getUserByEmail(mail).map {
       case Some(user) => Ok(Json.toJson(user))
       case None => NotFound
@@ -33,7 +33,7 @@ class Users(userService: UserService) extends Controller {
     }
   }
 
-  def updateUser(id: UserId, version: Version) = Action.async { implicit request =>
+  def updateUser(id: UserId, version: Version) = SecuredAction.async { implicit request =>
     request.body.asJson match {
       case Some(json) => json.asOpt[UserDraft] match {
         case Some(draft) => userService.updateUser(id, version, draft).map {
@@ -46,15 +46,10 @@ class Users(userService: UserService) extends Controller {
     }
   }
 
-  def deleteUser(id: UserId, version: Version) = Action.async {
+  def deleteUser(id: UserId, version: Version) = SecuredAction.async {
     userService.deleteUser(id, version).map {
       case Some(_) => Ok
       case None => NotFound
     }
   }
-
-  //
-  //  def decodeBase64: String = {
-  //    new String(new sun.misc.BASE64Decoder().decodeBuffer(s), Charset.forName("UTF-8"))
-  //  }
 }

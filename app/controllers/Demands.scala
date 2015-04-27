@@ -1,6 +1,7 @@
 package controllers
 
 import common.domain._
+import common.helper.SecuredAction
 import model.DemandId
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
@@ -10,7 +11,7 @@ import scala.concurrent.Future
 
 class Demands(service: DemandService) extends Controller {
 
-  def createDemand = Action.async {
+  def createDemand = SecuredAction.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[DemandDraft] match {
           case Some(draft) => service.createDemand(draft).map {
@@ -30,7 +31,7 @@ class Demands(service: DemandService) extends Controller {
     }
   }
 
-  def updateDemand(id: DemandId, version: Version) = Action.async {
+  def updateDemand(id: DemandId, version: Version) = SecuredAction.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[DemandDraft] match {
           case Some(draft) => service.updateDemand(id, version, draft).map {
@@ -43,7 +44,7 @@ class Demands(service: DemandService) extends Controller {
     }
   }
 
-  def deleteDemand(id: DemandId, version: Version) = Action.async {
+  def deleteDemand(id: DemandId, version: Version) = SecuredAction.async {
     service.deleteDemand(id, version).map {
       case Some(product) => Ok
       case None => NotFound

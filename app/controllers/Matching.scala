@@ -1,6 +1,7 @@
 package controllers
 
 import common.domain.{From, PageSize}
+import common.helper.SecuredAction
 import model.Demand
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
@@ -10,13 +11,15 @@ import scala.concurrent.Future
 
 class Matching(matchingService: MatchingService) extends Controller {
 
+  /* TODO diese methode noch umbauen in ListDemands bzw ListOffers als Schnupperaction
+   * TODO für nicht registrierte (In den Login / die Registrierung treiben */
   def matchDemands() = Action.async {
     matchingService.matchDemands().map {
       demands => Ok(Json.obj("demands" -> Json.toJson(demands)))
     }
   }
 
-  def matchDemand(from: From, pageSize: PageSize) = Action.async {
+  def matchDemand(from: From, pageSize: PageSize) = SecuredAction.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[Demand] match {
         case Some(demand) =>
