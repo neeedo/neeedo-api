@@ -1,7 +1,6 @@
 package model
 
 import common.domain._
-import io.sphere.sdk.attributes.AttributeAccess
 import io.sphere.sdk.products.Product
 import play.api.Logger
 import play.api.libs.json.Writes
@@ -31,23 +30,20 @@ object Demand extends ModelUtils with DemandImplicits {
 
   def fromProduct(product: Product): Option[Demand] = {
     try {
-      Some(
-        Demand(
+      Some(Demand(
           DemandId(product.getId),
           Version(product.getVersion),
-          UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-          getAttribute(product, "mustTags").getValue(AttributeAccess.ofString().attributeMapper()).split(";").toSet,
-          getAttribute(product, "shouldTags").getValue(AttributeAccess.ofString().attributeMapper()).split(";").toSet,
+          UserId(readStringAttribute("userId")),
+          readStringAttribute("mustTags").split(";").toSet,
+          readStringAttribute("shouldTags").split(";").toSet,
           Location(
-            Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-            Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+            Longitude(readDoubleAttribute("longitude")),
+            Latitude(readDoubleAttribute("latitude"))
           ),
-          Distance(getAttribute(product, "distance").getValue(AttributeAccess.ofDouble().attributeMapper()).intValue()),
-          // Todo Nullpointer case
-          Price(getAttribute(product, "priceMin").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue()),
-          Price(getAttribute(product, "priceMax").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
-        )
-      )
+          Distance(readDoubleAttribute("distance").intValue()),
+          Price(readMoneyAttribute("priceMin").getNumber.doubleValue()),
+          Price(readMoneyAttribute("priceMax").getNumber.doubleValue())
+      ))
     } catch {
       case e: Exception =>
         Logger.error(s"Failed to parse product as a valid Demand.")
@@ -74,14 +70,13 @@ object Offer extends ModelUtils with OfferImplicits {
         Offer(
           OfferId(product.getId),
           Version(product.getVersion),
-          UserId(getAttribute(product, "userId").getValue(AttributeAccess.ofString().attributeMapper())),
-          getAttribute(product, "tags").getValue(AttributeAccess.ofString().attributeMapper()).split(";").toSet,
+          UserId(readStringAttribute("userId")),
+          readStringAttribute("tags").split(";").toSet,
           Location(
-            Longitude(getAttribute(product, "longitude").getValue(AttributeAccess.ofDouble().attributeMapper())),
-            Latitude(getAttribute(product, "latitude").getValue(AttributeAccess.ofDouble().attributeMapper()))
+            Longitude(readDoubleAttribute("longitude")),
+            Latitude(readDoubleAttribute("latitude"))
           ),
-          // Todo Nullpointer case
-          Price(getAttribute(product, "price").getValue(AttributeAccess.ofMoney().attributeMapper()).getNumber.doubleValue())
+          Price(readMoneyAttribute("price").getNumber.doubleValue())
         )
       )
     } catch {
