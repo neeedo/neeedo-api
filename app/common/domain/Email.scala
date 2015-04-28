@@ -21,4 +21,3 @@ object Email {
     override def unbind(key: String, email: Email): String = email.value
   }
 }
-

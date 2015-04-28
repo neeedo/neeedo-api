@@ -1,6 +1,6 @@
 package common.helper
 
-import common.domain.{Email, UserCredentials}
+import common.domain.{Password, Email, UserCredentials}
 import org.apache.commons.codec.binary.Base64
 import play.api.{Mode, Play}
 import play.api.http.HeaderNames._
@@ -32,7 +32,7 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
 
   def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = {
     if (Play.current.mode == Mode.Test)
-      Future { userCredentials.email == Email("test") && userCredentials.password == "test" }
+      Future { userCredentials.email == Email("test") && userCredentials.password == Password("test") }
     else
       UserService.authorizeUser(userCredentials)
   }
@@ -66,7 +66,7 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
 
     getToken(authHeader).flatMap { encodedToken =>
       new String(Base64.decodeBase64(encodedToken.getBytes)).split(":").toList match {
-        case List(email, password) => Some(UserCredentials(Email(email), password))
+        case List(email, password) => Some(UserCredentials(Email(email), Password(password)))
         case _ => None
       }
     }

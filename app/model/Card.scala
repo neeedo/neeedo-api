@@ -3,7 +3,6 @@ package model
 import common.domain._
 import io.sphere.sdk.products.Product
 import play.api.Logger
-import play.api.libs.json.Writes
 
 sealed trait Card
 
