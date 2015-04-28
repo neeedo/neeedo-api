@@ -12,7 +12,6 @@ sealed trait SphereClient {
 
 object RemoteSphereClient extends SphereClient {
   override def createSphereClient(): ScalaClient = {
-//    val config = Play.current.configuration.underlying
     val config = SphereApiConfig.of(Configloader.getString("sphere.project"))
     val httpClient = NingHttpClientAdapter.of()
     val tokenSupplier = SphereAccessTokenSupplierFactory.of()
@@ -24,9 +23,4 @@ object RemoteSphereClient extends SphereClient {
 
     ScalaClient(SphereClient.of(config, httpClient, tokenSupplier))
   }
-
-
-
-
-
 }
