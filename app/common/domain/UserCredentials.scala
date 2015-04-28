@@ -1,6 +1,8 @@
 package common.domain
 
-case class UserCredentials(email: Email, password: Password)
+case class UserCredentials(email: Email, password: Password) {
+  val cacheKey =  s"userCredentials.${email.value}"
+}
 
 case class EncryptedUserCredentials(email: Email, md5: PasswordHash)
 

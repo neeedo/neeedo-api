@@ -53,22 +53,25 @@ class UserService(sphereClient: SphereClient) {
   }
 
   def authorizeUser(credentials: UserCredentials): Future[Boolean] = {
-    val cachedUserCredentials: Option[UserCredentials] = Cache.getAs[UserCredentials](s"userCredentials.${credentials.email.value}")
+    val cachedUserCredentials: Option[UserCredentials] =
+      Cache.getAs[UserCredentials](credentials.cacheKey)
+
     cachedUserCredentials match {
       case Some(result) => Future.successful(result.password == credentials.password)
-      case None =>
-        val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password.value)
-        sphereClient
-          .execute(signInQuery)
-          .map {
-            res => {
-              Cache.set(s"userCredentials.${credentials.email.value}", EncryptedUserCredentials(credentials))
-              true
-            }
-          } recover {
-            case e: Exception => false
-          }
+      case None => sphereSignIn(credentials)
+
     }
+  }
+
+  def sphereSignIn(credentials: UserCredentials): Future[Boolean] = {
+    val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password.value)
+
+    sphereClient.execute(signInQuery).map {
+      _ => {
+        Cache.set(credentials.cacheKey, EncryptedUserCredentials(credentials))
+        true
+      }
+    } recover { case e: Exception => false }
   }
 }
 
