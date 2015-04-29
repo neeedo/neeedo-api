@@ -27,8 +27,8 @@ libraryDependencies ++= Seq(
   "org.elasticsearch" % "elasticsearch" % "latest.integration",
   "com.softwaremill.macwire" %% "macros" % "0.7.3",
   "com.softwaremill.macwire" %% "runtime" % "0.7.3",
-  "io.sphere.sdk.jvm" % "models" % "latest.integration",
-  "io.sphere.sdk.jvm" %% "scala-client" % "latest.integration",
+  "io.sphere.sdk.jvm" % "sphere-models" % "latest.integration",
+  "io.sphere.sdk.jvm" %% "sphere-scala-client" % "latest.integration",
   cache
 )
 

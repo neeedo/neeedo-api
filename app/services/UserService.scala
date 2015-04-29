@@ -19,14 +19,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class UserService(sphereClient: SphereClient) {
 
-  def getUserByEmail(email: Email): Future[Option[User]] = {
-    val query = CustomerQuery.of().withAdditionalQueryParameters( List(QueryParameter.of("email", email.value)).asJava )
+  def getUserByEmail(email:Email): Future[Option[User]] = {
+    val query = CustomerQuery.of().byEmail(email.value)
 
-    sphereClient.execute(query) map {
-      case (res: PagedQueryResult[Customer]) => res.head.asScala map {
-        case (customer: Customer) => User.fromCustomer(customer)
-      }
-    }
+    for {
+      res <- sphereClient.execute(query)
+      customer <- res.head().asScala
+    } yield User.fromCustomer(customer)
   }
 
   def createUser(userDraft: UserDraft): Future[Option[User]] = {
