@@ -6,14 +6,14 @@ import play.api.libs.json.{Json, Writes, JsPath, Reads}
 trait UserImplicits {
 
   implicit val userReads: Reads[User] = (
-    (JsPath \ "id").read[String] and
-    (JsPath \ "version").read[Long] and
-    (JsPath \ "username").read[String] and
-    (JsPath \ "email").read[String]
+    (JsPath \ "user" \ "id").read[String] and
+    (JsPath \ "user" \ "version").read[Long] and
+    (JsPath \ "user" \ "username").read[String] and
+    (JsPath \ "user" \ "email").read[String]
     ) {
-    (uid, version, username, email) =>
+    (id, version, username, email) =>
       User(
-        UserId(uid),
+        UserId(id),
         Version(version),
         Username(username),
         Email(email)
@@ -22,10 +22,12 @@ trait UserImplicits {
 
   implicit val userWrites = new Writes[User] {
     def writes(u: User) = Json.obj(
-      "id" -> u.id.value,
-      "version" -> u.version.value,
-      "username" -> u.username.value,
-      "email" -> u.email.value
+      "user" -> Json.obj(
+        "id" -> u.id.value,
+        "version" -> u.version.value,
+        "username" -> u.username.value,
+        "email" -> u.email.value
+      )
     )
   }
 }

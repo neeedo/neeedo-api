@@ -13,7 +13,6 @@ import ControllerUtils.bindRequestJsonBody
 
 class Users(userService: UserService) extends Controller {
 
-  // Todo enable secured actions, currently gives 301
   def getUserByMail(mail: Email) = SecuredAction.async {
     userService.getUserByEmail(mail).map {
       case Some(user) => Ok(Json.toJson(user))
