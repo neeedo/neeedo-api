@@ -78,12 +78,8 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     val futureProductOption = getProductById(id)
 
     futureProductOption.map {
-      productOptional: Optional[Product] =>
-        val option: Option[Product] = productOptional.asScala
-        option match {
-          case Some(product) => Demand.fromProduct(product)
-          case _ => Option.empty[Demand]
-      }
+      case Some(product) => Demand.fromProduct(product)
+      case _ => Option.empty[Demand]
     }
   }
 
@@ -127,6 +123,6 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   def deleteDemandFromEs(demandId: DemandId): Future[Boolean] =
     elasticsearch.deleteDocument(demandId.value, EsIndices.demandIndexName, EsIndices.demandTypeName)
 
-  def getProductById(id: DemandId): Future[Optional[Product]] =
-    sphereClient.execute(ProductByIdFetch.of(id.value))
+  def getProductById(id: DemandId): Future[Option[Product]] =
+    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
 }
