@@ -8,10 +8,11 @@ import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.helper.Configloader
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
-import io.sphere.sdk.models.{Versioned, LocalizedStrings}
-import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.models.{Image, Versioned, LocalizedStrings}
+import io.sphere.sdk.products.commands.updateactions.AddExternalImage
+import io.sphere.sdk.products.commands.{ProductUpdateCommand, ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
-import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder, Product}
+import io.sphere.sdk.products.{ProductUpdateScope, ProductDraftBuilder, ProductVariantDraftBuilder, Product}
 import model.{OfferId, Offer}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
@@ -80,12 +81,8 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     val futureProductOption = getProductById(id)
 
     futureProductOption.map {
-      productOptional: Optional[Product] =>
-        val option: Option[Product] = productOptional.asScala
-        option match {
-          case Some(product) => Offer.fromProduct(product)
-          case _ => Option.empty[Offer]
-        }
+      case Some(product) => Offer.fromProduct(product)
+      case _ => Option.empty[Offer]
     }
   }
 
@@ -105,6 +102,25 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     }
   }
 
-  def getProductById(id: OfferId): Future[Optional[Product]] =
-    sphereClient.execute(ProductByIdFetch.of(id.value))
+  def getProductById(id: OfferId): Future[Option[Product]] =
+    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
+
+  def addImageToOffer(id: OfferId, img: ExternalImage): Future[Option[Offer]] = {
+    getProductById(id) flatMap {
+      case Some(product) => {
+        val sphereImage = img.toSphereImage
+        val variantId = product.getMasterData.getStaged.getMasterVariant.getId
+        val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
+        val updateCommand = ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
+
+        sphereClient.execute(updateCommand) map {
+          p => Offer.fromProduct(p)
+        } recover {
+          case e: Exception => throw e
+        }
+      }
+      // TODO more that one case here sphere could be down or product not found
+      case None => Future.failed(new NoSuchElementException(""))
+    }
+  }
 }
