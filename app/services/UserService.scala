@@ -3,7 +3,8 @@ package services
 import common.domain._
 import common.helper.Wirehelper
 import common.helper.ImplicitConversions._
-import common.sphere.SphereClient
+import common.sphere.{CustomerExceptionHandler, SphereClient}
+import io.sphere.sdk.client.ErrorResponseException
 import io.sphere.sdk.customers.queries.CustomerQuery
 import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName}
 import io.sphere.sdk.customers.commands._
@@ -17,7 +18,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class UserService(sphereClient: SphereClient) {
+class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
 
   def getUserByEmail(email: Email): Future[Option[User]] = {
     val query = CustomerQuery.of().byEmail(email.value)
@@ -29,20 +30,23 @@ class UserService(sphereClient: SphereClient) {
     }
   }
 
-  def createUser(userDraft: UserDraft): Future[Option[User]] = {
+  def createUser(userDraft: UserDraft): Future[User] = {
     val customerName = CustomerName.ofFirstAndLastName(userDraft.username.value, "NonEmpty")
     val customerDraft = CustomerDraft.of(customerName, userDraft.email.value, userDraft.password)
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
 
-    for {
-      result <- sphereClient.execute(customerCreateCommand)
-    } yield Option(User.fromCustomer(result.getCustomer))
+    sphereClient.execute(customerCreateCommand) map {
+      res => User.fromCustomer(res.getCustomer)
+    } recover {
+      case ex: Exception => parseSphereCustomerException(ex)
+    }
   }
 
-  def updateUser(id: UserId, version: Version, userDraft: UserDraft): Future[Option[User]] = {
+  def updateUser(id: UserId, version: Version, userDraft: UserDraft): Future[User] = {
     deleteUser(id, version)
     createUser(userDraft)
   }
+
   def deleteUser(id: UserId, version: Version): Future[Option[User]] = {
     for {
       customer <- sphereClient.execute(CustomerDeleteCommand.of(Versioned.of(id.value, version.value)))
