@@ -1,6 +1,7 @@
 package model
 
 import common.domain._
+import common.exceptions.ProductParseException
 import io.sphere.sdk.products.Product
 import play.api.Logger
 
@@ -55,25 +56,23 @@ case class Offer(
 
 object Offer extends ModelUtils with OfferImplicits {
 
-  def fromProduct(product: Product): Option[Offer] = {
+  def fromProduct(product: Product): Offer = {
     try {
-      Some(
-        Offer(
-          OfferId(product.getId),
-          Version(product.getVersion),
-          UserId(readStringAttribute(product, "userId")),
-          readStringAttribute(product, "tags").split(";").toSet,
-          Location(
-            Longitude(readDoubleAttribute(product, "longitude")),
-            Latitude(readDoubleAttribute(product, "latitude"))
-          ),
-          Price(readMoneyAttribute(product, "price").getNumber.doubleValue())
-        )
+      Offer(
+        OfferId(product.getId),
+        Version(product.getVersion),
+        UserId(readStringAttribute(product, "userId")),
+        readStringAttribute(product, "tags").split(";").toSet,
+        Location(
+          Longitude(readDoubleAttribute(product, "longitude")),
+          Latitude(readDoubleAttribute(product, "latitude"))
+        ),
+        Price(readMoneyAttribute(product, "price").getNumber.doubleValue())
       )
     } catch {
       case e: Exception =>
         Logger.error(s"Failed to parse product as a valid Offer.")
-        None
+        throw new ProductParseException()
     }
   }
 }
