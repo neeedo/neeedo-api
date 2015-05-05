@@ -4,7 +4,7 @@ import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.LocalizedStrings
-import io.sphere.sdk.products.{ProductVariantBuilder, ProductVariantDraftBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductBuilder}
+import io.sphere.sdk.products._
 import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
@@ -37,10 +37,12 @@ class DemandServiceSpec extends Specification with Mockito {
     "getProductById must call Sphereclient execute with fetchcommand" in {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
+      sphere.execute(ProductByIdFetch.of(demandId.value)) returns Future(Optional.empty())
+
       val productTypes = mock[ProductTypes]
       val demandService = new DemandService(es, sphere, productTypes)
 
-      demandService.getProductById(demandId)
+      demandService.getProductById(demandId) must be (Option.empty[Product]).await
       there was one (sphere).execute(ProductByIdFetch.of(demandId.value))
     }
 

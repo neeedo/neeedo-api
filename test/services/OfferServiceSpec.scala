@@ -36,10 +36,11 @@ class OfferServiceSpec extends Specification with Mockito {
     "call Sphereclient execute with fetchcommand" in {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
+      sphere.execute(ProductByIdFetch.of(offerId.value)) returns Future(Optional.empty())
       val productTypes = mock[ProductTypes]
       val service = new OfferService(es, sphere, productTypes)
 
-      service.getProductById(offerId)
+      service.getProductById(offerId) must be (Option.empty[Product]).await
       there was one (sphere).execute(ProductByIdFetch.of(offerId.value))
     }
   }
