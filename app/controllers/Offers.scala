@@ -1,13 +1,16 @@
 package controllers
 
 import common.domain._
+import common.helper.ControllerUtils._
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.SecuredAction
-import model.OfferId
+import model.{Offer, OfferId}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.OfferService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Success, Failure}
 
 class Offers(service: OfferService) extends Controller {
 
@@ -49,6 +52,19 @@ class Offers(service: OfferService) extends Controller {
     service.deleteOffer(id, version).map {
       case Some(_) => Ok
       case None => NotFound
+    }
+  }
+
+  def addImageToOffer(id: OfferId) = Action.async { implicit request =>
+    val externalImage = bindRequestJsonBody(request.body)(ExternalImage.externalImageReads)
+
+    externalImage match {
+      case Success(img) =>
+        service.addImageToOffer(id, img) map {
+          offer => Created(Json.obj("offer" -> Json.toJson(offer)))
+        } recover { case e: Exception => e.asResult }
+
+      case Failure(e) => Future(e.asResult)
     }
   }
 
