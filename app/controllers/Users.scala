@@ -6,7 +6,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.UserService
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 import scala.concurrent.Future
 
 class Users(userService: UserService) extends Controller {
@@ -23,10 +23,12 @@ class Users(userService: UserService) extends Controller {
     request.body.asJson match {
       case Some(json) =>
         json.asOpt[UserDraft] match {
-          case Some(draft) => userService.createUser(draft).map {
-            case Some(user) => Created(Json.obj("user" -> Json.toJson(user)))
-            case _ => BadRequest(Json.obj("error" -> "Unknown error"))
-          }
+          case Some(draft) =>
+            userService.createUser(draft).map {
+              user => Created(Json.obj("user" -> Json.toJson(user)))
+            } recover {
+              case e: Exception => e.asResult
+            }
           case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
         }
       case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
@@ -36,10 +38,12 @@ class Users(userService: UserService) extends Controller {
   def updateUser(id: UserId, version: Version) = SecuredAction.async { implicit request =>
     request.body.asJson match {
       case Some(json) => json.asOpt[UserDraft] match {
-        case Some(draft) => userService.updateUser(id, version, draft).map {
-          case Some(user) => Ok(Json.obj("user" -> Json.toJson(user)))
-          case _ => BadRequest(Json.obj("error" -> "Unknown error"))
-        }
+        case Some(draft) =>
+          userService.updateUser(id, version, draft).map {
+            user => Ok(Json.obj("user" -> Json.toJson(user)))
+          } recover {
+            case e: Exception => e.asResult
+          }
         case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
       }
       case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
