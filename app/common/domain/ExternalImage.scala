@@ -2,7 +2,7 @@ package common.domain
 
 import io.sphere.sdk.models.Image
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Reads}
+import play.api.libs.json.{Json, Writes, JsPath, Reads}
 
 case class ExternalImage(url: Url, label: String)
 
@@ -15,4 +15,11 @@ object ExternalImage {
     (JsPath \ "url").read[String] and
     (JsPath \ "label").read[String]
     ) { (url, label) => ExternalImage(Url(url), label) }
+
+  implicit val externalImageWrites = new Writes[ExternalImage] {
+    def writes(i: ExternalImage) = Json.obj(
+      "url" -> i.url.value,
+      "label" -> i.label
+    )
+  }
 }
