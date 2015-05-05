@@ -49,9 +49,9 @@ class Offers(service: OfferService) extends Controller {
   }
 
   def deleteOffer(id: OfferId, version: Version) = SecuredAction.async {
-    service.deleteOffer(id, version).map {
-      case Some(_) => Ok
-      case None => NotFound
+    service.deleteOffer(id, version) map {
+      case Success(_) => Ok
+      case Failure(e) => e.asResult
     }
   }
 
