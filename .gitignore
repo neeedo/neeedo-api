@@ -16,4 +16,6 @@ tmp
 data
 conf/custom-application.conf
 conf/generated.keystore
+conf/host.cert
+conf/host.key
 .DS_Store
