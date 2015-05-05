@@ -45,61 +45,24 @@ If you run the application on your local machine access it under
 
 API-Documentation
 ----------
-- [Status](#status)
+- [Status (unsecured)](#status)
 - [Matching](#matching)
     - [Get all offers for one demand](#get-all-offers-for-one-demand)
-        - [Resource](#resource)
-        - [URL Parameters](#url-parameters)
-        - [Response](#response)
-        - [Example](#example)
 - [Demands](#demands)
-	- [Query all Demands](#query-all-demands)
-		- [Resource](#resource-1)
-		- [Response](#response-1)
-		- [Example](#example-1)
 	- [Query single Demand](#query-single-demand)
-		- [Resource](#resource-2)
-		- [URL Parameters](#url-parameters-1)
-		- [Response](#response-2)
 	- [Create Demand](#create-demand-1)
-		- [Resource](#resource-3)
-		- [Body](#body-1)
-		- [Response](#response-3)
-		- [Example](#example-1)
 	- [Update Demand](#update-demand)
-		- [Resource](#resource-4)
-		- [URL Parameters](#url-parameters-2)
-		- [Body](#body-2)
-		- [Response](#response-4)
-		- [Example](#example-3)
 	- [Delete Demand](#delete-demand)
-		- [Resource](#resource-5)
-		- [URL Parameters](#url-parameters-3)
-		- [Response](#response-5)
-		- [Example](#example-4)
 - [Offers](#offers)
 	- [Query single Offer](#query-single-offer)
-		- [Resource](#resource-6)
-		- [URL Parameters](#url-parameters-4)
-		- [Response](#response-6)
 	- [Create Offer](#create-offer)
-		- [Resource](#resource-7)
-		- [Body](#body-3)
-		- [Response](#response-7)
-		- [Example](#example-5)
 	- [Update Offer](#update-offer)
-		- [Resource](#resource-8)
-		- [URL Parameters](#url-parameters-5)
-		- [Body](#body-4)
-		- [Response](#response-7)
-		- [Example](#example-6)
 	- [Delete Offer](#delete-offer)
-		- [Resource](#resource-9)
-		- [URL Parameters](#url-parameters-7)
-		- [Response](#response-9)
-		- [Example](#example-7)
 - [Users](#users)
-    - [Create User](#create-user)
+	- [Query singer User](query-single-user-by-email)
+ 	- [Create User (unsecured)](#create-user)
+ 	- [Update User](#update-user)
+	- [Delete User](#delete-user)
 
 # Status
 The status will be reported under `/status`.
@@ -146,17 +109,6 @@ The request body must contain a valid DemandDraft json object
     curl -XPOST -H "Content-Type: application/json" -d '{"id":"c1ef9724-935e-4455-854e-96b99eec555d","version":1,"userId":"1","mustTags":["iphone"],"shouldTags":["neuwertig","schwarz"],"location":{"lat":35.92516,"lon":12.37528},"distance":30,"price":{"min":100.0,"max":340.0}}' https://localhost:9443/matching/demand/0/0 -v
 
 # Demands
-
-## Query all Demands
-### Resource
-GET `/matching/demands`
-
-### Response
-200 Ok
-
-### Example
-    curl -XGET https://localhost:9443/matching/demands -v
-    
 ## Query single Demand
 ### Resource
 GET `/demands/{id}`
