@@ -1,13 +1,15 @@
 package controllers
 
 import common.domain.{Email, Version, UserDraft, UserId}
-import common.helper.SecuredAction
+import common.helper.{ControllerUtils, SecuredAction}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.UserService
 import scala.concurrent.ExecutionContext.Implicits.global
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
+import ControllerUtils.bindRequestJsonBody
 
 class Users(userService: UserService) extends Controller {
 
@@ -20,18 +22,16 @@ class Users(userService: UserService) extends Controller {
   }
 
   def createUser = Action.async { implicit request =>
-    request.body.asJson match {
-      case Some(json) =>
-        json.asOpt[UserDraft] match {
-          case Some(draft) =>
-            userService.createUser(draft).map {
-              user => Created(Json.obj("user" -> Json.toJson(user)))
-            } recover {
-              case e: Exception => e.asResult
-            }
-          case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
+    val userDraft = bindRequestJsonBody(request.body)(UserDraft.userDraftReads)
+
+    userDraft match {
+      case Failure(e) => Future(e.asResult)
+      case Success(u) =>
+        userService.createUser(u).map {
+          user => Created(Json.obj("user" -> Json.toJson(user)))
+        } recover {
+          case e: Exception => e.asResult
         }
-      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
     }
   }
 
