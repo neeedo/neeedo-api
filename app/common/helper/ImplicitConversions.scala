@@ -16,7 +16,7 @@ object ImplicitConversions {
     }
   }
 
-  implicit class ExceptionToResultConverter(x: Exception) {
+  implicit class ExceptionToResultConverter(x: Throwable) {
     def asResult: Result = BadRequest(Json.obj("error" -> x.getMessage))
   }
 
