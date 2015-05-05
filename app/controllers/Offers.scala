@@ -36,15 +36,15 @@ class Offers(service: OfferService) extends Controller {
   }
 
   def updateOffer(id: OfferId, version: Version) = SecuredAction.async { implicit request =>
-    request.body.asJson match {
-      case Some(json) => json.asOpt[OfferDraft] match {
-        case Some(draft) => service.updateOffer(id, version, draft).map {
-          case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
-          case _ => BadRequest(Json.obj("error" -> "Unknown error"))
-        }
-        case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
-      }
-      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+    val offerDraft = bindRequestJsonBody(request.body)(OfferDraft.offerDraftReads)
+
+    offerDraft match {
+      case Success(o) =>
+        service.updateOffer(id, version, o) map {
+         offer => Ok(Json.obj("offer" -> Json.toJson(offer)))
+      } recover { case e: Exception => e.asResult }
+
+      case Failure(e) => Future(e.asResult)
     }
   }
 

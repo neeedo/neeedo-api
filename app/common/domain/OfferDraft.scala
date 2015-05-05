@@ -13,7 +13,7 @@ object OfferDraft {
 
   def generateName(offerDraft: OfferDraft) = "Biete: " + offerDraft.tags.mkString(" ")
 
-  implicit val offerReads: Reads[OfferDraft] = (
+  implicit val offerDraftReads: Reads[OfferDraft] = (
     (JsPath \ "userId").read[String] and
     (JsPath \ "tags").read[Set[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
@@ -32,7 +32,7 @@ object OfferDraft {
       )
   }
 
-  implicit val offerWrites = new Writes[OfferDraft] {
+  implicit val offerDraftWrites = new Writes[OfferDraft] {
     def writes(o: OfferDraft) = Json.obj(
       "userId" -> o.uid.value,
       "tags" -> o.tags,
