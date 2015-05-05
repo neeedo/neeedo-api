@@ -46,8 +46,8 @@ If you run the application on your local machine access it under
 API-Documentation
 ----------
 - [Status (unsecured)](#status)
-- [Matching](#matching)
-    - [Get all offers for one demand](#get-all-offers-for-one-demand)
+- [Matching (experimental)](#matching)
+    - [Get all offers for one demand (unsecured)](#get-all-offers-for-one-demand)
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
 	- [Create Demand](#create-demand-1)
