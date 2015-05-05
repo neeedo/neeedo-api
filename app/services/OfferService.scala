@@ -108,7 +108,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   def addImageToOffer(id: OfferId, img: ExternalImage): Future[Option[Offer]] = {
     getProductById(id) flatMap {
       case Some(product) => {
-        val sphereImage = img.toSphereImage
+        val sphereImage = ExternalImage.toSphereImage(img)
         val variantId = product.getMasterData.getStaged.getMasterVariant.getId
         val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
         val updateCommand = ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
