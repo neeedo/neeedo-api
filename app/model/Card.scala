@@ -1,21 +1,14 @@
 package model
 
 import common.domain._
+import io.sphere.sdk.models.{Image => SphereImage}
 import io.sphere.sdk.products.Product
 import play.api.Logger
 
 sealed trait Card
 
-case class Demand(
-  id: DemandId,
-  version: Version,
-  uid: UserId,
-  mustTags: Set[String],
-  shouldTags: Set[String],
-  location: Location,
-  distance: Distance,
-  priceMin: Price,
-  priceMax: Price) extends Card
+case class Demand(id: DemandId, version: Version, uid: UserId, mustTags: Set[String], shouldTags: Set[String],
+                  location: Location, distance: Distance, priceMin: Price, priceMax: Price) extends Card
 
 object Demand extends ModelUtils with DemandImplicits {
 
@@ -46,13 +39,8 @@ object Demand extends ModelUtils with DemandImplicits {
 }
 
 
-case class Offer(
-  id: OfferId,
-  version: Version,
-  uid: UserId,
-  tags: Set[String],
-  location: Location,
-  price: Price) extends Card
+case class Offer(id: OfferId, version: Version, uid: UserId, tags: Set[String],
+                 location: Location, price: Price, images: List[Image]) extends Card
 
 object Offer extends ModelUtils with OfferImplicits {
 
@@ -69,7 +57,8 @@ object Offer extends ModelUtils with OfferImplicits {
             Longitude(readDoubleAttribute(variant, "longitude")),
             Latitude(readDoubleAttribute(variant, "latitude"))
           ),
-          Price(readMoneyAttribute(variant, "price").getNumber.doubleValue())
+          Price(readMoneyAttribute(variant, "price").getNumber.doubleValue()),
+          readImages(variant)
         )
       )
     } catch {
