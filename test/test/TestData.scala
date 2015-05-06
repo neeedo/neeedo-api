@@ -128,7 +128,8 @@ object TestData {
     userId,
     tags,
     location,
-    price)
+    price,
+    List.empty)
 
   val offerJson: JsObject = Json.obj(
     "id" -> offerId.value,
