@@ -4,22 +4,26 @@ import io.sphere.sdk.models.Image
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Json, Writes, JsPath, Reads}
 
-case class ExternalImage(url: Url, label: String)
+case class ExternalImage(url: Url, width: Int, height: Int)
 
 object ExternalImage {
 
   // TODO Resolution Values
-  def toSphereImage(img: ExternalImage) = Image.ofWidthAndHeight(img.url.value, 1280, 720, img.label)
+  def toSphereImage(img: ExternalImage) = Image.ofWidthAndHeight(img.url.value, img.width, img.height, "")
+
+  def fromSphereImage(img: Image) = ExternalImage(Url(img.getUrl), img.getWidth, img.getHeight)
 
   implicit val externalImageReads: Reads[ExternalImage] = (
     (JsPath \ "url").read[String] and
-    (JsPath \ "label").read[String]
-    ) { (url, label) => ExternalImage(Url(url), label) }
+    (JsPath \ "width").read[Int] and
+    (JsPath \ "height").read[Int]
+    ) { (url, width, height) => ExternalImage(Url(url), width, height) }
 
   implicit val externalImageWrites = new Writes[ExternalImage] {
     def writes(i: ExternalImage) = Json.obj(
       "url" -> i.url.value,
-      "label" -> i.label
+      "width" -> i.width,
+      "height" -> i.height
     )
   }
 }
