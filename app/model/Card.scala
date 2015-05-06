@@ -20,20 +20,21 @@ case class Demand(
 object Demand extends ModelUtils with DemandImplicits {
 
   def fromProduct(product: Product): Option[Demand] = {
+    val variant = product.getMasterData.getStaged.getMasterVariant
     try {
       Some(Demand(
           DemandId(product.getId),
           Version(product.getVersion),
-          UserId(readStringAttribute(product, "userId")),
-          readStringAttribute(product, "mustTags").split(";").toSet,
-          readStringAttribute(product, "shouldTags").split(";").toSet,
+          UserId(readStringAttribute(variant, "userId")),
+          readStringAttribute(variant, "mustTags").split(";").toSet,
+          readStringAttribute(variant, "shouldTags").split(";").toSet,
           Location(
-            Longitude(readDoubleAttribute(product, "longitude")),
-            Latitude(readDoubleAttribute(product, "latitude"))
+            Longitude(readDoubleAttribute(variant, "longitude")),
+            Latitude(readDoubleAttribute(variant, "latitude"))
           ),
-          Distance(readDoubleAttribute(product, "distance").intValue()),
-          Price(readMoneyAttribute(product, "priceMin").getNumber.doubleValue()),
-          Price(readMoneyAttribute(product, "priceMax").getNumber.doubleValue())
+          Distance(readDoubleAttribute(variant, "distance").intValue()),
+          Price(readMoneyAttribute(variant, "priceMin").getNumber.doubleValue()),
+          Price(readMoneyAttribute(variant, "priceMax").getNumber.doubleValue())
       ))
     } catch {
       case e: Exception =>
@@ -56,18 +57,19 @@ case class Offer(
 object Offer extends ModelUtils with OfferImplicits {
 
   def fromProduct(product: Product): Option[Offer] = {
+    val variant = product.getMasterData.getStaged.getMasterVariant
     try {
       Some(
         Offer(
           OfferId(product.getId),
           Version(product.getVersion),
-          UserId(readStringAttribute(product, "userId")),
-          readStringAttribute(product, "tags").split(";").toSet,
+          UserId(readStringAttribute(variant, "userId")),
+          readStringAttribute(variant, "tags").split(";").toSet,
           Location(
-            Longitude(readDoubleAttribute(product, "longitude")),
-            Latitude(readDoubleAttribute(product, "latitude"))
+            Longitude(readDoubleAttribute(variant, "longitude")),
+            Latitude(readDoubleAttribute(variant, "latitude"))
           ),
-          Price(readMoneyAttribute(product, "price").getNumber.doubleValue())
+          Price(readMoneyAttribute(variant, "price").getNumber.doubleValue())
         )
       )
     } catch {
