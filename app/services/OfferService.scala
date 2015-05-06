@@ -7,7 +7,7 @@ import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.helper.Configloader
-import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
+import common.sphere.{AddImageCommand, ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{Image, Versioned, LocalizedStrings}
 import io.sphere.sdk.products.commands.updateactions.AddExternalImage
 import io.sphere.sdk.products.commands.{ProductUpdateCommand, ProductDeleteCommand, ProductCreateCommand}
@@ -108,17 +108,9 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   def addImageToOffer(id: OfferId, img: ExternalImage): Future[Option[Offer]] = {
     getProductById(id) flatMap {
       case Some(product) => {
-        sphereClient.execute(buildAddImageCommand(product, img)) map Offer.fromProduct
+        sphereClient.execute(AddImageCommand(product, img)) map Offer.fromProduct
       }
       case None => Future(None)
     }
-  }
-
-  def buildAddImageCommand(product: Product, img: ExternalImage) = {
-    val sphereImage = ExternalImage.toSphereImage(img)
-    val variantId = product.getMasterData.getStaged.getMasterVariant.getId
-    val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
-
-    ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
   }
 }
