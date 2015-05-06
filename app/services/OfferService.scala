@@ -1,24 +1,21 @@
 package services
 
 import java.util.concurrent.CompletionException
-import java.util.{Locale, Optional}
-
+import java.util.Locale
 import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.helper.Configloader
+import common.helper.ImplicitConversions._
 import common.sphere.{AddImageCommand, ProductTypeDrafts, ProductTypes, SphereClient}
-import io.sphere.sdk.models.{Image, Versioned, LocalizedStrings}
-import io.sphere.sdk.products.commands.updateactions.AddExternalImage
-import io.sphere.sdk.products.commands.{ProductUpdateCommand, ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.models.{Versioned, LocalizedStrings}
+import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
-import io.sphere.sdk.products.{ProductUpdateScope, ProductDraftBuilder, ProductVariantDraftBuilder, Product}
+import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder, Product}
 import model.{OfferId, Offer}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.Logger
-import common.helper.ImplicitConversions._
-
 import scala.concurrent.Future
 import scala.util.Random
 

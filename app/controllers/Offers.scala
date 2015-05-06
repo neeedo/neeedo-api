@@ -4,7 +4,7 @@ import common.domain._
 import common.helper.ControllerUtils._
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.SecuredAction
-import model.{Offer, OfferId}
+import model.OfferId
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.OfferService
