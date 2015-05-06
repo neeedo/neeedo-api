@@ -5,6 +5,8 @@ import io.sphere.sdk.models.{Image => SphereImage}
 import io.sphere.sdk.products.Product
 import play.api.Logger
 
+import scala.util.Try
+
 sealed trait Card
 
 case class Demand(id: DemandId, version: Version, uid: UserId, mustTags: Set[String], shouldTags: Set[String],
@@ -44,27 +46,21 @@ case class Offer(id: OfferId, version: Version, uid: UserId, tags: Set[String],
 
 object Offer extends ModelUtils with OfferImplicits {
 
-  def fromProduct(product: Product): Option[Offer] = {
+  def fromProduct(product: Product): Try[Offer] = {
     val variant = product.getMasterData.getStaged.getMasterVariant
-    try {
-      Some(
-        Offer(
-          OfferId(product.getId),
-          Version(product.getVersion),
-          UserId(readStringAttribute(variant, "userId")),
-          readStringAttribute(variant, "tags").split(";").toSet,
-          Location(
-            Longitude(readDoubleAttribute(variant, "longitude")),
-            Latitude(readDoubleAttribute(variant, "latitude"))
-          ),
-          Price(readMoneyAttribute(variant, "price").getNumber.doubleValue()),
-          readImages(variant)
-        )
+    Try {
+      Offer(
+        OfferId(product.getId),
+        Version(product.getVersion),
+        UserId(readStringAttribute(variant, "userId")),
+        readStringAttribute(variant, "tags").split(";").toSet,
+        Location(
+          Longitude(readDoubleAttribute(variant, "longitude")),
+          Latitude(readDoubleAttribute(variant, "latitude"))
+        ),
+        Price(readMoneyAttribute(variant, "price").getNumber.doubleValue()),
+        readImages(variant)
       )
-    } catch {
-      case e: Exception =>
-        Logger.error(s"Failed to parse product as a valid Offer.")
-        None
     }
   }
 }

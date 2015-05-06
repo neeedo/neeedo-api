@@ -45,7 +45,7 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
         isAuthorized(userCredentials).flatMap {
           result =>
             if (result) action(request)
-            else Future.successful(Unauthorized)
+            else Future.successful(Forbidden)
         }
       case None => requestAuthorization
     }

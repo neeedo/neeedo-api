@@ -25,15 +25,12 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
           val predicate = ProductQuery.model().id().isIn(esResult.results.map(_.value).asJava)
           val sphereQuery = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
 
-          sphereClient.execute(sphereQuery).map {
-            queryResult =>
-              MatchingResult(
-                esResult.hits,
-                from,
-                pageSize,
-                queryResult.getResults.asScala.toList.map(Offer.fromProduct).flatten
-              )
+          val offers = sphereClient.execute(sphereQuery) map {
+            pageQueryResult =>
+              pageQueryResult.getResults.asScala.toList.flatMap(Offer.fromProduct(_).toOption)
           }
+
+          offers.map(MatchingResult(esResult.hits, from, pageSize, _))
         } else {
           Future.successful(MatchingResult(0L, from, pageSize, List.empty[Offer]))
         }

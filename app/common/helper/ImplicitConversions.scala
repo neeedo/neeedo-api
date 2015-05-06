@@ -1,7 +1,8 @@
 package common.helper
 
+import common.exceptions.{ElasticSearchIndexFailed, ProductNotFound}
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
 
@@ -17,7 +18,15 @@ object ImplicitConversions {
   }
 
   implicit class ExceptionToResultConverter(x: Throwable) {
-    def asResult: Result = BadRequest(Json.obj("error" -> x.getMessage))
+    def asResult: Result = {
+      x match {
+        case e: ProductNotFound => NotFound(errorJson(x.getMessage))
+        case e: ElasticSearchIndexFailed => InternalServerError(errorJson(x.getMessage))
+        case _ => BadRequest(errorJson(x.getMessage))
+      }
+    }
+
+    def errorJson(message: String) = Json.obj("error" -> message)
   }
 
   implicit class ActionListenableFutureConverter[T](x: ListenableActionFuture[T]) {
