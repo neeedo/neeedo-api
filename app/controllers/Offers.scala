@@ -41,8 +41,9 @@ class Offers(service: OfferService) extends Controller {
     offerDraft match {
       case Success(o) =>
         service.updateOffer(id, version, o) map {
-         offer => Ok(Json.obj("offer" -> Json.toJson(offer)))
-      } recover { case e: Exception => e.asResult }
+          case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
+          case None => BadRequest(Json.obj("error" -> "Unknown error"))
+        } recover { case e: Exception => e.asResult }
 
       case Failure(e) => Future(e.asResult)
     }

@@ -87,15 +87,20 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def updateOffer(id: OfferId, version: Version, draft: OfferDraft): Future[Option[Offer]] = {
-    for {
-      createOffer <- createOffer(draft)
-      deleteOldOffer <- deleteOffer(id, version)
-    } yield createOffer
+    createOffer(draft) map {
+      case Some(offer) => {
+        deleteOffer(id, version)
+        Some(offer)
+      }
+      case None => None
+    }
   }
 
   def deleteOffer(id: OfferId, version: Version): Future[Option[Offer]] = {
     val product: Versioned[Product] = Versioned.of(id.value, version.value)
-    sphereClient.execute(ProductDeleteCommand.of(product)).map(Offer.fromProduct).recover {
+    sphereClient.execute(ProductDeleteCommand.of(product)) map {
+      Offer.fromProduct
+    } recover {
       // TODO enhance exception matching
       case e: CompletionException => Option.empty[Offer]
       case e: Exception => throw e
