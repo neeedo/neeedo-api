@@ -28,7 +28,7 @@ class Offers(service: OfferService) extends Controller {
     }
   }
 
-  def getOffer(id: OfferId) = Action.async {
+  def getOffer(id: OfferId) = SecuredAction.async {
     service.getOfferById(id).map {
       case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
       case None => NotFound(Json.obj("error" -> "Offer Entity not found"))
@@ -56,7 +56,7 @@ class Offers(service: OfferService) extends Controller {
     }
   }
 
-  def addImageToOffer(id: OfferId) = Action.async { implicit request =>
+  def addImageToOffer(id: OfferId) = SecuredAction.async { implicit request =>
     val image = bindRequestJsonBody(request.body)(Image.imageReads)
 
     image match {
