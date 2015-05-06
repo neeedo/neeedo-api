@@ -57,9 +57,9 @@ class Offers(service: OfferService) extends Controller {
   }
 
   def addImageToOffer(id: OfferId) = Action.async { implicit request =>
-    val externalImage = bindRequestJsonBody(request.body)(ExternalImage.externalImageReads)
+    val image = bindRequestJsonBody(request.body)(Image.imageReads)
 
-    externalImage match {
+    image match {
       case Success(img) =>
         service.addImageToOffer(id, img) map {
           offer => Created(Json.obj("offer" -> Json.toJson(offer)))

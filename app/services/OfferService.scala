@@ -107,7 +107,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   def getProductById(id: OfferId): Future[Option[Product]] =
     sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
 
-  def addImageToOffer(id: OfferId, img: ExternalImage): Future[Option[Offer]] = {
+  def addImageToOffer(id: OfferId, img: Image): Future[Option[Offer]] = {
     getProductById(id) flatMap {
       case Some(product) => {
         sphereClient.execute(AddImageCommand(product, img)) map Offer.fromProduct
