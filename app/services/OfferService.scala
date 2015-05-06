@@ -108,19 +108,17 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   def addImageToOffer(id: OfferId, img: ExternalImage): Future[Option[Offer]] = {
     getProductById(id) flatMap {
       case Some(product) => {
-        val sphereImage = ExternalImage.toSphereImage(img)
-        val variantId = product.getMasterData.getStaged.getMasterVariant.getId
-        val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
-        val updateCommand = ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
-
-        sphereClient.execute(updateCommand) map {
-          p => Offer.fromProduct(p)
-        } recover {
-          case e: Exception => throw e
-        }
+        sphereClient.execute(buildAddImageCommand(product, img)) map Offer.fromProduct
       }
-      // TODO more that one case here sphere could be down or product not found
-      case None => Future.failed(new NoSuchElementException(""))
+      case None => Future(None)
     }
+  }
+
+  def buildAddImageCommand(product: Product, img: ExternalImage) = {
+    val sphereImage = ExternalImage.toSphereImage(img)
+    val variantId = product.getMasterData.getStaged.getMasterVariant.getId
+    val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
+
+    ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
   }
 }
