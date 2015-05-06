@@ -58,7 +58,7 @@ API-Documentation
 	- [Create Offer](#create-offer)
 	- [Update Offer](#update-offer)
 	- [Delete Offer](#delete-offer)
-	- [Add Image to Offer](#add-image-to-offer)
+	- [Add Image to Offer (experimental)](#add-image-to-offer)
 - [Users](#users)
 	- [Query singer User](#query-single-user-by-email)
  	- [Create User (unsecured)](#create-user)
@@ -444,7 +444,8 @@ The request body must contain a valid ExternalImage json object
 
     {
         "url":"http://www.commercetools.com/assets/img/ct_logo_farbe.gif",
-        "label":"Kindersocken"
+        "width":"460",
+        "height":"102"
     }
 
 ### Response
