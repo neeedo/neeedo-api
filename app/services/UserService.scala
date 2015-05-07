@@ -63,7 +63,6 @@ class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
     cachedUserCredentials match {
       case Some(result) => Future.successful(result.password == credentials.password)
       case None => sphereSignIn(credentials)
-
     }
   }
 

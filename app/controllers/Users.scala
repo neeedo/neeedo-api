@@ -24,13 +24,13 @@ class Users(userService: UserService) extends Controller {
     val userDraft = bindRequestJsonBody(request.body)(UserDraft.userDraftReads)
 
     userDraft match {
-      case Failure(e) => Future(e.asResult)
       case Success(u) =>
         userService.createUser(u).map {
-          user => Created(Json.obj("user" -> Json.toJson(user)))
+          user => Created(Json.toJson(user))
         } recover {
           case e: Exception => e.asResult
         }
+      case Failure(e) => Future(e.asResult)
     }
   }
 

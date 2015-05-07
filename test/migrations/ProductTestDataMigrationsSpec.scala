@@ -33,9 +33,9 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
         val emptyPagedResult = PagedQueryResult.empty[Product]()
         sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
         demandService.createDemand(any[DemandDraft]) returns Future.successful(Option(demand))
-        offerService.createOffer(any[OfferDraft]) returns Future.successful(Option(offer))
+        offerService.createOffer(any[OfferDraft]) returns Future.successful(offer)
         demandService.writeDemandToEs(demand) returns Future.successful(DemandSaved)
-        offerService.writeOfferToEs(offer) returns Future.successful(OfferSaved)
+        offerService.writeOfferToEs(offer) returns Future.successful(offer)
 
         val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService)
         Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))

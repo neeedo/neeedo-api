@@ -1,7 +1,10 @@
 package services
 
+import java.util.concurrent.TimeUnit
+
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
+import common.exceptions.{SphereIndexFailed, ElasticSearchIndexFailed}
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.products._
@@ -9,13 +12,14 @@ import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateComma
 import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import java.util.{Optional, Locale}
-import java.util.concurrent.CompletionException
+import scala.concurrent.{Await, Future}
 import model.Offer
 import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import test.{TestData, TestApplications}
-import scala.concurrent.Future
+import test.{TestApplications, TestData}
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 class OfferServiceSpec extends Specification with Mockito {
 
@@ -46,21 +50,21 @@ class OfferServiceSpec extends Specification with Mockito {
   }
 
   "createOffer" should {
-    "return None if writing to sphere fails" in TestApplications.loggingOffApp() {
+    "return exception if writing to sphere fails" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(any[ProductCreateCommand]) returns Future.failed(new RuntimeException("test exception"))
+      sphere.execute(any[ProductCreateCommand]) returns Future.failed(new RuntimeException("writing to es failed"))
       productTypes.offer returns ProductTypeBuilder.of("id", ProductTypeDrafts.offer).build()
 
       val service = new OfferService(es, sphere, productTypes)
 
-      service.createOffer(offerDraft) must be (Option.empty[Offer]).await
+      Await.result(service.createOffer(offerDraft), Duration(3, SECONDS)) must throwA(new SphereIndexFailed("Error while saving offer in sphere"))
       there was one (sphere).execute(any[ProductCreateCommand])
     }
 
-    "return None if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp() {
+    "return exception if writing to es fails and call sphere execute twice" in TestApplications.loggingOffApp() {
       val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
       val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
 
@@ -77,12 +81,12 @@ class OfferServiceSpec extends Specification with Mockito {
       es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.failed(new RuntimeException("test exception"))
 
       val service = new OfferService(es, sphere, productTypes)
-      service.createOffer(offerDraft) must be (Option.empty[Offer]).await
+      Await.result(service.createOffer(offerDraft), Duration(3, SECONDS)) must throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
       there was two (sphere).execute(any)
       there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
 
-    "return Future[Option[Offer]] if parameters are valid" in TestApplications.loggingOffApp() {
+    "return Future[Offer] if parameters are valid" in TestApplications.loggingOffApp() {
       val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
       val productNameAndSlug = LocalizedStrings.of(Locale.ENGLISH, offer.tags.mkString(";")) //Todo proveide name method
 
@@ -99,14 +103,14 @@ class OfferServiceSpec extends Specification with Mockito {
       es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
-      service.createOffer(offerDraft) must beEqualTo(Option(offer)).await
+      service.createOffer(offerDraft) must beEqualTo(offer).await
       there was one (sphere).execute(any)
       there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
   }
 
   "writeOfferToEs" should {
-    "return OfferSaveFailed when IndexResponse is not created" in
+    "return when IndexResponse is not created" in
       TestApplications.configOffApp(Map("offer.typeName" -> offerIndex.value)) {
 
         val es = mock[ElasticsearchClient]
@@ -117,21 +121,23 @@ class OfferServiceSpec extends Specification with Mockito {
       es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
-      service.writeOfferToEs(offer) must beEqualTo(OfferSaveFailed).await
-      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
+
+        Await.result(service.writeOfferToEs(offer), Duration(3, SECONDS)) must throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
+
+        there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }
   }
 
   "deleteOffer" should {
-    "return Option.empty[Product] when sphere execute throws CompletionException" in {
+    "return failed future when sphere execute throws CompletionException" in TestApplications.loggingOffApp() {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
 
-      sphere.execute(any[ProductDeleteCommand]) returns Future.failed(new CompletionException(new Exception()))
+      sphere.execute(any[ProductDeleteCommand]) returns Future.failed(new Exception("bla"))
 
       val service = new OfferService(es, sphere, productTypes)
-      service.deleteOffer(offerId, offerVersion) must beEqualTo(Option.empty[Product]).await
+      Await.result(service.deleteOffer(offerId, offerVersion), Duration(3, SECONDS)) must throwA(new Exception("bla"))
       there was one (sphere).execute(any)
     }
   }
@@ -186,7 +192,7 @@ class OfferServiceSpec extends Specification with Mockito {
       es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
-      service.updateOffer(offerId, offerVersion, offerDraft) must beEqualTo(Option(offer)).await
+      service.updateOffer(offerId, offerVersion, offerDraft) must beEqualTo(offer).await
       there was two (sphere).execute(any)
       there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
     }

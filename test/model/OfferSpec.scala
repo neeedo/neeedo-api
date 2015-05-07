@@ -4,6 +4,7 @@ import java.util.Locale
 
 import common.sphere.ProductTypeDrafts
 import io.sphere.sdk.attributes.Attribute
+import io.sphere.sdk.json.JsonException
 import io.sphere.sdk.models.{LocalizedStrings, DefaultCurrencyUnits}
 import io.sphere.sdk.products.{ProductBuilder, ProductDataBuilder, ProductCatalogDataBuilder, ProductVariantBuilder}
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
@@ -13,6 +14,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.WithApplication
 import test.{TestData, TestApplications}
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success}
 
 
 class OfferSpec extends Specification {
@@ -41,10 +43,10 @@ class OfferSpec extends Specification {
       val validMasterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, validProductVariant).build()).build()
       val validProduct = ProductBuilder.of(productType, validMasterData).id(offerId.value).build()
 
-      Offer.fromProduct(validProduct) mustEqual Option(offer)
+      Offer.fromProduct(validProduct) mustEqual Success(offer)
     }
 
-    "fromProduct must return None objects for invalid offer products" in TestApplications.loggingOffApp() {
+    "fromProduct must return failed try for invalid offer products" in TestApplications.loggingOffApp() {
       val invalidProductAttributeList = List(
         Attribute.of("userId", offer.uid.value),
         Attribute.of("tags", offer.tags),
@@ -56,7 +58,7 @@ class OfferSpec extends Specification {
       val invalidMasterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, invalidProductVariant).build()).build()
       val invalidProduct = ProductBuilder.of(productType, invalidMasterData).id(offerId.value).build()
 
-      Offer.fromProduct(invalidProduct) mustEqual None
+      Offer.fromProduct(invalidProduct).get must throwA[JsonException]
     }
 
     "trailing whitespaces in taglist must be trimmed" in TestApplications.loggingOffApp() {
