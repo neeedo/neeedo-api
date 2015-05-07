@@ -19,15 +19,16 @@ trait WireDependencies {
   lazy val offerService = wire[OfferService]
   lazy val esMatchingService = wire[EsMatchingService]
   lazy val matchingService = wire[MatchingService]
+  lazy val esCompletionService = wire[EsCompletionService]
+  lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
 
   // Controllers
   lazy val demandController = wire[Demands]
   lazy val offerController = wire[Offers]
-  //lazy val demandsStubController = wire[DemandsStub]
-  //lazy val offersStubController = wire[OffersStub]
   lazy val documentationController = wire[Documentation]
   lazy val matchingController = wire[Matching]
+  lazy val completionController = wire[Completion]
   lazy val staticController = wire[Static]
   lazy val userController = wire[Users]
 

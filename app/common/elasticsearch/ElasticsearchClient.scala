@@ -18,7 +18,6 @@ import common.helper.ImplicitConversions._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
 sealed trait ElasticsearchClient {
 
   lazy val client = createElasticsearchClient()

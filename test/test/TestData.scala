@@ -55,6 +55,24 @@ object TestData {
     )
   )
 
+  val demandJsonWithCompletionTags: JsObject = Json.obj(
+    "id" -> demandId.value,
+    "version" -> version.value,
+    "userId" -> userId.value,
+    "mustTags" -> tags,
+    "shouldTags" -> shouldTags,
+    "completionTags" -> (tags ++ shouldTags),
+    "location" -> Json.obj(
+      "lat" -> location.lat.value,
+      "lon" -> location.lon.value
+    ),
+    "distance" -> distance.value,
+    "price" -> Json.obj(
+      "min" -> priceMin.value,
+      "max" -> priceMax.value
+    )
+  )
+
   val demandJsonWithWhitespaces: JsObject = Json.obj(
     "id" -> demandId.value,
     "version" -> version.value,
@@ -136,6 +154,19 @@ object TestData {
     "version" -> version.value,
     "userId" -> userId.value,
     "tags" -> tags,
+    "location" -> Json.obj(
+      "lat" -> location.lat.value,
+      "lon" -> location.lon.value
+    ),
+    "price" -> price.value
+  )
+
+  val offerJsonWithCompletionTags: JsObject = Json.obj(
+    "id" -> offerId.value,
+    "version" -> version.value,
+    "userId" -> userId.value,
+    "tags" -> tags,
+    "completionTags" -> tags,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
       "lon" -> location.lon.value

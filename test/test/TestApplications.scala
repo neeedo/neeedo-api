@@ -8,7 +8,9 @@ object TestApplications {
       FakeApplication(
         additionalConfiguration = Map(
           "logger.application" -> "OFF",
-          "logger.Migrations" -> "OFF"
+          "logger.Migrations" -> "OFF",
+          "offer.typeName" -> "offer",
+          "demand.typeName" -> "demand"
         ) ++ additionalConfig)){}
   def configOffApp(additionalConfig: Map[String,  _ <: Any] = Map.empty) = new WithApplication(FakeApplication(additionalConfiguration = additionalConfig)){}
 }

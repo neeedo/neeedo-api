@@ -4,7 +4,7 @@ import java.util.concurrent.CompletionException
 import java.util.Locale
 import com.github.slugify.Slugify
 import common.domain._
-import common.elasticsearch.ElasticsearchClient
+import common.elasticsearch.{EsIndices, ElasticsearchClient}
 import common.exceptions.{SphereIndexFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.Configloader
 import common.helper.ImplicitConversions._
@@ -16,7 +16,7 @@ import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.products.{ProductUpdateScope, ProductDraftBuilder, ProductVariantDraftBuilder, Product}
 import model.{OfferId, Offer}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import scala.concurrent.Future
 import scala.util.{Success, Random, Failure}
 
@@ -32,11 +32,14 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     }
   }
 
-  def writeOfferToEs(offer: Offer): Future[Offer] = {
-    val offerIndex = IndexName(Configloader.getString("offer.typeName"))
-    val offerType = offerIndex.toTypeName
+  def buildEsOfferJson(offer: Offer) = {
+    Json.obj( "completionTags" -> offer.tags) ++ Json.toJson(offer).as[JsObject]
+  }
 
-    elasticsearch.indexDocument(offer.id.value, offerIndex, offerType, Json.toJson(offer)).map {
+  def writeOfferToEs(offer: Offer): Future[Offer] = {
+    val index = EsIndices.offerIndexName
+    val typeName = EsIndices.offerTypeName
+    elasticsearch.indexDocument(offer.id.value, index, typeName, buildEsOfferJson(offer)).map {
       indexResponse =>
         if (indexResponse.isCreated) offer
         else throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")
