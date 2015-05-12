@@ -1,19 +1,19 @@
 package migrations
 
 import common.domain.IndexName
-import common.elasticsearch.{EsMapping, ElasticsearchClient}
-import common.helper.Configloader
+import common.elasticsearch.{ElasticsearchClient, EsMapping}
+import common.helper.ConfigLoader
 import common.logger.MigrationsLogger
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ProductTypeEsMigrations(elasticsearch: ElasticsearchClient) extends Migration {
+class ProductTypeEsMigrations(elasticsearch: ElasticsearchClient, config: ConfigLoader) extends Migration {
   override def run(): Future[Unit] = {
     MigrationsLogger.info("# Product Elasticsearch Index Migrations started")
 
-    val demandIndex: IndexName = IndexName(Configloader.getString("demand.typeName"))
-    val offerIndex: IndexName = IndexName(Configloader.getString("offer.typeName"))
+    val demandIndex: IndexName = config.demandIndex
+    val offerIndex: IndexName = config.offerIndex
     elasticsearch.waitForGreenStatus.flatMap(green => {
       if (green) {
         MigrationsLogger.info("# Elasticsearch cluster status is green")

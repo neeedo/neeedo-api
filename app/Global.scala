@@ -19,7 +19,7 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
   }
 
   override def onStop(app: Application): Unit = {
-    ElasticsearchClientFactory.instance.close()
+    Wirehelper().lookupSingleOrThrow(classOf[ElasticsearchClientFactory]).instance.close()
   }
 
   override def onStart(app: Application): Unit = {

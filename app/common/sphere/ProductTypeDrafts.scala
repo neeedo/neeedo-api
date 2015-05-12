@@ -3,21 +3,21 @@ package common.sphere
 import java.util.Locale
 
 import common.domain.{OfferDraft, DemandDraft}
-import common.helper.Configloader
+import common.helper.ConfigLoader
 import io.sphere.sdk.attributes._
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.producttypes.ProductTypeDraft
 import io.sphere.sdk.utils.MoneyImpl
 import scala.collection.JavaConverters._
 
-object ProductTypeDrafts {
+class ProductTypeDrafts(configloader: ConfigLoader) {
   val demand = ProductTypeDraft
-    .of(Configloader.getStringOpt("demand.typeName")
+    .of(configloader.getStringOpt("demand.typeName")
       .getOrElse(throw new IllegalArgumentException("Can't access config-key demand.typeName. Make sure your configuration file is correct.")),
       "desc",
       demandAttributes)
   val offer = ProductTypeDraft
-    .of(Configloader.getStringOpt("offer.typeName")
+    .of(configloader.getStringOpt("offer.typeName")
       .getOrElse(throw new IllegalArgumentException("Can't access config-key offer.typeName. Make sure your configuration file is correct.")),
       "desc",
       offerAttributes)

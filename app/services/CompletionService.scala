@@ -1,8 +1,10 @@
 package services
 
 import common.domain._
-import common.elasticsearch.{EsIndices, ElasticsearchClient}
+import common.elasticsearch.ElasticsearchClient
 import common.exceptions.ElasticSearchQueryFailed
+import common.helper.ConfigLoader
+import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.suggest.SuggestResponse
 import org.elasticsearch.action.update.UpdateResponse
@@ -15,12 +17,12 @@ import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ChiSq
 import org.elasticsearch.search.suggest.SuggestBuilders
 import org.elasticsearch.search.suggest.completion.CompletionSuggestion
 import play.api.libs.json.Json
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Success, Try, Failure}
-import scala.collection.JavaConverters._
-import common.helper.ImplicitConversions.ActionListenableFutureConverter
+
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 
 class CompletionService(esCompletionService: EsCompletionService) {
@@ -38,7 +40,7 @@ class CompletionService(esCompletionService: EsCompletionService) {
   }
 }
 
-class EsCompletionService(elasticsearchClient: ElasticsearchClient) {
+class EsCompletionService(elasticsearchClient: ElasticsearchClient, config: ConfigLoader) {
   val aggregationName: String = "tags"
   val suggestionName: String = "tagCompletion"
 
@@ -50,7 +52,7 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient) {
 
   def getCompletions(tag: CompletionTag): Future[CompletionTagResult] = {
     val response: Future[SuggestResponse] = elasticsearchClient.client
-      .prepareSuggest(EsIndices.completionsIndexName.value)
+      .prepareSuggest(config.completionsIndex.value)
       .addSuggestion(buildSuggestions(tag))
       .execute()
       .asScala
@@ -72,9 +74,8 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient) {
     Future.sequence {
       tags.map {
         tag =>
-          val index = EsIndices.completionsIndexName
           elasticsearchClient.client
-            .prepareUpdate(index.value, index.value, tag.value)
+            .prepareUpdate(config.completionsIndex.value, config.completionsIndex.value, tag.value)
             .setScript("tagCompletionUpsert", ScriptType.FILE)
             .setUpsert(buildTagCompletionJson(tag).toString())
             .execute()
@@ -143,8 +144,8 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient) {
   def getEsIndex(offerOrDemand: String): Try[IndexName] = {
     Try {
       offerOrDemand match {
-        case "offer" => EsIndices.offerIndexName
-        case "demand" => EsIndices.demandIndexName
+        case "offer" => config.offerIndex
+        case "demand" => config.demandIndex
         case _ => throw new IllegalArgumentException("Type must be either demand or offer")
       }
     }

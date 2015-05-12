@@ -1,24 +1,28 @@
 package services
 
 import java.util.Locale
+
 import com.github.slugify.Slugify
 import common.domain._
-import common.elasticsearch.{EsIndices, ElasticsearchClient}
-import common.exceptions.{SphereIndexFailed, ElasticSearchIndexFailed, ProductNotFound}
+import common.elasticsearch.ElasticsearchClient
+import common.exceptions.{ElasticSearchIndexFailed, ProductNotFound, SphereIndexFailed}
+import common.helper.ConfigLoader
 import common.helper.ImplicitConversions._
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
-import io.sphere.sdk.models.{Versioned, LocalizedStrings}
+import io.sphere.sdk.models.{LocalizedStrings, Versioned}
 import io.sphere.sdk.products.commands.updateactions.AddExternalImage
-import io.sphere.sdk.products.commands.{ProductUpdateCommand, ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand, ProductUpdateCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
-import io.sphere.sdk.products.{ProductUpdateScope, ProductDraftBuilder, ProductVariantDraftBuilder, Product}
-import model.{OfferId, Offer}
+import io.sphere.sdk.products.{Product, ProductDraftBuilder, ProductUpdateScope, ProductVariantDraftBuilder}
+import model.{Offer, OfferId}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsObject, Json}
-import scala.concurrent.Future
-import scala.util.{Success, Random, Failure}
 
-class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes, esCompletionService: EsCompletionService) {
+import scala.concurrent.Future
+import scala.util.{Failure, Random, Success}
+
+class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts,
+                   productTypes: ProductTypes, esCompletionService: EsCompletionService, config: ConfigLoader) {
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
     writeOfferToSphere(draft).flatMap {
@@ -35,8 +39,8 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def writeOfferToEs(offer: Offer): Future[Offer] = {
-    val index = EsIndices.offerIndexName
-    val typeName = EsIndices.offerTypeName
+    val index = config.offerIndex
+    val typeName = config.offerIndex.toTypeName
     elasticsearch.indexDocument(offer.id.value, index, typeName, buildEsOfferJson(offer)).map {
       indexResponse =>
         if (indexResponse.isCreated) {
@@ -54,7 +58,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
     val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(ProductTypeDrafts.buildOfferAttributes(draft))
+      .attributes(productTypeDrafts.buildOfferAttributes(draft))
       .build()
 
     val productDraft = ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()

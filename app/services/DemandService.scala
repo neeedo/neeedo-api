@@ -1,27 +1,29 @@
 package services
 
+import java.util.Locale
 import java.util.concurrent.CompletionException
-import java.util.{Optional, Locale}
 
 import com.github.slugify.Slugify
 import common.domain._
-import common.elasticsearch.{EsIndices, ElasticsearchClient}
-import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
-import io.sphere.sdk.models.{Versioned, LocalizedStrings}
-import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
-import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import common.elasticsearch.ElasticsearchClient
+import common.helper.ConfigLoader
+import common.helper.ImplicitConversions._
+import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
+import io.sphere.sdk.models.{LocalizedStrings, Versioned}
+import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
-import model.{Offer, Demand, DemandId}
+import io.sphere.sdk.products.{Product, ProductDraftBuilder, ProductVariantDraftBuilder}
+import model.{Demand, DemandId}
 import play.api.Logger
 import play.api.libs.json.{JsObject, Json}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import common.helper.ImplicitConversions._
-
 import scala.util.Random
 
 
-class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
+class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient,
+                    productTypes: ProductTypes, productTypeDrafts: ProductTypeDrafts, config: ConfigLoader) {
 
   def createDemand(demandDraft: DemandDraft): Future[Option[Demand]] = {
     for {
@@ -52,7 +54,12 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
-    elasticsearch.indexDocument(demand.id.value, EsIndices.demandIndexName, EsIndices.demandTypeName, buildEsDemandJson(demand)).map {
+    elasticsearch.indexDocument(
+      demand.id.value,
+      config.demandIndex,
+      config.demandIndex.toTypeName,
+      buildEsDemandJson(demand)
+    ).map {
       indexResponse => if (indexResponse.isCreated) DemandSaved
       else DemandSaveFailed
     } recover {
@@ -66,7 +73,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
     val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(ProductTypeDrafts.buildDemandAttributes(demandDraft))
+      .attributes(productTypeDrafts.buildDemandAttributes(demandDraft))
       .build()
 
     val productDraft = ProductDraftBuilder.of(productTypes.demand, productName, slug, productVariant).build()
@@ -127,7 +134,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def deleteDemandFromEs(demandId: DemandId): Future[Boolean] =
-    elasticsearch.deleteDocument(demandId.value, EsIndices.demandIndexName, EsIndices.demandTypeName)
+    elasticsearch.deleteDocument(demandId.value, config.demandIndex, config.demandIndex.toTypeName)
 
   def getProductById(id: DemandId): Future[Option[Product]] =
     sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)

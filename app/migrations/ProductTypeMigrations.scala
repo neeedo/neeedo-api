@@ -12,14 +12,14 @@ import common.helper.ImplicitConversions._
 
 import scala.concurrent.Future
 
-class ProductTypeMigrations(sphereClient: SphereClient) extends Migration {
+class ProductTypeMigrations(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts) extends Migration {
 
   override def run(): Future[Unit] = {
     MigrationsLogger.info("# Product Type Migrations started")
 
     for {
-      demand <- createType(ProductTypeDrafts.demand)
-      offer <- createType(ProductTypeDrafts.offer)
+      demand <- createType(productTypeDrafts.demand)
+      offer <- createType(productTypeDrafts.offer)
     } yield(demand, offer)
   }
 

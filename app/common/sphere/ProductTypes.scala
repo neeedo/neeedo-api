@@ -1,6 +1,6 @@
 package common.sphere
 
-import common.helper.Configloader
+import common.helper.ConfigLoader
 import io.sphere.sdk.attributes.AttributeDefinition
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
@@ -13,17 +13,17 @@ trait ProductTypes {
   def offer: ProductType
 }
 
-class SphereProductTypes(sphereClient: SphereClient) extends ProductTypes {
+class SphereProductTypes(sphereClient: SphereClient, configloader: ConfigLoader) extends ProductTypes {
   lazy val demand: ProductType = queryDemandType
   lazy val offer: ProductType = queryOfferType
 
   private def queryDemandType: ProductType = {
-    val typeName = Configloader.getStringOpt("demand.typeName").get
+    val typeName = configloader.getStringOpt("demand.typeName").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }
 
   private def queryOfferType: ProductType = {
-    val typeName = Configloader.getStringOpt("offer.typeName").get
+    val typeName = configloader.getStringOpt("offer.typeName").get
     Await.result(sphereClient.execute(ProductTypeQuery.of().byName(typeName)), 10 seconds).getResults.get(0)
   }
 }

@@ -1,7 +1,7 @@
 package migrations
 
 import common.domain._
-import common.helper.Configloader
+import common.helper.ConfigLoader
 import common.logger.MigrationsLogger
 import common.sphere.SphereClient
 import io.sphere.sdk.products.queries.ProductQuery
@@ -12,11 +12,12 @@ import scala.concurrent.Future
 import common.helper.ImplicitConversions.OptionConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ProductTestDataMigrations(sphereClient: SphereClient, demandService: DemandService, offerService: OfferService) extends Migration {
+class ProductTestDataMigrations(sphereClient: SphereClient, demandService: DemandService,
+                                offerService: OfferService, configloader: ConfigLoader) extends Migration {
 
   override def run(): Future[Unit] = {
     MigrationsLogger.info("# Product Test Data Migrations started")
-    if (Configloader.getBoolean("sphere.IO.createTestData")) {
+    if (configloader.getBoolean("sphere.IO.createTestData")) {
       val queryResult: Future[PagedQueryResult[Product]] = sphereClient.execute(ProductQuery.of())
       val option: Future[Unit] = queryResult.flatMap {
         res =>

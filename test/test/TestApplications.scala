@@ -9,6 +9,7 @@ object TestApplications {
         additionalConfiguration = Map(
           "logger.application" -> "OFF",
           "logger.Migrations" -> "OFF",
+          "logger.Elasticsearch" -> "OFF",
           "offer.typeName" -> "offer",
           "demand.typeName" -> "demand"
         ) ++ additionalConfig)){}

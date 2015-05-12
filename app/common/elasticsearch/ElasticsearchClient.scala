@@ -3,7 +3,7 @@ package common.elasticsearch
 import java.util.concurrent.TimeUnit
 
 import common.domain.{IndexName, TypeName}
-import common.helper.Configloader
+import common.helper.ConfigLoader
 import common.logger.EsLogger
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
 import org.elasticsearch.action.index.IndexResponse
@@ -93,18 +93,6 @@ sealed trait ElasticsearchClient {
       )
       .addMapping(mapping.name.value, mapping.value)
   }
-
-
-  def readHostsFromConfig: List[HostWithPort] = {
-    Configloader.getStringSeq("elasticsearch.hosts").map {
-      s =>
-        val hostsAndPorts = s.split(":").toList
-        HostWithPort(
-          hostsAndPorts.dropRight(1).mkString(":").trim,
-          hostsAndPorts.takeRight(1).mkString.trim.toInt
-        )
-    }
-  }
 }
 
 class LocalEsClient extends ElasticsearchClient {
@@ -122,8 +110,8 @@ class LocalEsClient extends ElasticsearchClient {
   override def close() = node.close()
 }
 
-class RemoteEsClient extends ElasticsearchClient {
-  val clustername = Configloader.getStringOpt("elasticsearch.clustername").getOrElse("elasticsearch")
+class RemoteEsClient(configloader: ConfigLoader) extends ElasticsearchClient {
+  val clustername = configloader.getStringOpt("elasticsearch.clustername").getOrElse("elasticsearch")
   val hosts = readHostsFromConfig.mkString(",")
   lazy val node: Node = createNode
 
@@ -139,6 +127,18 @@ class RemoteEsClient extends ElasticsearchClient {
       .data(false)
       .node()
   }
+
+  def readHostsFromConfig: List[HostWithPort] = {
+    configloader.getStringSeq("elasticsearch.hosts").map {
+      s =>
+        val hostsAndPorts = s.split(":").toList
+        HostWithPort(
+          hostsAndPorts.dropRight(1).mkString(":").trim,
+          hostsAndPorts.takeRight(1).mkString.trim.toInt
+        )
+    }
+  }
+
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
 }
