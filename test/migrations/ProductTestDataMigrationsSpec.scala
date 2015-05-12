@@ -15,7 +15,7 @@ import io.sphere.sdk.queries.PagedQueryResult
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Play
-import services.{OfferService, DemandService}
+import services.{EsOfferService, OfferService, DemandService}
 import test.{TestData, TestApplications}
 import scala.collection.JavaConverters._
 
@@ -33,12 +33,13 @@ class ProductTestDataMigrationsSpec extends Specification with Mockito {
         val sphereClient = mock[SphereClient]
         val demandService = mock[DemandService]
         val offerService = mock[OfferService]
+        val esOfferService = mock[EsOfferService]
         val emptyPagedResult = PagedQueryResult.empty[Product]()
         sphereClient.execute(ProductQuery.of()) returns Future.successful(emptyPagedResult)
         demandService.createDemand(any[DemandDraft]) returns Future.successful(Option(demand))
         offerService.createOffer(any[OfferDraft]) returns Future.successful(offer)
         demandService.writeDemandToEs(demand) returns Future.successful(DemandSaved)
-        offerService.writeOfferToEs(offer) returns Future.successful(offer)
+        esOfferService.writeOfferToEs(offer) returns Future.successful(offer)
 
         val productTestDataMigrations = new ProductTestDataMigrations(sphereClient, demandService, offerService, configLoader)
         Await.result(productTestDataMigrations.run(), new FiniteDuration(10, TimeUnit.SECONDS))
