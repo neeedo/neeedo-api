@@ -1,0 +1,12 @@
+{
+  "completions" : {
+    "properties" : {
+      "tag" : {
+        "type" : "completion",
+        "index_analyzer" : "simple",
+        "search_analyzer" : "simple",
+        "payloads" : true
+      }
+    }
+  }
+}

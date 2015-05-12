@@ -3,10 +3,10 @@ package common.domain
 import play.api.libs.json.{Json, Writes}
 
 case class CompletionTag(value: String)
-case class CompletionTagResult(value: String)
+case class CompletionTagResult(value: List[String])
 object CompletionTagResult {
   implicit val completionTagResult = new Writes[CompletionTagResult] {
-    def writes(c: CompletionTagResult) = Json.obj("completedTag" -> c.value)
+    def writes(c: CompletionTagResult) = Json.obj("completedTags" -> c.value)
   }
 }
 

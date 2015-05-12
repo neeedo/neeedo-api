@@ -28,7 +28,7 @@ OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeade
 OPTIONS        /matching/demand/0/0         @controllers.Static.deliverCorsHeaders()
 
 # Completion
-GET            /completion/:type/tag/:tag       @controllers.Completion.completeTag(type: String, tag: String)
+GET            /completion/tag/:tag             @controllers.Completion.completeTag(tag: String)
 GET            /completion/:type/phrase/:phrase @controllers.Completion.suggestTags(type: String, phrase: String)
 
 # Users

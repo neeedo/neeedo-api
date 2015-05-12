@@ -4,34 +4,98 @@ import common.domain._
 import common.elasticsearch.{EsIndices, ElasticsearchClient}
 import common.exceptions.ElasticSearchQueryFailed
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.suggest.SuggestResponse
+import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.script.ScriptService.ScriptType
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms.Bucket
 import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ChiSquare.ChiSquareBuilder
-import org.elasticsearch.search.aggregations.bucket.significant.heuristics.{ChiSquare, SignificanceHeuristic}
+import org.elasticsearch.search.suggest.SuggestBuilders
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion
+import play.api.libs.json.Json
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Try, Failure}
 import scala.collection.JavaConverters._
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
+import scala.collection.JavaConversions._
+
 
 class CompletionService(esCompletionService: EsCompletionService) {
 
-  def completeTag(offerOrDemand: String, tag: CompletionTag): Future[CompletionTagResult] = {
-      Future(CompletionTagResult(tag.value))
+  def completeTag(tag: CompletionTag): Future[CompletionTagResult] = {
+    esCompletionService.getCompletions(tag)
   }
 
   def suggestTags(offerOrDemand: String, phrase: CompletionPhrase): Future[CompletionPhraseResult] = {
       esCompletionService.getSuggestions(offerOrDemand, phrase)
   }
+
+  def writeCompletions(tags: List[CompletionTag]) = {
+    esCompletionService.writeCompletionsToEs(tags)
+  }
 }
 
 class EsCompletionService(elasticsearchClient: ElasticsearchClient) {
-
   val aggregationName: String = "tags"
+  val suggestionName: String = "tagCompletion"
 
-  def buildPhraseCompletionQuery(index: IndexName, phrase: CompletionPhrase) =
+  def buildSuggestions(tag: CompletionTag) =
+    SuggestBuilders
+      .completionSuggestion(suggestionName)
+      .field("tag")
+      .text(tag.value)
+
+  def getCompletions(tag: CompletionTag): Future[CompletionTagResult] = {
+    val response: Future[SuggestResponse] = elasticsearchClient.client
+      .prepareSuggest(EsIndices.completionsIndexName.value)
+      .addSuggestion(buildSuggestions(tag))
+      .execute()
+      .asScala
+
+    getCompletionsFromSuggestResponse(response) map(CompletionTagResult(_))
+  }
+
+  def writeCompletionsToEs(tags: List[CompletionTag]): Future[List[UpdateResponse]] = {
+    def buildTagCompletionJson(tag: CompletionTag) = {
+      Json.obj(
+        "tag" -> Json.obj(
+          "input" -> tag.value,
+          "output" -> tag.value,
+          "weight" -> 1
+        )
+      )
+    }
+
+    Future.sequence {
+      tags.map {
+        tag =>
+          val index = EsIndices.completionsIndexName
+          elasticsearchClient.client
+            .prepareUpdate(index.value, index.value, tag.value)
+            .setScript("tagCompletionUpsert", ScriptType.FILE)
+            .setUpsert(buildTagCompletionJson(tag).toString())
+            .execute()
+            .asScala
+      }
+    }
+  }
+
+  def getCompletionsFromSuggestResponse(resp: Future[SuggestResponse]): Future[List[String]] = {
+    resp.map {
+      res =>
+        val completion: CompletionSuggestion = res.getSuggest.getSuggestion(suggestionName)
+        val entries = completion.getEntries.get(0).getOptions.iterator().toList
+        entries.map(_.getText.string())
+    } recover {
+      case e: Exception =>
+        throw new ElasticSearchQueryFailed("Failed to get receive tag completions from Elasticsearch")
+    }
+  }
+
+  def buildPhraseCompletionQuery(phrase: CompletionPhrase) =
     QueryBuilders
       .termsQuery("completionTags", phrase.value.asJava)
       .minimumShouldMatch("1")
@@ -48,7 +112,7 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient) {
   def getSuggestions(index: String, phrase: CompletionPhrase): Future[CompletionPhraseResult] = {
     getEsIndex(index) match {
       case Success(i) =>
-        val query = buildPhraseCompletionQuery(i, phrase)
+        val query = buildPhraseCompletionQuery(phrase)
         val aggregation = buildAggregation(i)
 
         val searchresponse = elasticsearchClient.client

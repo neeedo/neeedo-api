@@ -3,7 +3,7 @@ import java.util.concurrent.TimeUnit
 import common.elasticsearch.ElasticsearchClientFactory
 import common.helper.{Wirehelper, CrossOriginFilter}
 import common.logger.MigrationsLogger
-import migrations.{ProductTypeEsMigrations, ProductTestDataMigrations, ProductTypeMigrations}
+import migrations.{CompletionsEsMigrations, ProductTypeEsMigrations, ProductTestDataMigrations, ProductTypeMigrations}
 import play.api._
 import com.softwaremill.macwire.{MacwireMacros, Macwire}
 import play.api.mvc.WithFilters
@@ -30,6 +30,7 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
     MigrationsLogger.info("### Migrations started ###")
     Await.result(Wirehelper().lookupSingleOrThrow(classOf[ProductTypeMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     Await.result(Wirehelper().lookupSingleOrThrow(classOf[ProductTypeEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    Await.result(Wirehelper().lookupSingleOrThrow(classOf[CompletionsEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     Await.result(Wirehelper().lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     MigrationsLogger.info("### Migrations done ###\n")
   }

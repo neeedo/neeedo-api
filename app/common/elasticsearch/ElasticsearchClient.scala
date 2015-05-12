@@ -111,6 +111,7 @@ class LocalEsClient extends ElasticsearchClient {
   val nodeSettings = ImmutableSettings.settingsBuilder()
     .classLoader(classOf[Settings].getClassLoader)
     .put("path.data", "resources/es-data/")
+    .put("path.conf", "resources/es-config/")
     .build()
 
   lazy val node: Node = {
