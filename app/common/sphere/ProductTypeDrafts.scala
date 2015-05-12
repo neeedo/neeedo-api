@@ -12,13 +12,11 @@ import scala.collection.JavaConverters._
 
 class ProductTypeDrafts(configloader: ConfigLoader) {
   val demand = ProductTypeDraft
-    .of(configloader.getStringOpt("demand.typeName")
-      .getOrElse(throw new IllegalArgumentException("Can't access config-key demand.typeName. Make sure your configuration file is correct.")),
+    .of(configloader.getString("demand.typeName"),
       "desc",
       demandAttributes)
   val offer = ProductTypeDraft
-    .of(configloader.getStringOpt("offer.typeName")
-      .getOrElse(throw new IllegalArgumentException("Can't access config-key offer.typeName. Make sure your configuration file is correct.")),
+    .of(configloader.getString("offer.typeName"),
       "desc",
       offerAttributes)
 
