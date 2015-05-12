@@ -12,6 +12,8 @@ import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateComma
 import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import java.util.{Optional, Locale}
+import play.api.libs.json.JsValue
+
 import scala.concurrent.{Await, Future}
 import model.Offer
 import org.elasticsearch.action.index.IndexResponse
@@ -27,6 +29,7 @@ class OfferServiceSpec extends Specification with Mockito {
   val offerVersion = TestData.version
   val offer = TestData.offer
   val offerJson = TestData.offerJson
+  val offerJsonWithCompletionTags = TestData.offerJsonWithCompletionTags
   val offerDraft = TestData.offerDraft
   val productAttributeList = TestData.offerProductAttributeList
 
@@ -78,12 +81,15 @@ class OfferServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       sphere.execute(any[ProductDeleteCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
-      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.failed(new RuntimeException("test exception"))
+
+      val anyIndex: IndexName = any[String].asInstanceOf[IndexName]
+      val anyType: TypeName = any[String].asInstanceOf[TypeName]
+      es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.failed(new RuntimeException("test exception"))
 
       val service = new OfferService(es, sphere, productTypes)
       Await.result(service.createOffer(offerDraft), Duration(3, SECONDS)) must throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
       there was two (sphere).execute(any)
-      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
     }
 
     "return Future[Offer] if parameters are valid" in TestApplications.loggingOffApp() {
@@ -100,31 +106,34 @@ class OfferServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
-      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
+      val anyIndex: IndexName = any[String].asInstanceOf[IndexName]
+      val anyType: TypeName = any[String].asInstanceOf[TypeName]
+      es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
       service.createOffer(offerDraft) must beEqualTo(offer).await
       there was one (sphere).execute(any)
-      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
     }
   }
 
   "writeOfferToEs" should {
     "return when IndexResponse is not created" in
       TestApplications.configOffApp(Map("offer.typeName" -> offerIndex.value)) {
-
         val es = mock[ElasticsearchClient]
-      val sphere = mock[SphereClient]
-      val productTypes = mock[ProductTypes]
+        val sphere = mock[SphereClient]
+        val productTypes = mock[ProductTypes]
 
-      val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
-      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
+        val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
+        val anyIndex: IndexName = any[String].asInstanceOf[IndexName]
+        val anyType: TypeName = any[String].asInstanceOf[TypeName]
+        es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.successful(indexResponse)
 
-      val service = new OfferService(es, sphere, productTypes)
+        val service = new OfferService(es, sphere, productTypes)
 
         Await.result(service.writeOfferToEs(offer), Duration(3, SECONDS)) must throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
 
-        there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
+        there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
     }
   }
 
@@ -189,12 +198,14 @@ class OfferServiceSpec extends Specification with Mockito {
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
       val indexResponse: IndexResponse = new IndexResponse("","","",1L,true)
-      es.indexDocument(offerId.value, offerIndex, offerType, offerJson) returns Future.successful(indexResponse)
+      val anyIndex: IndexName = any[String].asInstanceOf[IndexName]
+      val anyType: TypeName = any[String].asInstanceOf[TypeName]
+      es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.successful(indexResponse)
 
       val service = new OfferService(es, sphere, productTypes)
       service.updateOffer(offerId, offerVersion, offerDraft) must beEqualTo(offer).await
       there was two (sphere).execute(any)
-      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJson)
+      there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
     }
   }
 

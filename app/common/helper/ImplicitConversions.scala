@@ -1,8 +1,8 @@
 package common.helper
 
-import common.exceptions.{ElasticSearchIndexFailed, ProductNotFound}
+import common.exceptions.{ElasticSearchQueryFailed, ElasticSearchIndexFailed, ProductNotFound}
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.mvc.Results._
 
@@ -22,6 +22,7 @@ object ImplicitConversions {
       x match {
         case e: ProductNotFound => NotFound(errorJson(x.getMessage))
         case e: ElasticSearchIndexFailed => InternalServerError(errorJson(x.getMessage))
+        case e: ElasticSearchQueryFailed => InternalServerError(errorJson(x.getMessage))
         case _ => BadRequest(errorJson(x.getMessage))
       }
     }

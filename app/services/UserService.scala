@@ -4,16 +4,13 @@ import common.domain._
 import common.helper.Wirehelper
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
-import io.sphere.sdk.client.ErrorResponseException
 import io.sphere.sdk.customers.queries.CustomerQuery
 import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName}
 import io.sphere.sdk.customers.commands._
 import io.sphere.sdk.models.Versioned
-import java.security.MessageDigest
-import io.sphere.sdk.queries.{PagedQueryResult, QueryParameter}
+import io.sphere.sdk.queries.PagedQueryResult
 import play.api.cache.Cache
 import play.api.Play.current
-import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 

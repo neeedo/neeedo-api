@@ -27,9 +27,12 @@ POST           /matching/demand/:from/:size @controllers.Matching.matchDemand(fr
 OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeaders()
 OPTIONS        /matching/demand/0/0         @controllers.Static.deliverCorsHeaders()
 
+# Completion
+GET            /completion/:type/tag/:tag       @controllers.Completion.completeTag(type: String, tag: String)
+GET            /completion/:type/phrase/:phrase @controllers.Completion.suggestTags(type: String, phrase: String)
+
 # Users
 GET            /users/mail/:mail            @controllers.Users.getUserByMail(mail: common.domain.Email)
-# GET            /users/id/:id                @controllers.Users.getUserById(id: common.domain.UserId)
 POST           /users                       @controllers.Users.createUser()
 PUT            /users/:id/:version          @controllers.Users.updateUser(id: common.domain.UserId, version: common.domain.Version)
 DELETE         /users/:id/:version          @controllers.Users.deleteUser(id: common.domain.UserId, version: common.domain.Version)

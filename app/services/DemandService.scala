@@ -11,9 +11,9 @@ import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.{ProductVariantDraftBuilder, ProductDraftBuilder, Product}
 import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
-import model.{Demand, DemandId}
+import model.{Offer, Demand, DemandId}
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import common.helper.ImplicitConversions._
@@ -45,8 +45,14 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
     }
   }
 
+  def buildEsDemandJson(demand: Demand) = {
+    val completionJson = Json.obj("completionTags" -> (demand.mustTags ++ demand.shouldTags))
+
+    completionJson ++ Json.toJson(demand).as[JsObject]
+  }
+
   def writeDemandToEs(demand: Demand): Future[AddDemandResult] = {
-    elasticsearch.indexDocument(demand.id.value, EsIndices.demandIndexName, EsIndices.demandTypeName, Json.toJson(demand)).map {
+    elasticsearch.indexDocument(demand.id.value, EsIndices.demandIndexName, EsIndices.demandTypeName, buildEsDemandJson(demand)).map {
       indexResponse => if (indexResponse.isCreated) DemandSaved
       else DemandSaveFailed
     } recover {
