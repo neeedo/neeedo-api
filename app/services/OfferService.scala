@@ -8,6 +8,7 @@ import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchIndexFailed, ProductNotFound, SphereIndexFailed}
 import common.helper.ConfigLoader
 import common.helper.ImplicitConversions._
+import common.logger.OfferLogger
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{LocalizedStrings, Versioned}
 import io.sphere.sdk.products.commands.updateactions.AddExternalImage
@@ -39,6 +40,11 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
   }
 
   def writeOfferToEs(offer: Offer): Future[Offer] = {
+    def throwAndReportElasticSearchIndexFailed = {
+      OfferLogger.error(s"Offer: ${Json.toJson(offer)} could not be saved in Elasticsearch")
+      throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")
+    }
+
     val index = config.offerIndex
     val typeName = config.offerIndex.toTypeName
     elasticsearch.indexDocument(offer.id.value, index, typeName, buildEsOfferJson(offer)).map {
@@ -47,13 +53,18 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
           esCompletionService.writeCompletionsToEs(offer.tags.map(CompletionTag).toList)
           offer
         }
-        else throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")
+        else throwAndReportElasticSearchIndexFailed
     } recover {
-      case e: Exception => throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")
+      case e: Exception => throwAndReportElasticSearchIndexFailed
     }
   }
 
   def writeOfferToSphere(draft: OfferDraft): Future[Offer] = {
+    def throwAndReportSphereIndexFailed = {
+      OfferLogger.error(s"Offer: ${Json.toJson(draft)} could not be saved in Sphere")
+      throw new SphereIndexFailed("Error while saving offer in sphere")
+    }
+
     val name = OfferDraft.generateName(draft) + " " + Random.nextInt(1000)
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
     val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
@@ -66,7 +77,7 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
       product => Offer.fromProduct(product).get
     } recover {
-      case e: Exception => throw new SphereIndexFailed("Error while saving offer in sphere")
+      case e: Exception => throwAndReportSphereIndexFailed
     }
   }
 

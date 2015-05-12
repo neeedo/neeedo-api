@@ -10,3 +10,7 @@ object MigrationsLogger extends LoggerLike {
 object EsLogger extends LoggerLike {
   override val logger: Logger = LoggerFactory.getLogger("Elasticsearch")
 }
+
+object OfferLogger extends LoggerLike {
+  override val logger: Logger = LoggerFactory.getLogger("Offer")
+}
