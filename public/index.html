@@ -1,0 +1,52 @@
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
+    <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            $("#myTags").tagit({
+                autocomplete: {
+                    source: function( request, response ) {
+                        $.ajax({
+                            url: "http://localhost:9000/completion/tag/" + request.term,
+                            success: function( data ) {
+                                response( $.map( data.completedTags, function( item ) {
+                                    return {
+                                        label: item,
+                                        value: item
+                                    }
+                                }));
+                            }
+                        });
+                    },
+                    minLength: 2
+                },
+                afterTagAdded: function(event, ui) {
+                    // do something special
+                    getSuggests();
+                }
+            });
+        });
+
+        function getSuggests() {
+            $.ajax({
+                url: "http://localhost:9000/completion/offer/phrase/" + $("#myTags").tagit("assignedTags").join(" "),
+                success: function( data ) {
+                    console.log(data.suggestedTags.join(" "));
+                    $("#suggests").text(data.suggestedTags.join(" "));
+                }
+            });
+        }
+    </script>
+
+    <ul id="myTags">
+        <!-- Existing list items will be pre-added to the tags -->
+    </ul>
+    <div id="suggests"></div>
+</body>
+</html>

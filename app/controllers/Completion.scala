@@ -8,8 +8,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 
 class Completion(completionService: CompletionService) extends Controller {
-  def completeTag(offerOrDemand: String, tag: String) = Action.async {
-    completionService.completeTag(offerOrDemand: String, CompletionTag(tag)) map {
+  def completeTag(tag: String) = Action.async {
+    completionService.completeTag(CompletionTag(tag)) map {
       res => Ok(Json.toJson(res))
     } recover {
       case e: Exception => e.asResult

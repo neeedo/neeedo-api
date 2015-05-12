@@ -1,12 +1,10 @@
 package services
 
-import java.util.concurrent.CompletionException
 import java.util.Locale
 import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.{EsIndices, ElasticsearchClient}
 import common.exceptions.{SphereIndexFailed, ElasticSearchIndexFailed, ProductNotFound}
-import common.helper.Configloader
 import common.helper.ImplicitConversions._
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
@@ -20,7 +18,7 @@ import play.api.libs.json.{JsObject, Json}
 import scala.concurrent.Future
 import scala.util.{Success, Random, Failure}
 
-class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes) {
+class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClient, productTypes: ProductTypes, esCompletionService: EsCompletionService) {
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
     writeOfferToSphere(draft).flatMap {
@@ -41,7 +39,10 @@ class OfferService(elasticsearch: ElasticsearchClient, sphereClient: SphereClien
     val typeName = EsIndices.offerTypeName
     elasticsearch.indexDocument(offer.id.value, index, typeName, buildEsOfferJson(offer)).map {
       indexResponse =>
-        if (indexResponse.isCreated) offer
+        if (indexResponse.isCreated) {
+          esCompletionService.writeCompletionsToEs(offer.tags.map(CompletionTag).toList)
+          offer
+        }
         else throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")
     } recover {
       case e: Exception => throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")

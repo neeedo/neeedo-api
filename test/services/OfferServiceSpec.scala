@@ -43,9 +43,10 @@ class OfferServiceSpec extends Specification with Mockito {
     "call Sphereclient execute with fetchcommand" in {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
-      sphere.execute(ProductByIdFetch.of(offerId.value)) returns Future(Optional.empty())
+      sphere.execute(ProductByIdFetch.of(anyString)) returns Future(Optional.empty())
       val productTypes = mock[ProductTypes]
-      val service = new OfferService(es, sphere, productTypes)
+      val esCompletionService = mock[EsCompletionService]
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
 
       service.getProductById(offerId) must be (Option.empty[Product]).await
       there was one (sphere).execute(ProductByIdFetch.of(offerId.value))
@@ -57,11 +58,12 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(any[ProductCreateCommand]) returns Future.failed(new RuntimeException("writing to es failed"))
       productTypes.offer returns ProductTypeBuilder.of("id", ProductTypeDrafts.offer).build()
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
 
       Await.result(service.createOffer(offerDraft), Duration(3, SECONDS)) must throwA(new SphereIndexFailed("Error while saving offer in sphere"))
       there was one (sphere).execute(any[ProductCreateCommand])
@@ -77,6 +79,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       sphere.execute(any[ProductDeleteCommand]) returns Future.successful(product)
@@ -86,7 +89,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val anyType: TypeName = any[String].asInstanceOf[TypeName]
       es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.failed(new RuntimeException("test exception"))
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
       Await.result(service.createOffer(offerDraft), Duration(3, SECONDS)) must throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
       there was two (sphere).execute(any)
       there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
@@ -102,6 +105,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
@@ -110,7 +114,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val anyType: TypeName = any[String].asInstanceOf[TypeName]
       es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.successful(indexResponse)
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
       service.createOffer(offerDraft) must beEqualTo(offer).await
       there was one (sphere).execute(any)
       there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
@@ -123,13 +127,14 @@ class OfferServiceSpec extends Specification with Mockito {
         val es = mock[ElasticsearchClient]
         val sphere = mock[SphereClient]
         val productTypes = mock[ProductTypes]
+        val esCompletionService = mock[EsCompletionService]
 
         val indexResponse: IndexResponse = new IndexResponse("","","",1L,false)
         val anyIndex: IndexName = any[String].asInstanceOf[IndexName]
         val anyType: TypeName = any[String].asInstanceOf[TypeName]
         es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.successful(indexResponse)
 
-        val service = new OfferService(es, sphere, productTypes)
+        val service = new OfferService(es, sphere, productTypes, esCompletionService)
 
         Await.result(service.writeOfferToEs(offer), Duration(3, SECONDS)) must throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
 
@@ -142,10 +147,11 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(any[ProductDeleteCommand]) returns Future.failed(new Exception("bla"))
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
       Await.result(service.deleteOffer(offerId, offerVersion), Duration(3, SECONDS)) must throwA(new Exception("bla"))
       there was one (sphere).execute(any)
     }
@@ -162,10 +168,11 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(ProductByIdFetch.of(offerId.value)) returns Future.successful(Optional.of(product))
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
       service.getOfferById(offerId) must beEqualTo(Option(offer)).await
       there was one (sphere).execute(any)
     }
@@ -174,10 +181,11 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(ProductByIdFetch.of(offerId.value)) returns Future.successful(Optional.empty())
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
       service.getOfferById(offerId) must beEqualTo(Option.empty[Offer]).await
       there was one (sphere).execute(any)
     }
@@ -194,6 +202,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val es = mock[ElasticsearchClient]
       val sphere = mock[SphereClient]
       val productTypes = mock[ProductTypes]
+      val esCompletionService = mock[EsCompletionService]
 
       sphere.execute(any[ProductCreateCommand]) returns Future.successful(product)
       productTypes.offer returns ProductTypeBuilder.of("offer", ProductTypeDrafts.offer).build()
@@ -202,7 +211,7 @@ class OfferServiceSpec extends Specification with Mockito {
       val anyType: TypeName = any[String].asInstanceOf[TypeName]
       es.indexDocument(anyString, anyIndex, anyType, any[JsValue]) returns Future.successful(indexResponse)
 
-      val service = new OfferService(es, sphere, productTypes)
+      val service = new OfferService(es, sphere, productTypes, esCompletionService)
       service.updateOffer(offerId, offerVersion, offerDraft) must beEqualTo(offer).await
       there was two (sphere).execute(any)
       there was one (es).indexDocument(offerId.value, offerIndex, offerType, offerJsonWithCompletionTags)
