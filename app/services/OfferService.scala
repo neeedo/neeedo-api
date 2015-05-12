@@ -1,12 +1,10 @@
 package services
 
-import java.util.concurrent.CompletionException
 import java.util.Locale
 import com.github.slugify.Slugify
 import common.domain._
 import common.elasticsearch.{EsIndices, ElasticsearchClient}
 import common.exceptions.{SphereIndexFailed, ElasticSearchIndexFailed, ProductNotFound}
-import common.helper.Configloader
 import common.helper.ImplicitConversions._
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
