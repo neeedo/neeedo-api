@@ -1,8 +1,14 @@
 package services
 
-/**
- * Created by peter on 5/12/15.
- */
-class ImageService {
+import common.amazon.S3Client
+import common.domain.ImageHash
+
+import scala.reflect.io.File
+
+class ImageService(s3Client: AmazonS3Client) {
+
+  def uploadImage(image: File) = ???
+
+  def deleteImage(imageHash: ImageHash) = ???
 
 }

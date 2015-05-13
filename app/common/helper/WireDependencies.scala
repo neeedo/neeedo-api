@@ -1,5 +1,6 @@
 package common.helper
 
+import common.amazon.S3ClientFactory
 import common.elasticsearch.ElasticsearchClientFactory
 import common.sphere.{MockProductTypes, ProductTypes, SphereClientFactory, SphereProductTypes}
 import controllers._
@@ -13,6 +14,7 @@ trait WireDependencies {
   //Clients
   val sphereClient = SphereClientFactory()
   val elasticsearchClient = ElasticsearchClientFactory()
+  val s3Client = S3ClientFactory()
 
   // Services
   lazy val demandService = wire[DemandService]
@@ -22,6 +24,7 @@ trait WireDependencies {
   lazy val esCompletionService = wire[EsCompletionService]
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
+  lazy val imageService = wire[ImageService]
 
   // Controllers
   lazy val demandController = wire[Demands]
@@ -31,6 +34,7 @@ trait WireDependencies {
   lazy val completionController = wire[Completion]
   lazy val staticController = wire[Static]
   lazy val userController = wire[Users]
+  lazy val imagesController = wire[Images]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
