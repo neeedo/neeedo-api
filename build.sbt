@@ -24,11 +24,12 @@ excludeFilter in (Compile, unmanagedResources) := "es-data"
 unmanagedResourceDirectories in Test += baseDirectory.value / "test"
 
 libraryDependencies ++= Seq(
-  "org.elasticsearch" % "elasticsearch" % "latest.integration",
+  "org.elasticsearch" % "elasticsearch" % "1.5.0",
   "com.softwaremill.macwire" %% "macros" % "0.7.3",
   "com.softwaremill.macwire" %% "runtime" % "0.7.3",
   "io.sphere.sdk.jvm" % "sphere-models" % "1.0.0-M13",
   "io.sphere.sdk.jvm" %% "sphere-scala-client" % "1.0.0-M13",
+  "com.amazonaws" % "aws-java-sdk" % "1.9.6",
   cache
 )
 
