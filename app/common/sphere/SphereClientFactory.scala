@@ -1,9 +1,11 @@
 package common.sphere
 
-object SphereClientFactory {
+import common.helper.ConfigLoader
+
+class SphereClientFactory(configloader: ConfigLoader) {
   lazy val instance = getInstance
 
   def apply(): SphereClient = instance
 
-  def getInstance = RemoteSphereClient
+  def getInstance = new RemoteSphereClient(configloader)
 }

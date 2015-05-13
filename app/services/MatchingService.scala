@@ -2,20 +2,22 @@ package services
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
-import common.helper.Configloader
+import common.helper.ConfigLoader
+import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import common.sphere.{ProductTypes, SphereClient}
 import io.sphere.sdk.products.Product
 import io.sphere.sdk.products.queries.ProductQuery
 import io.sphere.sdk.queries.{PagedQueryResult, QueryDsl}
-import model.{Card, OfferId, Offer, Demand}
+import model.{Card, Demand, Offer, OfferId}
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.index.query._
+
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.collection.JavaConverters._
-import common.helper.ImplicitConversions.ActionListenableFutureConverter
 
-class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService, productTypes: ProductTypes) {
+class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
+                      productTypes: ProductTypes) {
 
   //TODO use from and size
   def matchDemand(from: From, pageSize: PageSize, demand: Demand): Future[MatchingResult] = {
@@ -47,7 +49,7 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
   }
 }
 
-class EsMatchingService(elasticsearch: ElasticsearchClient) {
+class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader) {
   def getShouldTagsQuery(shouldTags: Set[String]) : QueryBuilder = {
     if (shouldTags.isEmpty) new MatchAllQueryBuilder()
     else new TermsQueryBuilder("tags", shouldTags.asJava).minimumShouldMatch("10%")
@@ -73,8 +75,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient) {
   def buildQuery(card: Card, from: From, pageSize: PageSize): SearchRequestBuilder = {
     card match {
       case d: Demand =>
-        val indexName = IndexName(Configloader.getString("offer.typeName"))
-        val typeName = indexName.toTypeName
+        val indexName = config.offerIndex
         elasticsearch.client
           .prepareSearch(indexName.value)
           .setQuery(
@@ -85,8 +86,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient) {
           )
       case o: Offer =>
         //TODO match against offers
-        val indexName = IndexName(Configloader.getString("demand.typeName"))
-        val typeName = indexName.toTypeName
+        val indexName = config.demandIndex
         elasticsearch.client
           .prepareSearch(indexName.value)
           .setQuery(getShouldTagsQuery(o.tags))

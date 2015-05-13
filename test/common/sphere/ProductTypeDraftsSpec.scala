@@ -1,19 +1,23 @@
 package common.sphere
 
+import common.helper.ConfigLoader
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.DefaultCurrencyUnits
 import io.sphere.sdk.utils.MoneyImpl
 import org.specs2.mutable.Specification
-import test.TestData
+import play.api.Play
+import test.{TestApplications, TestData}
 import scala.collection.JavaConverters._
 
 class ProductTypeDraftsSpec  extends Specification {
 
   "buildDemandAttributes" should {
-    "return correct java.util.List<Attribute>" in {
+    "return correct java.util.List<Attribute>" in TestApplications.loggingOffApp() {
       val demandDraft = TestData.demandDraft
+      val configLoader = new ConfigLoader
+      val productTypeDrafts = new ProductTypeDrafts(configLoader)
 
-      ProductTypeDrafts.buildDemandAttributes(demandDraft) mustEqual List(
+      productTypeDrafts.buildDemandAttributes(demandDraft) mustEqual List(
         Attribute.of("userId", demandDraft.uid.value),
         Attribute.of("mustTags", demandDraft.mustTags.mkString(";")),
         Attribute.of("shouldTags", demandDraft.shouldTags.mkString(";")),
@@ -27,10 +31,12 @@ class ProductTypeDraftsSpec  extends Specification {
   }
 
   "buildOfferAttributes" should {
-    "return correct java.util.List<Attribute>" in {
+    "return correct java.util.List<Attribute>" in TestApplications.loggingOffApp() {
       val offerDraft = TestData.offerDraft
+      val configLoader = new ConfigLoader
+      val productTypeDrafts = new ProductTypeDrafts(configLoader)
 
-      ProductTypeDrafts.buildOfferAttributes(offerDraft) mustEqual List(
+      productTypeDrafts.buildOfferAttributes(offerDraft) mustEqual List(
         Attribute.of("userId", offerDraft.uid.value),
         Attribute.of("tags", offerDraft.tags.mkString(";")),
         Attribute.of("longitude", offerDraft.location.lon.value),

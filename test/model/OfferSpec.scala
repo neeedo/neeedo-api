@@ -2,19 +2,21 @@ package model
 
 import java.util.Locale
 
+import common.helper.ConfigLoader
 import common.sphere.ProductTypeDrafts
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.json.JsonException
-import io.sphere.sdk.models.{LocalizedStrings, DefaultCurrencyUnits}
-import io.sphere.sdk.products.{ProductBuilder, ProductDataBuilder, ProductCatalogDataBuilder, ProductVariantBuilder}
-import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
+import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
+import io.sphere.sdk.products.{ProductBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductVariantBuilder}
+import io.sphere.sdk.producttypes.{ProductType, ProductTypeBuilder}
 import io.sphere.sdk.utils.MoneyImpl
 import org.specs2.mutable.Specification
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.WithApplication
-import test.{TestData, TestApplications}
+import test.{TestApplications, TestData}
+
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success}
+import scala.util.Success
 
 
 class OfferSpec extends Specification {
@@ -37,9 +39,11 @@ class OfferSpec extends Specification {
     }
 
     "fromProduct must return valid Offer objects for offer products" in TestApplications.loggingOffApp() {
+      val configLoader = new ConfigLoader
+      val productTypeDrafts = new ProductTypeDrafts(configLoader)
       val validProductAttributeList = TestData.offerProductAttributeList
       val validProductVariant = ProductVariantBuilder.of(1).attributes(validProductAttributeList).build()
-      val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
+      val productType: ProductType = ProductTypeBuilder.of("id2", productTypeDrafts.offer).build()
       val validMasterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, validProductVariant).build()).build()
       val validProduct = ProductBuilder.of(productType, validMasterData).id(offerId.value).build()
 
@@ -47,6 +51,8 @@ class OfferSpec extends Specification {
     }
 
     "fromProduct must return failed try for invalid offer products" in TestApplications.loggingOffApp() {
+      val configLoader = new ConfigLoader
+      val productTypeDrafts = new ProductTypeDrafts(configLoader)
       val invalidProductAttributeList = List(
         Attribute.of("userId", offer.uid.value),
         Attribute.of("tags", offer.tags),
@@ -54,7 +60,7 @@ class OfferSpec extends Specification {
         Attribute.of("price", MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal, DefaultCurrencyUnits.EUR))
       ).asJava
       val invalidProductVariant = ProductVariantBuilder.of(1).attributes(invalidProductAttributeList).build()
-      val productType: ProductType = ProductTypeBuilder.of("id2", ProductTypeDrafts.offer).build()
+      val productType: ProductType = ProductTypeBuilder.of("id2", productTypeDrafts.offer).build()
       val invalidMasterData = ProductCatalogDataBuilder.ofStaged(ProductDataBuilder.of(productNameAndSlug, productNameAndSlug, invalidProductVariant).build()).build()
       val invalidProduct = ProductBuilder.of(productType, invalidMasterData).id(offerId.value).build()
 
