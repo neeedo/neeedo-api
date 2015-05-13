@@ -1,11 +1,12 @@
 package common.amazon
 
-object S3ClientFactory {
+import common.helper.ConfigLoader
 
+class S3ClientFactory(configloader: ConfigLoader) {
   lazy val instance = getInstance
 
   def apply(): S3Client = instance
 
-  private def getInstance = RemoteS3Client
+  def getInstance = new RemoteS3Client(configloader)
 
 }
