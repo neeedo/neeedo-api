@@ -1,26 +1,20 @@
 package services
 
-import java.util.UUID
-
 import common.amazon.S3Client
+import common.domain.FileHash
 import java.io.File
 import scala.concurrent.ExecutionContext.Implicits.global
-
-
 import scala.concurrent.Future
 
 class UploadService(s3Client: S3Client) {
 
   def uploadFile(file: File): Future[String] = {
-    val fileHash = createFileHash(file)
-    s3Client.putObject(fileHash, file).map(_ => fileHash)
+    val fileHash = FileHash(file)
+    s3Client.putObject(fileHash.value, file).map(_ => fileHash.value)
   }
 
-  def deleteFile(fileHash: String) = {
-    s3Client.deleteObject(fileHash)
+  def deleteFile(fileHash: FileHash) = {
+    s3Client.deleteObject(fileHash.value)
   }
-
-  // Todo dummy method, implement and move elsewhere
-  def createFileHash(file: File): String = UUID.randomUUID.toString
 
 }
