@@ -25,8 +25,7 @@ trait OfferImplicits {
           Longitude(lon),
           Latitude(lat)
         ),
-        Price(price),
-        List.empty
+        Price(price)
       )
   }
 

@@ -6,7 +6,7 @@ import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.SecuredAction
 import model.OfferId
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import services.OfferService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -55,19 +55,19 @@ class Offers(service: OfferService) extends Controller {
       }
   }
 
-  def addImageToOffer(id: OfferId) = SecuredAction.async { implicit request =>
-    val image = bindRequestJsonBody(request.body)(Image.imageReads)
-
-    image match {
-      case Success(img) =>
-        service.addImageToOffer(id, img) map {
-          offer => Created(Json.obj("offer" -> Json.toJson(offer)))
-        } recover {
-          case e: Exception => e.asResult
-        }
-
-      case Failure(e) => Future(e.asResult)
-    }
-  }
+//  def addImageToOffer(id: OfferId) = SecuredAction.async { implicit request =>
+//    val image = bindRequestJsonBody(request.body)(Image.imageReads)
+//
+//    image match {
+//      case Success(img) =>
+//        service.addImageToOffer(id, img) map {
+//          offer => Created(Json.obj("offer" -> Json.toJson(offer)))
+//        } recover {
+//          case e: Exception => e.asResult
+//        }
+//
+//      case Failure(e) => Future(e.asResult)
+//    }
+//  }
 
  }

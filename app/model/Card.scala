@@ -42,7 +42,7 @@ object Demand extends ModelUtils with DemandImplicits {
 
 
 case class Offer(id: OfferId, version: Version, uid: UserId, tags: Set[String],
-                 location: Location, price: Price, images: List[Image]) extends Card
+                 location: Location, price: Price) extends Card
 
 object Offer extends ModelUtils with OfferImplicits {
 
@@ -58,8 +58,7 @@ object Offer extends ModelUtils with OfferImplicits {
           Longitude(readDoubleAttribute(variant, "longitude")),
           Latitude(readDoubleAttribute(variant, "latitude"))
         ),
-        Price(readMoneyAttribute(variant, "price").getNumber.doubleValue()),
-        readImages(variant)
+        Price(readMoneyAttribute(variant, "price").getNumber.doubleValue())
       )
     }
   }

@@ -33,7 +33,7 @@ trait WireDependencies {
   lazy val esCompletionService = wire[EsCompletionService]
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
-  lazy val imageService = wire[ImageService]
+  lazy val uploadService = wire[UploadService]
 
   // Controllers
   lazy val demandController = wire[Demands]
