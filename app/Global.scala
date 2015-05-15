@@ -3,12 +3,11 @@ import java.util.concurrent.TimeUnit
 import common.elasticsearch.ElasticsearchClientFactory
 import common.helper.{Wirehelper, CrossOriginFilter}
 import common.logger.MigrationsLogger
-import migrations.{CompletionsEsMigrations, ProductTypeEsMigrations, ProductTestDataMigrations, ProductTypeMigrations}
+import migrations._
 import play.api._
-import com.softwaremill.macwire.{MacwireMacros, Macwire}
+import com.softwaremill.macwire.Macwire
 import play.api.mvc.WithFilters
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 
 object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Macwire  {

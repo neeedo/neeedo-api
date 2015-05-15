@@ -52,6 +52,13 @@ class OffersSpec extends Specification with Mockito {
       AnyContentAsEmpty,
       secure = true)
 
+    val emptyBodyGetFakeRequest = new FakeRequest[AnyContent](
+      Helpers.GET,
+      "offer/1",
+      FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
+      AnyContentAsEmpty,
+      secure = true)
+
     "offer controller must return 401 for wrong user credentials in secured actions" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new Offers(offerService)
@@ -144,7 +151,7 @@ class OffersSpec extends Specification with Mockito {
       val offer = TestData.offer
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option(offer))
 
-      val res: Future[Result] = ctrl.getOffer(OfferId("1"))(FakeRequest())
+      val res: Future[Result] = ctrl.getOffer(OfferId("1"))(emptyBodyGetFakeRequest)
 
       Helpers.status(res) must equalTo(200)
       Helpers.contentAsString(res) must equalTo(Json.obj("offer" -> Json.toJson(offer)).toString())
@@ -155,7 +162,7 @@ class OffersSpec extends Specification with Mockito {
       val ctrl = new Offers(offerService)
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option.empty[Offer])
 
-      val res: Future[Result] = ctrl.getOffer(OfferId("1"))(FakeRequest())
+      val res: Future[Result] = ctrl.getOffer(OfferId("1"))(emptyBodyGetFakeRequest)
 
       Helpers.status(res) must equalTo(404)
       Helpers.contentAsString(res) must equalTo(Json.obj("error" -> "Offer not found").toString())

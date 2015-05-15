@@ -4,7 +4,7 @@ import common.amazon.S3ClientFactory
 import common.elasticsearch.ElasticsearchClientFactory
 import common.sphere._
 import controllers._
-import migrations.{CompletionsEsMigrations, ProductTestDataMigrations, ProductTypeEsMigrations, ProductTypeMigrations}
+import migrations._
 import play.api.{Mode, Play}
 import services._
 
@@ -50,4 +50,5 @@ trait WireDependencies {
   lazy val productTypeEsMigration = wire[ProductTypeEsMigrations]
   lazy val completionsEsMigration = wire[CompletionsEsMigrations]
   lazy val productTestDataMigration = wire[ProductTestDataMigrations]
+  lazy val amazons3Migration = wire[AmazonS3Migrations]
 }
