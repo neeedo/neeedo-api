@@ -18,8 +18,11 @@ import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
 import io.sphere.sdk.products.{Product, ProductDraftBuilder, ProductUpdateScope, ProductVariantDraftBuilder}
 import io.sphere.sdk.queries.{PagedQueryResult, QueryParameter}
 import model.{Offer, OfferId}
+import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{Reads, JsObject, Json}
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.util.{Try, Failure, Random, Success}
@@ -69,15 +72,7 @@ class OfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDra
   }
 
   def getOffersByUserId(id: UserId): Future[List[Offer]] = {
-    val query = ProductQuery.of().byProductType(productTypes.offer)
-      .withAdditionalQueryParameters(List(QueryParameter.of("userId", id.value)).asJava)
-
-
-    sphereClient.execute(query) map { res: PagedQueryResult[Product] =>
-      res.getResults.asScala.toList map { p: Product =>
-        Offer.fromProduct(p).get
-      }
-    }
+    esOfferService.getOffersByUserId(id)
   }
 
   def updateOffer(id: OfferId, version: Version, draft: OfferDraft): Future[Offer] = {
@@ -123,6 +118,19 @@ class OfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDra
 }
 
 class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
+
+  def getOffersByUserId(id: UserId): Future[List[Offer]] = {
+    elasticsearch.client
+      .prepareSearch(config.offerIndex.value)
+      .setQuery(QueryBuilders.termQuery("userId", id.value))
+      .addSort("_timestamp", SortOrder.DESC)
+      .execute()
+      .asScala
+      .map {
+        response => elasticsearch.searchresponseAs[Offer](response)
+      }
+  }
+
   def writeOfferToEs(offer: Offer): Future[Offer] = {
     def throwAndReportElasticSearchIndexFailed = {
       OfferLogger.error(s"Offer: ${Json.toJson(offer)} could not be saved in Elasticsearch")
@@ -165,8 +173,4 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
       case e: Exception => throwAndLogElasticSearchDeleteFailed
     }
   }
-
-//  def getOffersByUserId(id: UserId): Future[List[Offer]] = {
-//    elasticsearch.client
-//  }
 }

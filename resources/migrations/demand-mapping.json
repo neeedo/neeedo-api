@@ -1,4 +1,8 @@
 {
+  "_timestamp" : {
+    "enabled" : true,
+    "store" : true
+  },
   "properties": {
     "distance": {
       "type": "long"
