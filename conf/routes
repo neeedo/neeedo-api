@@ -6,8 +6,6 @@
 GET            /                            @controllers.Documentation.showDocumentation()
 GET            /status                      @controllers.Static.status()
 
-POST           /upload                      @controllers.Images.upload()
-
 # Demands
 GET            /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
 POST           /demands                     @controllers.Demands.createDemand()
@@ -38,6 +36,9 @@ GET            /users/mail/:mail            @controllers.Users.getUserByMail(mai
 POST           /users                       @controllers.Users.createUser()
 PUT            /users/:id/:version          @controllers.Users.updateUser(id: common.domain.UserId, version: common.domain.Version)
 DELETE         /users/:id/:version          @controllers.Users.deleteUser(id: common.domain.UserId, version: common.domain.Version)
+
+# Images
+POST           /images                      @controllers.Images.upload()
 
 # Stub Demands
 # GET            /stub/demands                @controllers.DemandsStub.listDemands()
