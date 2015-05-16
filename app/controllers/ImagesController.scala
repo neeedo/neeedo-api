@@ -7,7 +7,7 @@ import play.api.mvc.Controller
 import scala.concurrent.ExecutionContext.Implicits.global
 import services.UploadService
 
-class Images(uploadService: UploadService) extends Controller {
+class ImagesController(uploadService: UploadService) extends Controller {
 
   def upload = SecuredAction.async(parse.temporaryFile) { request =>
     uploadService.uploadFile(request.body.file) map {

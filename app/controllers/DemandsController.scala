@@ -9,7 +9,7 @@ import services.DemandService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class Demands(service: DemandService) extends Controller {
+class DemandsController(service: DemandService) extends Controller {
 
   def createDemand = SecuredAction.async {
     implicit request => request.body.asJson match {

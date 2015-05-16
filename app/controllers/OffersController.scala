@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class Offers(service: OfferService) extends Controller {
+class OffersController(service: OfferService) extends Controller {
 
   def createOffer = SecuredAction.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request.body)(OfferDraft.offerDraftReads)

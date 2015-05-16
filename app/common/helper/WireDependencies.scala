@@ -34,14 +34,13 @@ trait WireDependencies {
   lazy val uploadService = wire[UploadService]
 
   // Controllers
-  lazy val demandController = wire[Demands]
-  lazy val offerController = wire[Offers]
-  lazy val documentationController = wire[Documentation]
-  lazy val matchingController = wire[Matching]
-  lazy val completionController = wire[Completion]
-  lazy val staticController = wire[Static]
-  lazy val userController = wire[Users]
-  lazy val imagesController = wire[Images]
+  lazy val demandController = wire[DemandsController]
+  lazy val offerController = wire[OffersController]
+  lazy val matchingController = wire[MatchingController]
+  lazy val completionController = wire[CompletionController]
+  lazy val staticController = wire[StaticController]
+  lazy val userController = wire[UsersController]
+  lazy val imagesController = wire[ImagesController]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
