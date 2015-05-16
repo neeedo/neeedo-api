@@ -3,8 +3,9 @@
 # ~~~~
 
 # Home page
-GET            /                            @controllers.Documentation.showDocumentation()
+GET            /                            @controllers.Static.status()
 GET            /status                      @controllers.Static.status()
+GET            /doc                         @controllers.Documentation.showDocumentation()
 
 # Demands
 GET            /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
