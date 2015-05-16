@@ -1,5 +1,6 @@
 package services
 
+import java.util
 import java.util.Locale
 
 import com.github.slugify.Slugify
@@ -13,14 +14,15 @@ import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.models.{LocalizedStrings, Versioned}
 import io.sphere.sdk.products.commands.updateactions.AddExternalImage
 import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand, ProductUpdateCommand}
-import io.sphere.sdk.products.queries.ProductByIdFetch
+import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
 import io.sphere.sdk.products.{Product, ProductDraftBuilder, ProductUpdateScope, ProductVariantDraftBuilder}
+import io.sphere.sdk.queries.{PagedQueryResult, QueryParameter}
 import model.{Offer, OfferId}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsObject, Json}
-
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
-import scala.util.{Failure, Random, Success}
+import scala.util.{Try, Failure, Random, Success}
 
 class OfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts,
                    productTypes: ProductTypes, esOfferService: EsOfferService) {
@@ -63,6 +65,18 @@ class OfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDra
     futureProductOption.map {
       case Some(product) => Offer.fromProduct(product).toOption
       case None => None
+    }
+  }
+
+  def getOffersByUserId(id: UserId): Future[List[Offer]] = {
+    val query = ProductQuery.of().byProductType(productTypes.offer)
+      .withAdditionalQueryParameters(List(QueryParameter.of("userId", id.value)).asJava)
+
+
+    sphereClient.execute(query) map { res: PagedQueryResult[Product] =>
+      res.getResults.asScala.toList map { p: Product =>
+        Offer.fromProduct(p).get
+      }
     }
   }
 
@@ -151,4 +165,8 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
       case e: Exception => throwAndLogElasticSearchDeleteFailed
     }
   }
+
+//  def getOffersByUserId(id: UserId): Future[List[Offer]] = {
+//    elasticsearch.client
+//  }
 }

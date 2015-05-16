@@ -16,6 +16,7 @@ OPTIONS        /demands                     @controllers.Static.deliverCorsHeade
 
 # Offers
 GET            /offers/:id                  @controllers.Offers.getOffer(id: model.OfferId)
+GET            /offers/users/:id            @controllers.Offers.getOffersByUserId(id: common.domain.UserId)
 POST           /offers                      @controllers.Offers.createOffer()
 POST           /offers/images/:id           @controllers.Offers.addImageToOffer(id: model.OfferId)
 PUT            /offers/:id/:version         @controllers.Offers.updateOffer(id: model.OfferId, version: common.domain.Version)

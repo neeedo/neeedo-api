@@ -4,7 +4,7 @@ import common.domain._
 import common.helper.ControllerUtils._
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.SecuredAction
-import model.OfferId
+import model.{Offer, OfferId}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import services.OfferService
@@ -31,6 +31,15 @@ class Offers(service: OfferService) extends Controller {
     service.getOfferById(id).map {
       case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
       case None => NotFound(Json.obj("error" -> "Offer not found"))
+    }
+  }
+
+  def getOffersByUserId(id: UserId) = SecuredAction.async {
+    service.getOffersByUserId(id).map { offers: List[Offer] =>
+      Ok(Json.obj("offers" -> Json.toJson(offers)))
+    } recover {
+      // Todo refine exception handling
+      case e: Exception => NotFound(Json.obj("error" -> "User not found"))
     }
   }
 
