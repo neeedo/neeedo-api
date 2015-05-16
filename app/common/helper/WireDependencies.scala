@@ -1,11 +1,13 @@
 package common.helper
 import common.amazon.S3ClientFactory
-import common.elasticsearch.{ElasticsearchClient, LocalEsClient, ElasticsearchClientFactory}
+import common.elasticsearch.{ElasticsearchClient, ElasticsearchClientFactory}
 import common.sphere._
 import controllers._
 import migrations._
 import play.api.{Mode, Play}
 import services._
+import services.es.EsOfferService
+import services.sphere.SphereOfferService
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
@@ -25,13 +27,16 @@ trait WireDependencies {
   // Services
   lazy val demandService = wire[DemandService]
   lazy val offerService = wire[OfferService]
-  lazy val esOfferService = wire[EsOfferService]
-  lazy val esMatchingService = wire[EsMatchingService]
   lazy val matchingService = wire[MatchingService]
-  lazy val esCompletionService = wire[EsCompletionService]
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
   lazy val uploadService = wire[UploadService]
+  //// Elasticsearch
+  lazy val esOfferService = wire[EsOfferService]
+  lazy val esMatchingService = wire[EsMatchingService]
+  lazy val esCompletionService = wire[EsCompletionService]
+  //// Sphere
+  lazy val sphereOfferService = wire[SphereOfferService]
 
   // Controllers
   lazy val demandController = wire[DemandsController]

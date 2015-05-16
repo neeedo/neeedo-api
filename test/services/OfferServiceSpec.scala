@@ -16,6 +16,8 @@ import model.{OfferId, Offer}
 import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
+import services.es.EsOfferService
+import services.offers.EsOfferService
 import test.{TestApplications, TestData}
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._

@@ -15,7 +15,9 @@ import io.sphere.sdk.queries.PagedQueryResult
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Play
-import services.{EsOfferService, OfferService, DemandService}
+import services.es.EsOfferService
+import services.offers.EsOfferService
+import services.{OfferService, DemandService}
 import test.{TestData, TestApplications}
 import scala.collection.JavaConverters._
 
