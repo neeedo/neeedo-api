@@ -88,24 +88,24 @@ class OfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDra
   def getProductById(id: OfferId): Future[Option[Product]] =
     sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
 
-//  def addImageToOffer(id: OfferId, img: Image): Future[Offer] = {
-//    getProductById(id) flatMap {
-//      case Some(product) =>
-//        sphereClient.execute(buildAddImageCommand(product, img)) map Offer.fromProduct map {
-//          case Success(offer) => offer
-//          case Failure(e) => throw new IllegalArgumentException(s"Product with id: ${id.value} is no valid offer")
-//        }
-//      case None => throw new ProductNotFound(s"No product with id: ${id.value} found")
-//    }
-//  }
-//
-//  def buildAddImageCommand(product: Product, image: Image) = {
-//    val sphereImage = Image.toSphereImage(image)
-//    val variantId = product.getMasterData.getStaged.getMasterVariant.getId
-//    val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
-//
-//    ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
-//  }
+  def addImageToOffer(id: OfferId, img: ExternalImage): Future[Offer] = {
+    getProductById(id) flatMap {
+      case Some(product) =>
+        sphereClient.execute(buildAddImageCommand(product, img)) map Offer.fromProduct map {
+          case Success(offer) => offer
+          case Failure(e) => throw new IllegalArgumentException(s"Product with id: ${id.value} is no valid offer")
+        }
+      case None => throw new ProductNotFound(s"No product with id: ${id.value} found")
+    }
+  }
+
+  def buildAddImageCommand(product: Product, image: ExternalImage) = {
+    val sphereImage = ExternalImage.toSphereImage(image)
+    val variantId = product.getMasterData.getStaged.getMasterVariant.getId
+    val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
+
+    ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
+  }
 }
 
 class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {

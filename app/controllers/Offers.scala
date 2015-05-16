@@ -55,19 +55,19 @@ class Offers(service: OfferService) extends Controller {
       }
   }
 
-//  def addImageToOffer(id: OfferId) = SecuredAction.async { implicit request =>
-//    val image = bindRequestJsonBody(request.body)(Image.imageReads)
-//
-//    image match {
-//      case Success(img) =>
-//        service.addImageToOffer(id, img) map {
-//          offer => Created(Json.obj("offer" -> Json.toJson(offer)))
-//        } recover {
-//          case e: Exception => e.asResult
-//        }
-//
-//      case Failure(e) => Future(e.asResult)
-//    }
-//  }
+  def addImageToOffer(id: OfferId) = SecuredAction.async { implicit request =>
+    val image = bindRequestJsonBody(request.body)(ExternalImage.imageReads)
+
+    image match {
+      case Success(img) =>
+        service.addImageToOffer(id, img) map {
+          offer => Created(Json.obj("offer" -> Json.toJson(offer)))
+        } recover {
+          case e: Exception => e.asResult
+        }
+
+      case Failure(e) => Future(e.asResult)
+    }
+  }
 
  }
