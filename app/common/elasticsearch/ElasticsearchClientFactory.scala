@@ -7,8 +7,6 @@ import play.api.{Mode, Play}
 class ElasticsearchClientFactory(configloader: ConfigLoader) {
   lazy val instance = getInstance
 
-  def apply(): ElasticsearchClient = instance
-
   def returnClientForMode(mode: Mode) = mode match {
     case Mode.Dev =>
       val useRemoteClient = configloader.getBoolean("elasticsearch.dev.useRemoteClient")

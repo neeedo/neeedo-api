@@ -1,7 +1,6 @@
 package common.helper
-
 import common.amazon.S3ClientFactory
-import common.elasticsearch.ElasticsearchClientFactory
+import common.elasticsearch.{ElasticsearchClient, LocalEsClient, ElasticsearchClientFactory}
 import common.sphere._
 import controllers._
 import migrations._
@@ -11,18 +10,17 @@ import services._
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
 
-  //Configloader
   val configLoader = wire[ConfigLoader]
   lazy val productTypeDrafts = wire[ProductTypeDrafts]
   lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) MockProductTypes else wire[SphereProductTypes]
 
   // Factories
-  val esFactory = wire[ElasticsearchClientFactory]
+  val esFactory: ElasticsearchClientFactory = wire[ElasticsearchClientFactory]
 
   //Clients
   val s3Client = wire[S3ClientFactory].instance
   val sphereClient = wire[SphereClientFactory].instance
-  val elasticsearchClient = wire[ElasticsearchClientFactory].instance
+  val elasticsearchClient: ElasticsearchClient = esFactory.instance
 
   // Services
   lazy val demandService = wire[DemandService]

@@ -1,7 +1,7 @@
 package services
 
+import common.Global
 import common.domain._
-import common.helper.Wirehelper
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
 import io.sphere.sdk.customers.queries.CustomerQuery
@@ -77,5 +77,5 @@ class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
 
 object UserService {
   def authorizeUser(userCredentials: UserCredentials): Future[Boolean] =
-    Wirehelper.wired.lookupSingleOrThrow(classOf[UserService]).authorizeUser(userCredentials)
+    Global.wired.lookupSingleOrThrow(classOf[UserService]).authorizeUser(userCredentials)
 }
