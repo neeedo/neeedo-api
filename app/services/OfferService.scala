@@ -11,10 +11,10 @@ import scala.concurrent.Future
 class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOfferService) {
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
-    sphereOfferService.writeOfferToSphere(draft).flatMap {
-      offer => esOfferService.writeOfferToEs(offer).recoverWith {
+    sphereOfferService.createOffer(draft).flatMap {
+      offer => esOfferService.createOffer(offer).recoverWith {
         case e: Exception =>
-          deleteOffer(offer.id, offer.version)
+          sphereOfferService.deleteOffer(offer.id, offer.version)
           throw e
       }
     }
@@ -35,10 +35,9 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
   }
 
   def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
-    esOfferService.deleteOfferFromElasticsearch(id).flatMap {
+    esOfferService.deleteOffer(id).flatMap {
       offerId => sphereOfferService.deleteOffer(offerId, version)
     } recover {
-      // TODO Log and Throw
       case e: Exception => throw e
     }
   }

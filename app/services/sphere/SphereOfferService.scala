@@ -11,7 +11,7 @@ import io.sphere.sdk.models.{Versioned, LocalizedStrings}
 import io.sphere.sdk.products.commands.updateactions.AddExternalImage
 import io.sphere.sdk.products.commands.{ProductUpdateCommand, ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.products.queries.ProductByIdFetch
-import io.sphere.sdk.products.{ProductUpdateScope, Product, ProductDraftBuilder, ProductVariantDraftBuilder}
+import io.sphere.sdk.products._
 import model.{OfferId, Offer}
 import play.api.libs.json.Json
 import scala.concurrent.Future
@@ -29,25 +29,28 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     }
   }
 
-  def writeOfferToSphere(draft: OfferDraft): Future[Offer] = {
-    def throwAndReportSphereIndexFailed = {
-      OfferLogger.error(s"Offer: ${Json.toJson(draft)} could not be saved in Sphere")
+  def createOffer(draft: OfferDraft): Future[Offer] = {
+    def throwAndReportSphereIndexFailed(e: Exception) = {
+      OfferLogger.error(s"Offer: ${Json.toJson(draft)} could not be saved in Sphere. " +
+        s"Exception: ${e.getMessage}")
       throw new SphereIndexFailed("Error while saving offer in sphere")
     }
 
-    val name = OfferDraft.generateName(draft) + " " + Random.nextInt(1000)
-    val productName = LocalizedStrings.of(Locale.ENGLISH, name)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
-    val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(productTypeDrafts.buildOfferAttributes(draft))
-      .build()
+    def buildProductDraft  = {
+      val name = OfferDraft.generateName(draft) + " " + Random.nextInt(1000)
+      val productName = LocalizedStrings.of(Locale.ENGLISH, name)
+      val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
+      val productVariant = ProductVariantDraftBuilder.of()
+        .attributes(productTypeDrafts.buildOfferAttributes(draft))
+        .build()
 
-    val productDraft = ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()
+      ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()
+    }
 
-    sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
+    sphereClient.execute(ProductCreateCommand.of(buildProductDraft)).map {
       product => Offer.fromProduct(product).get
     } recover {
-      case e: Exception => throwAndReportSphereIndexFailed
+      case e: Exception => throwAndReportSphereIndexFailed(e)
     }
   }
 

@@ -36,7 +36,7 @@ class CompletionService(esCompletionService: EsCompletionService) {
   }
 
   def writeCompletions(tags: List[CompletionTag]) = {
-    esCompletionService.writeCompletionsToEs(tags)
+    esCompletionService.upsertCompletions(tags)
   }
 }
 
@@ -60,7 +60,7 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient, config: Conf
     getCompletionsFromSuggestResponse(response) map(CompletionTagResult(_))
   }
 
-  def writeCompletionsToEs(tags: List[CompletionTag]): Future[List[UpdateResponse]] = {
+  def upsertCompletions(tags: List[CompletionTag]): Future[List[UpdateResponse]] = {
     def buildTagCompletionJson(tag: CompletionTag) = {
       Json.obj(
         "tag" -> Json.obj(

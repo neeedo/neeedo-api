@@ -3,7 +3,7 @@ package test
 import play.api.test.{FakeApplication, WithApplication}
 
 object TestApplications {
-  def loggingOffApp(additionalConfig: Map[String,  _ <: Any] = Map.empty) =
+  def loggingOffApp(additionalConfig: Map[String,  _ <: Any] = Map.empty): WithApplication =
     new WithApplication(
       FakeApplication(
         additionalConfiguration = Map(

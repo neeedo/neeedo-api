@@ -10,7 +10,7 @@ import scala.concurrent.Future
 
 class ProductTypeEsMigrations(elasticsearch: ElasticsearchClient, config: ConfigLoader) extends Migration {
   override def run(): Future[Unit] = {
-    MigrationsLogger.info("# ProductType Elasticsearch Index Migrations started")
+    MigrationsLogger.info("# Productty Elasticsearch Index Migrations started")
 
     val demandIndex: IndexName = config.demandIndex
     val offerIndex: IndexName = config.offerIndex
