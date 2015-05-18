@@ -7,7 +7,7 @@ import common.sphere.SphereClient
 import io.sphere.sdk.products.queries.ProductQuery
 import io.sphere.sdk.queries.PagedQueryResult
 import io.sphere.sdk.products.Product
-import services.{DemandService, OfferService}
+import services.{OfferService, DemandService}
 import scala.concurrent.Future
 import common.helper.ImplicitConversions.OptionConverter
 import scala.concurrent.ExecutionContext.Implicits.global

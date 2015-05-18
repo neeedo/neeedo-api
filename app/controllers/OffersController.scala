@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class Offers(service: OfferService) extends Controller {
+class OffersController(service: OfferService) extends Controller {
 
   def createOffer = SecuredAction.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request.body)(OfferDraft.offerDraftReads)
@@ -38,8 +38,7 @@ class Offers(service: OfferService) extends Controller {
     service.getOffersByUserId(id).map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {
-      // Todo refine exception handling
-      case e: Exception => NotFound(Json.obj("error" -> "User not found"))
+      case e: Exception => e.asResult
     }
   }
 

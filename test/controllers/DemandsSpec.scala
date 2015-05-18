@@ -62,7 +62,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "demand controller must return 401 for wrong user credentials in secured actions" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
 
       val create: Future[Result] = ctrl.createDemand()(emptyBodyRequestWithWrongCredentials)
       val delete: Future[Result] = ctrl.deleteDemand(DemandId("1"), Version(1L))(emptyBodyRequestWithWrongCredentials)
@@ -75,7 +75,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "demand controller must return 301 for non https request in secured actions" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
 
       val create: Future[Result] = ctrl.createDemand()(emptyBodyRequestWithoutSsl)
       val delete: Future[Result] = ctrl.deleteDemand(DemandId("1"), Version(1L))(emptyBodyRequestWithoutSsl)
@@ -88,7 +88,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "createDemand must return 400 missing body for post requests without body" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       val res: Future[Result] = ctrl.createDemand()(emptyBodyCreateFakeRequest)
 
       Helpers.status(res) must equalTo(400)
@@ -98,7 +98,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "createDemand must return 400 cannot parse json for post requests with invalid demanddraft" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       val demandDraftJson = Json.parse("""{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212},"distance":30,"price":{"min":25.0,"max":77.0}}""")
       val fakeRequest = emptyBodyCreateFakeRequest
         .withJsonBody(demandDraftJson)
@@ -110,7 +110,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "createDemand must return 400 unknown error when dermandService returns empty option" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.createDemand(demandDraft) returns Future.successful(Option.empty)
       val fakeRequest = emptyBodyCreateFakeRequest
         .withJsonBody(demandDraftJson)
@@ -122,7 +122,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "createDemand must return 200 when dermandService returns demand" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.createDemand(demandDraft) returns Future.successful(Option(demand))
 
       val fakeRequest = emptyBodyCreateFakeRequest
@@ -135,7 +135,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "getDemand must return 200 and the demand json for a valid id" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.getDemandById(demandId) returns Future.successful(Option(demand))
 
       val res: Future[Result] = ctrl.getDemand(demandId)(FakeRequest())
@@ -146,7 +146,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "getDemand must return 404 and error json for a invalid id" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.getDemandById(demandId) returns Future.successful(Option.empty[Demand])
 
       val res: Future[Result] = ctrl.getDemand(demandId)(FakeRequest())
@@ -157,7 +157,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "deleteDemand must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.deleteDemand(demandId, demandVersion) returns Future.successful(Option(demand))
 
       val res: Future[Result] = ctrl.deleteDemand(demandId, demandVersion)(emptyBodyDeleteFakeRequest)
@@ -167,7 +167,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "deleteDemand must return 404 for an invalid id or version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.deleteDemand(demandId, demandVersion) returns Future.successful(Option.empty[Demand])
 
       val res: Future[Result] = ctrl.deleteDemand(demandId, demandVersion)(emptyBodyDeleteFakeRequest)
@@ -177,7 +177,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "updateDemand must return 400 missing body for put requests without body" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(emptyBodyCreateFakeRequest)
 
       Helpers.status(res) must equalTo(400)
@@ -187,7 +187,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "updateDemands must return 400 cannot parse json for put requests with invalid demand draft" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       val demandDraftJson = Json.parse("""{"userId":"1","tags":"socken bekleidung wolle","location":{"lat":13.534212},"distance":30,"price":{"min":25.0,"max":77.0}}""")
       val fakeRequest = emptyBodyUpdateFakeRequest
         .withJsonBody(demandDraftJson)
@@ -199,7 +199,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "updateDemands must return 400 unknown error when dermandService returns empty option" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.successful(Option.empty)
       val fakeRequest = emptyBodyUpdateFakeRequest
         .withJsonBody(demandDraftJson)
@@ -211,7 +211,7 @@ class DemandsSpec extends Specification with Mockito {
 
     "updateDemands must return 200 when dermandService returns demand" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
-      val ctrl = new Demands(demandService)
+      val ctrl = new DemandsController(demandService)
       demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.successful(Option(demand))
 
       val fakeRequest = emptyBodyUpdateFakeRequest

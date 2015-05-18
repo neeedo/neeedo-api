@@ -9,7 +9,7 @@ class StaticControllerSpec extends Specification {
 
   "deliverCorsHeaders" should {
     "deliver correct headers" in {
-      val controller = new Static
+      val controller = new StaticController
       val result = CrossOriginFilter.apply(controller.deliverCorsHeaders())(FakeRequest("OPTIONS", "/demands")).run
 
       Helpers.status(result) must equalTo(200)

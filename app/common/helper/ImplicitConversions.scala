@@ -1,6 +1,6 @@
 package common.helper
 
-import common.exceptions.{ElasticSearchQueryFailed, ElasticSearchIndexFailed, ProductNotFound}
+import common.exceptions.{SphereIndexFailed, ElasticSearchQueryFailed, ElasticSearchIndexFailed, ProductNotFound}
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 import play.api.libs.json.Json
 import play.api.mvc.Result
@@ -20,6 +20,7 @@ object ImplicitConversions {
   implicit class ExceptionToResultConverter(x: Throwable) {
     def asResult: Result = {
       x match {
+        case e: SphereIndexFailed => InternalServerError(errorJson(x.getMessage))
         case e: ProductNotFound => NotFound(errorJson(x.getMessage))
         case e: ElasticSearchIndexFailed => InternalServerError(errorJson(x.getMessage))
         case e: ElasticSearchQueryFailed => InternalServerError(errorJson(x.getMessage))

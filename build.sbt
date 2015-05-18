@@ -41,3 +41,5 @@ initialize := {
       sys.error("Java 8 is required for this project.")
     }
 }
+
+javaOptions in Test +="-Dlogger.resource=test-logger.xml"

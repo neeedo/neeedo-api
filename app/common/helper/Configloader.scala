@@ -2,13 +2,11 @@ package common.helper
 
 import common.domain.IndexName
 import common.exceptions.InvalidConfiguration
-import play.api.Play
+import play.api.{Configuration}
 
 import scala.util.{Failure, Success, Try}
 
-class ConfigLoader {
-  private val config = Play.current.configuration
-
+class ConfigLoader(config: Configuration) {
   def getStringSeq(key: String): List[String] = getStringSeq(key, ",")
   def getStringSeq(key: String, delimiter: String): List[String] = config
       .getString(key)
@@ -34,9 +32,9 @@ class ConfigLoader {
     }
   }
 
-  val demandIndex = readIndexFromConfig("demand.typeName")
-  val offerIndex = readIndexFromConfig("offer.typeName")
-  val completionsIndex = readIndexFromConfig("completionsIndexName")
+  lazy val demandIndex = readIndexFromConfig("demand.typeName")
+  lazy val offerIndex = readIndexFromConfig("offer.typeName")
+  lazy val completionsIndex = readIndexFromConfig("completionsIndexName")
 
   def throwIllegalConfigException(key: String): Nothing = {
     throw new InvalidConfiguration(s"Missing Config Key: '$key'! " +

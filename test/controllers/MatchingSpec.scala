@@ -27,7 +27,7 @@ class MatchingSpec extends Specification with Mockito {
 
     "return 400 for POST request with missing body" in TestApplications.loggingOffApp() {
       val matchingService = mock[MatchingService]
-      val ctrl = new Matching(matchingService)
+      val ctrl = new MatchingController(matchingService)
       val fakeRequest = emptyBodyFakeRequest.withHeaders(("Content-Type","application/json"))
       val res: Future[Result] = ctrl.matchDemand(From(0), PageSize(0))(fakeRequest)
 
@@ -37,7 +37,7 @@ class MatchingSpec extends Specification with Mockito {
 
     "return 400 for POST request with invalid Demand Json" in TestApplications.loggingOffApp() {
       val matchingService = mock[MatchingService]
-      val ctrl = new Matching(matchingService)
+      val ctrl = new MatchingController(matchingService)
       val demandJson = Json.parse("""{"userId":"1","tags":"socken bekleidung wolle"}""")
       val fakeRequest = emptyBodyFakeRequest
         .withHeaders(("Content-Type","application/json"))
@@ -56,7 +56,7 @@ class MatchingSpec extends Specification with Mockito {
       matchingService.matchDemand(from, pageSize, TestData.demand) returns
         Future.successful(MatchingResult(0, from, pageSize, List.empty[Card]))
 
-      val ctrl = new Matching(matchingService)
+      val ctrl = new MatchingController(matchingService)
       val fakeRequest = emptyBodyFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(TestData.demandJson)

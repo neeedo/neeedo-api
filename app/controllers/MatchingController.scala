@@ -9,7 +9,7 @@ import services.MatchingService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class Matching(matchingService: MatchingService) extends Controller {
+class MatchingController(matchingService: MatchingService) extends Controller {
 
   /* TODO diese methode noch umbauen in ListDemands bzw ListOffers als Schnupperaction
    * TODO für nicht registrierte (In den Login / die Registrierung treiben */

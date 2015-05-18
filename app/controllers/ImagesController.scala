@@ -5,16 +5,13 @@ import java.util.UUID
 import common.helper.SecuredAction
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import java.io.File
-import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Controller
-import play.api.mvc.MultipartFormData.FilePart
 import scala.concurrent.ExecutionContext.Implicits.global
 import services.UploadService
-
 import scala.concurrent.Future
 
-class Images(uploadService: UploadService) extends Controller {
+class ImagesController(uploadService: UploadService) extends Controller {
 
   def upload = SecuredAction.async(parse.multipartFormData) { request =>
     request.body.file("image").map { image =>

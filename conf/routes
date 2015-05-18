@@ -3,61 +3,44 @@
 # ~~~~
 
 # Home page
-GET            /                            @controllers.Static.status()
-GET            /status                      @controllers.Static.status()
-GET            /doc                         @controllers.Documentation.showDocumentation()
+GET            /                            @controllers.StaticController.status()
+GET            /status                      @controllers.StaticController.status()
+GET            /doc                         @controllers.StaticController.showDocumentation()
 
 # Demands
-GET            /demands/:id                 @controllers.Demands.getDemand(id: model.DemandId)
-POST           /demands                     @controllers.Demands.createDemand()
-PUT            /demands/:id/:version        @controllers.Demands.updateDemand(id: model.DemandId, version: common.domain.Version)
-DELETE         /demands/:id/:version        @controllers.Demands.deleteDemand(id: model.DemandId, version: common.domain.Version)
-OPTIONS        /demands                     @controllers.Static.deliverCorsHeaders()
+GET            /demands/:id                 @controllers.DemandsController.getDemand(id: model.DemandId)
+POST           /demands                     @controllers.DemandsController.createDemand()
+PUT            /demands/:id/:version        @controllers.DemandsController.updateDemand(id: model.DemandId, version: common.domain.Version)
+DELETE         /demands/:id/:version        @controllers.DemandsController.deleteDemand(id: model.DemandId, version: common.domain.Version)
+OPTIONS        /demands                     @controllers.StaticController.deliverCorsHeaders()
 
 # Offers
-GET            /offers/:id                  @controllers.Offers.getOffer(id: model.OfferId)
-GET            /offers/users/:id            @controllers.Offers.getOffersByUserId(id: common.domain.UserId)
-POST           /offers                      @controllers.Offers.createOffer()
-POST           /offers/images/:id           @controllers.Offers.addImageToOffer(id: model.OfferId)
-PUT            /offers/:id/:version         @controllers.Offers.updateOffer(id: model.OfferId, version: common.domain.Version)
-DELETE         /offers/:id/:version         @controllers.Offers.deleteOffer(id: model.OfferId, version: common.domain.Version)
-OPTIONS        /offers                      @controllers.Static.deliverCorsHeaders()
+GET            /offers/:id                  @controllers.OffersController.getOffer(id: model.OfferId)
+GET            /offers/users/:id            @controllers.OffersController.getOffersByUserId(id: common.domain.UserId)
+POST           /offers                      @controllers.OffersController.createOffer()
+POST           /offers/images/:id           @controllers.OffersController.addImageToOffer(id: model.OfferId)
+PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
+DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
+OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching
-GET            /matching/demands            @controllers.Matching.matchDemands()
-POST           /matching/demand/:from/:size @controllers.Matching.matchDemand(from: common.domain.From, size: common.domain.PageSize)
-OPTIONS        /matching/demand             @controllers.Static.deliverCorsHeaders()
-OPTIONS        /matching/demand/0/0         @controllers.Static.deliverCorsHeaders()
+GET            /matching/demands            @controllers.MatchingController.matchDemands()
+POST           /matching/demand/:from/:size @controllers.MatchingController.matchDemand(from: common.domain.From, size: common.domain.PageSize)
+OPTIONS        /matching/demand             @controllers.StaticController.deliverCorsHeaders()
+OPTIONS        /matching/demand/0/0         @controllers.StaticController.deliverCorsHeaders()
 
 # Completion
-GET            /completion/tag/:tag             @controllers.Completion.completeTag(tag: String)
-GET            /completion/:type/phrase/:phrase @controllers.Completion.suggestTags(type: String, phrase: String)
+GET            /completion/tag/:tag             @controllers.CompletionController.completeTag(tag: String)
+GET            /completion/:type/phrase/:phrase @controllers.CompletionController.suggestTags(type: String, phrase: String)
 
 # Users
-GET            /users/mail/:mail            @controllers.Users.getUserByMail(mail: common.domain.Email)
-POST           /users                       @controllers.Users.createUser()
-PUT            /users/:id/:version          @controllers.Users.updateUser(id: common.domain.UserId, version: common.domain.Version)
-DELETE         /users/:id/:version          @controllers.Users.deleteUser(id: common.domain.UserId, version: common.domain.Version)
+GET            /users/mail/:mail            @controllers.UsersController.getUserByMail(mail: common.domain.Email)
+POST           /users                       @controllers.UsersController.createUser()
+PUT            /users/:id/:version          @controllers.UsersController.updateUser(id: common.domain.UserId, version: common.domain.Version)
+DELETE         /users/:id/:version          @controllers.UsersController.deleteUser(id: common.domain.UserId, version: common.domain.Version)
 
 # Images
-POST           /images                      @controllers.Images.upload()
-
-# Stub Demands
-# GET            /stub/demands                @controllers.DemandsStub.listDemands()
-# GET            /stub/demands/:id            @controllers.DemandsStub.getDemand(id: model.DemandId)
-# POST           /stub/demands                @controllers.DemandsStub.createDemand()
-# PUT            /stub/demands/:id/:version   @controllers.DemandsStub.updateDemand(id: model.DemandId, version: common.domain.Version)
-# DELETE         /stub/demands/:id/:version   @controllers.DemandsStub.deleteDemand(id: model.DemandId, version: common.domain.Version)
-# OPTIONS        /stub/demands                @controllers.Documentation.showDocumentation()
-
-# Stub Offers
-# GET             /stub/offers                @controllers.OffersStub.listOffers()
-# GET             /stub/offers/:id            @controllers.OffersStub.getOffer(id: model.OfferId)
-# POST            /stub/offers                @controllers.OffersStub.createOffer()
-# PUT             /stub/offers/:id/:version   @controllers.OffersStub.updateOffer(id: model.OfferId, version: common.domain.Version)
-# DELETE          /stub/offers/:id/:version   @controllers.OffersStub.deleteOffer(id: model.OfferId, version: common.domain.Version)
-# OPTIONS         /stub/offers                @controllers.Documentation.showDocumentation()
-
+POST           /images                      @controllers.ImagesController.upload()
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                controllers.Assets.at(path="/public", file)

@@ -13,7 +13,7 @@ import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query._
 import org.elasticsearch.node.{Node, NodeBuilder}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{Json, Reads, JsValue}
 import common.helper.ImplicitConversions._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,6 +23,10 @@ sealed trait ElasticsearchClient {
   lazy val client = createElasticsearchClient()
   def close(): Unit
   def createElasticsearchClient(): Client
+
+  def searchresponseAs[T](resp: SearchResponse)(implicit reads: Reads[T]): List[T] = {
+    resp.getHits.getHits.map( hit => Json.parse(hit.sourceAsString()).as[T]).toList
+  }
 
   def indexDocument(id: String, esIndex: IndexName, esType: TypeName, doc: JsValue): Future[IndexResponse] =
     client

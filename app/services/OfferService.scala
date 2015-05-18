@@ -1,172 +1,55 @@
 package services
 
-import java.util
-import java.util.Locale
-
-import com.github.slugify.Slugify
 import common.domain._
-import common.elasticsearch.ElasticsearchClient
-import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound, SphereIndexFailed}
-import common.helper.ConfigLoader
-import common.helper.ImplicitConversions._
-import common.logger.OfferLogger
-import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
-import io.sphere.sdk.models.{LocalizedStrings, Versioned}
-import io.sphere.sdk.products.commands.updateactions.AddExternalImage
-import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand, ProductUpdateCommand}
-import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
-import io.sphere.sdk.products.{Product, ProductDraftBuilder, ProductUpdateScope, ProductVariantDraftBuilder}
-import io.sphere.sdk.queries.{PagedQueryResult, QueryParameter}
 import model.{Offer, OfferId}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{JsObject, Json}
-import scala.collection.JavaConverters._
-import scala.concurrent.Future
-import scala.util.{Try, Failure, Random, Success}
+import services.es.EsOfferService
+import services.sphere.SphereOfferService
 
-class OfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts,
-                   productTypes: ProductTypes, esOfferService: EsOfferService) {
+import scala.concurrent.Future
+
+class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOfferService) {
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
-    writeOfferToSphere(draft).flatMap {
-      offer => esOfferService.writeOfferToEs(offer).recoverWith {
+    sphereOfferService.createOffer(draft).flatMap {
+      offer => esOfferService.createOffer(offer).recoverWith {
         case e: Exception =>
-          deleteOffer(offer.id, offer.version)
+          sphereOfferService.deleteOffer(offer.id, offer.version)
           throw e
       }
     }
   }
 
-  def writeOfferToSphere(draft: OfferDraft): Future[Offer] = {
-    def throwAndReportSphereIndexFailed = {
-      OfferLogger.error(s"Offer: ${Json.toJson(draft)} could not be saved in Sphere")
-      throw new SphereIndexFailed("Error while saving offer in sphere")
-    }
-
-    val name = OfferDraft.generateName(draft) + " " + Random.nextInt(1000)
-    val productName = LocalizedStrings.of(Locale.ENGLISH, name)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
-    val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(productTypeDrafts.buildOfferAttributes(draft))
-      .build()
-
-    val productDraft = ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()
-
-    sphereClient.execute(ProductCreateCommand.of(productDraft)).map {
-      product => Offer.fromProduct(product).get
-    } recover {
-      case e: Exception => throwAndReportSphereIndexFailed
-    }
-  }
-
   def getOfferById(id: OfferId): Future[Option[Offer]] = {
-    val futureProductOption = getProductById(id)
-
-    futureProductOption.map {
-      case Some(product) => Offer.fromProduct(product).toOption
-      case None => None
-    }
+    sphereOfferService.getOfferById(id)
   }
 
   def getOffersByUserId(id: UserId): Future[List[Offer]] = {
-    val query = ProductQuery.of().byProductType(productTypes.offer)
-      .withAdditionalQueryParameters(List(QueryParameter.of("userId", id.value)).asJava)
-
-
-    sphereClient.execute(query) map { res: PagedQueryResult[Product] =>
-      res.getResults.asScala.toList map { p: Product =>
-        Offer.fromProduct(p).get
-      }
-    }
+    esOfferService.getOffersByUserId(id)
   }
 
   def updateOffer(id: OfferId, version: Version, draft: OfferDraft): Future[Offer] = {
-    createOffer(draft) map {
-      offer =>
-        deleteOffer(id, version)
-        offer
+    createOffer(draft) flatMap {
+      offer => deleteOffer(id, version)
     }
   }
 
   def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
-    esOfferService.deleteOfferFromElasticsearch(id).flatMap {
-      offerId => val product: Versioned[Product] = Versioned.of(offerId.value, version.value)
-      sphereClient.execute(ProductDeleteCommand.of(product)) map {
-        Offer.fromProduct(_).get
-      } recover {
-        case e: Exception => throw e
-      }
+    esOfferService.deleteOffer(id).flatMap {
+      offerId => sphereOfferService.deleteOffer(offerId, version)
+    } recover {
+      case e: Exception => throw e
     }
   }
 
-  def getProductById(id: OfferId): Future[Option[Product]] =
-    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
 
   def addImageToOffer(id: OfferId, img: ExternalImage): Future[Offer] = {
-    getProductById(id) flatMap {
-      case Some(product) =>
-        sphereClient.execute(buildAddImageCommand(product, img)) map Offer.fromProduct map {
-          case Success(offer) => offer
-          case Failure(e) => throw new IllegalArgumentException(s"Product with id: ${id.value} is no valid offer")
-        }
-      case None => throw new ProductNotFound(s"No product with id: ${id.value} found")
-    }
-  }
-
-  def buildAddImageCommand(product: Product, image: ExternalImage) = {
-    val sphereImage = ExternalImage.toSphereImage(image)
-    val variantId = product.getMasterData.getStaged.getMasterVariant.getId
-    val updateScope = ProductUpdateScope.STAGED_AND_CURRENT
-
-    ProductUpdateCommand.of(product, AddExternalImage.of(sphereImage, variantId, updateScope))
-  }
-}
-
-class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
-  def writeOfferToEs(offer: Offer): Future[Offer] = {
-    def throwAndReportElasticSearchIndexFailed = {
-      OfferLogger.error(s"Offer: ${Json.toJson(offer)} could not be saved in Elasticsearch")
-      throw new ElasticSearchIndexFailed("Error while saving offer in elasticsearch")
-    }
-
-    val index = config.offerIndex
-    val typeName = config.offerIndex.toTypeName
-    elasticsearch.indexDocument(offer.id.value, index, typeName, buildEsOfferJson(offer)).map {
-      indexResponse =>
-        if (indexResponse.isCreated) {
-          esCompletionService.writeCompletionsToEs(offer.tags.map(CompletionTag).toList)
-          offer
-        }
-        else throwAndReportElasticSearchIndexFailed
+    addImageToOffer(id, img) flatMap {
+      offer => esOfferService.addImageToOffer(offer.id, img)
     } recover {
-      case e: Exception => throwAndReportElasticSearchIndexFailed
+      case e: Exception => throw e
     }
   }
-
-  def buildEsOfferJson(offer: Offer) = {
-    Json.obj( "completionTags" -> offer.tags) ++ Json.toJson(offer).as[JsObject]
-  }
-
-  def deleteOfferFromElasticsearch(id: OfferId): Future[OfferId] = {
-    def throwAndLogElasticSearchDeleteFailed = {
-      OfferLogger.error(s"Offer with id: ${id.value} could not be deleted from Elasticsearch")
-      throw new ElasticSearchDeleteFailed("Error while deleting offer from Elasticsearch")
-    }
-
-    elasticsearch.client
-      .prepareDelete(config.offerIndex.value, config.offerIndex.toTypeName.value, id.value)
-      .execute()
-      .asScala
-      .map {
-      deleteReq =>
-        if (deleteReq.isFound) id
-        else throw new ProductNotFound(s"No offer with id: ${id.value} found")
-    }.recover {
-      case e: Exception => throwAndLogElasticSearchDeleteFailed
-    }
-  }
-
-//  def getOffersByUserId(id: UserId): Future[List[Offer]] = {
-//    elasticsearch.client
-//  }
 }
+
+

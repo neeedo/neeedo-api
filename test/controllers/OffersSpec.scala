@@ -61,7 +61,7 @@ class OffersSpec extends Specification with Mockito {
 
     "offer controller must return 401 for wrong user credentials in secured actions" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
 
       val create: Future[Result] = ctrl.createOffer()(emptyBodyRequestWithWrongCredentials)
       val delete: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyRequestWithWrongCredentials)
@@ -74,7 +74,7 @@ class OffersSpec extends Specification with Mockito {
 
     "offer controller must return 301 for non https request in secured actions" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
 
       val create: Future[Result] = ctrl.createOffer()(emptyBodyRequestWithoutSsl)
       val delete: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyRequestWithoutSsl)
@@ -87,7 +87,7 @@ class OffersSpec extends Specification with Mockito {
 
     "createOffer must return 400 missing body for post requests without body" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
 
       val res: Future[Result] = ctrl.createOffer()(emptyBodyCreateFakeRequest)
 
@@ -97,7 +97,7 @@ class OffersSpec extends Specification with Mockito {
 
     "createOffer must return 400 cannot parse json for post requests with invalid offerdraft" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offerDraftJson: JsObject = Json.obj(
         "userId" -> "testUid",
         "tags" -> "testTags",
@@ -117,7 +117,7 @@ class OffersSpec extends Specification with Mockito {
 
     "createOffer must return InternalServerError offerService returns ElasticSearchFailedException" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offerDraft = TestData.offerDraft
       offerService.createOffer(offerDraft) returns Future.failed(new ElasticSearchIndexFailed("bla"))
       val fakeRequest = emptyBodyCreateFakeRequest
@@ -131,7 +131,7 @@ class OffersSpec extends Specification with Mockito {
 
     "createOffer must return 200 when offerService returns offer" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offerDraft = TestData.offerDraft
       val offer = TestData.offer
       offerService.createOffer(offerDraft) returns Future.successful(offer)
@@ -147,7 +147,7 @@ class OffersSpec extends Specification with Mockito {
 
     "getOffer must return 200 and the offer json for a valid id" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offer = TestData.offer
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option(offer))
 
@@ -159,7 +159,7 @@ class OffersSpec extends Specification with Mockito {
 
     "getOffer must return 404 and error json for a invalid id" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option.empty[Offer])
 
       val res: Future[Result] = ctrl.getOffer(OfferId("1"))(emptyBodyGetFakeRequest)
@@ -170,7 +170,7 @@ class OffersSpec extends Specification with Mockito {
 
     "deleteOffer must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offer = TestData.offer
       offerService.deleteOffer(OfferId("1"), Version(1L)) returns Future.successful(offer)
 
@@ -181,7 +181,7 @@ class OffersSpec extends Specification with Mockito {
 
     "deleteOffer must return 404 for an invalid id or version" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       offerService.deleteOffer(OfferId("1"), Version(1L)) returns Future.failed(new ProductNotFound("bla"))
 
       val res: Future[Result] = ctrl.deleteOffer(OfferId("1"), Version(1L))(emptyBodyDeleteFakeRequest)
@@ -192,7 +192,7 @@ class OffersSpec extends Specification with Mockito {
 
     "deleteOffer must return 400 missing body for put requests without body" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(emptyBodyDeleteFakeRequest)
 
       Helpers.status(res) must equalTo(400)
@@ -201,7 +201,7 @@ class OffersSpec extends Specification with Mockito {
 
     "updateOffers must return 400 cannot parse json for put requests with invalid offer draft" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offerDraftJson: JsObject = Json.obj(
         "userId" -> "testUid",
         "tags" -> "testTags",
@@ -219,7 +219,7 @@ class OffersSpec extends Specification with Mockito {
 
     "updateOffers must return 500 internal server error when offerService returns elasticsearchIndexException" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       offerService.updateOffer(OfferId("1"), Version(1L), TestData.offerDraft) returns Future.failed(new ElasticSearchIndexFailed("bla"))
       val fakeRequest =  emptyBodyUpdateFakeRequest.withBody[AnyContent](AnyContentAsJson(TestData.offerDraftJson))
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(fakeRequest)
@@ -230,7 +230,7 @@ class OffersSpec extends Specification with Mockito {
 
     "updateOffers must return 200 when offerService returns offer" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
-      val ctrl = new Offers(offerService)
+      val ctrl = new OffersController(offerService)
       val offerDraft = TestData.offerDraft
       val offer = TestData.offer
       offerService.updateOffer(OfferId("1"), Version(1L), offerDraft) returns Future.successful(offer)

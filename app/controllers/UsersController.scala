@@ -11,7 +11,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import ControllerUtils.bindRequestJsonBody
 
-class Users(userService: UserService) extends Controller {
+class UsersController(userService: UserService) extends Controller {
 
   def getUserByMail(mail: Email) = SecuredAction.async {
     userService.getUserByEmail(mail).map {

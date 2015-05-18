@@ -7,7 +7,7 @@ import services.CompletionService
 import scala.concurrent.ExecutionContext.Implicits.global
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 
-class Completion(completionService: CompletionService) extends Controller {
+class CompletionController(completionService: CompletionService) extends Controller {
   def completeTag(tag: String) = Action.async {
     completionService.completeTag(CompletionTag(tag)) map {
       res => Ok(Json.toJson(res))
