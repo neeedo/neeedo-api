@@ -39,7 +39,8 @@ POST           /users                       @controllers.UsersController.createU
 PUT            /users/:id/:version          @controllers.UsersController.updateUser(id: common.domain.UserId, version: common.domain.Version)
 DELETE         /users/:id/:version          @controllers.UsersController.deleteUser(id: common.domain.UserId, version: common.domain.Version)
 
-# Images
+#
+GET            /images/:id                  @controllers.ImagesController.getImage(id: String)
 POST           /images                      @controllers.ImagesController.upload()
 
 # Map static resources from the /public folder to the /assets URL path
