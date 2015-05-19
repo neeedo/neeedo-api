@@ -45,6 +45,7 @@ If you run the application on your local machine access it under
 
 API-Documentation
 ----------
+- [Common Errors](#common/errors)
 - [Status (unsecured)](#status)
 - [Matching (experimental)](#matching)
     - [Get all offers for one demand (unsecured)](#get-all-offers-for-one-demand)
@@ -64,6 +65,20 @@ API-Documentation
  	- [Create User (unsecured)](#create-user)
  	- [Update User](#update-user)
 	- [Delete User](#delete-user)
+
+# Common Errors
+Each POST or PUT request sent to this api will respond with these error codes
+when the body is incorrect:
+
+If you send a json object that can't be parsed and is not as expected you will get:
+
+    400 BadRequest
+    {"error":"Invalid json body"}
+
+If you dont send any json body at all you will get:
+
+    400 BadRequest
+    {"error":"Missing body json object"}
 
 # Status
 The status will be reported under `/status`.
@@ -105,6 +120,11 @@ The request body must contain a valid DemandDraft json object
 
 ### Response
 200 Ok
+
+400 Bad Request
+    {
+        "error" : "A user with this email address already exists"
+    }
 
 ### Example
     curl -XPOST -H "Content-Type: application/json" -d '{"id":"c1ef9724-935e-4455-854e-96b99eec555d","version":1,"userId":"1","mustTags":["iphone"],"shouldTags":["neuwertig","schwarz"],"location":{"lat":35.92516,"lon":12.37528},"distance":30,"price":{"min":100.0,"max":340.0}}' https://localhost:9443/matching/demand/0/0 -v

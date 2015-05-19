@@ -1,5 +1,6 @@
 package common.helper
 
+import common.exceptions.InvalidJson
 import play.api.libs.json.Reads
 import play.api.mvc.AnyContent
 
@@ -12,9 +13,9 @@ object ControllerUtils {
         case Some(json) =>
           json.asOpt[T] match {
             case Some(draft) => draft
-            case None => throw new IllegalArgumentException("Cannot parse json")
+            case None => throw new InvalidJson(s"Invalid json body")
           }
-        case None => throw new IllegalArgumentException("Missing body")
+        case None => throw new InvalidJson("Missing body json object")
       }
     }
   }
