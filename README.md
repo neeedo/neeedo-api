@@ -121,11 +121,6 @@ The request body must contain a valid DemandDraft json object
 ### Response
 200 Ok
 
-400 Bad Request
-    {
-        "error" : "A user with this email address already exists"
-    }
-
 ### Example
     curl -XPOST -H "Content-Type: application/json" -d '{"id":"c1ef9724-935e-4455-854e-96b99eec555d","version":1,"userId":"1","mustTags":["iphone"],"shouldTags":["neuwertig","schwarz"],"location":{"lat":35.92516,"lon":12.37528},"distance":30,"price":{"min":100.0,"max":340.0}}' https://localhost:9443/matching/demand/0/0 -v
 
@@ -543,9 +538,11 @@ The request body must contain a valid UserDraft json object
         }
     }
 
-400 Bad Request - Empty Body
+400 Bad Request
 
-400 Bad Request - Invalid Json
+    {
+        "error" : "A user with this email address already exists"
+    }
 
 ### Example
 
@@ -586,9 +583,11 @@ The request body must contain a valid UserDraft json object
         }
     }
 
-400 Bad Request - Missing body
+400 Bad Request
 
-400 Bad Request - Cannot parse json
+    {
+        "error" : "A user with this email address already exists"
+    }
 
 404 Not Found - Entity was not found
 
