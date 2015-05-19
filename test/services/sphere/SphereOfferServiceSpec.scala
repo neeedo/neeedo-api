@@ -3,13 +3,13 @@ package services.sphere
 import java.util.Locale
 
 import common.domain._
-import common.exceptions.SphereIndexFailed
+import common.exceptions.{SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ConfigLoader
 import common.sphere.{MockProductTypes, ProductTypeDrafts, RemoteSphereClient}
 import io.sphere.sdk.attributes.Attribute
-import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
+import io.sphere.sdk.models.{Versioned, DefaultCurrencyUnits, LocalizedStrings}
 import io.sphere.sdk.products
-import io.sphere.sdk.products.commands.ProductCreateCommand
+import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.products.{ProductBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductVariantBuilder}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{Offer, OfferId}
@@ -64,6 +64,25 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       offerAttributes must contain(Attribute.of("longitude", draft.location.lon.value))
       offerAttributes must contain(Attribute.of("latitude", draft.location.lat.value))
       offerAttributes must contain(Attribute.of("price", MoneyImpl.of(BigDecimal(draft.price.value).bigDecimal, "EUR")))
+    }
+
+    "deleteDraft must return SphereDeleteFailed when an exception occurs" in new SphereOfferServiceContext {
+      sphereClientMock.execute(any[ProductDeleteCommand]) returns
+        Future.failed(new Exception())
+
+      Await.result(service.deleteOffer(offer.id, offer.version), Duration.Inf) must
+        throwA[SphereDeleteFailed]
+      there was one (sphereClientMock)
+        .execute(ProductDeleteCommand.of(Versioned.of(offer.id.value, offer.version.value)))
+    }
+
+    "deleteDraft must return offer when sphere succeeds" in new SphereOfferServiceContext {
+      sphereClientMock.execute(any[ProductDeleteCommand]) returns Future(offerProduct)
+
+      Await.result(service.deleteOffer(offer.id, offer.version), Duration.Inf) must
+          beEqualTo(offer)
+      there was one (sphereClientMock)
+        .execute(ProductDeleteCommand.of(Versioned.of(offer.id.value, offer.version.value)))
     }
   }
 
