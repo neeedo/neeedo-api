@@ -10,7 +10,7 @@ trait CustomerExceptionHandler {
     cause match {
       case e: ErrorResponseException => {
         if (!e.getErrors.isEmpty && e.getErrors.get(0).getCode == "DuplicateField")
-          throw new CustomerAlreadyExists("A user with this email adress already exists")
+          throw new CustomerAlreadyExists("A user with this email address already exists")
         else
           throw new Exception("Unknown error occured")
       }
