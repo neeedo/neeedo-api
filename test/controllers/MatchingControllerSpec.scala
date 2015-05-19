@@ -14,7 +14,7 @@ import test.{TestApplications, TestData}
 
 import scala.concurrent.Future
 
-class MatchingSpec extends Specification with Mockito {
+class MatchingControllerSpec extends Specification with Mockito {
 
   val emptyBodyFakeRequest = new FakeRequest[AnyContent](
     Helpers.POST,

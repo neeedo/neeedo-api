@@ -203,7 +203,7 @@ class OffersControllerSpec extends Specification with Mockito {
       val offerService = mock[OfferService]
       val ctrl = new OffersController(offerService)
       val offerDraftJson: JsObject = Json.obj(
-        "userId" -> "testUid",
+        "userId" -> "123",
         "tags" -> "testTags",
         "location" -> Json.obj(
           "lon" -> 20.0

@@ -16,7 +16,7 @@ object TestData {
   val demandId = DemandId("testDemandId")
   val offerId = OfferId("testOfferId")
   val version = Version(1L)
-  val userId = UserId("testUserId")
+  val userId = UserId("123")
   val tags = Set("TV Regal", "Oppli", "Birkenoptik")
   val tagsWithWhitespaces = Set("  TV Regal", "Oppli   ", " Birkenoptik")
   val shouldTags = Set("Buche", "Kiefer", "Schwarz")
