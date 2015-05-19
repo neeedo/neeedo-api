@@ -45,7 +45,7 @@ If you run the application on your local machine access it under
 
 API-Documentation
 ----------
-- [Common Errors](#common/errors)
+- [Common Errors](#common-errors)
 - [Status (unsecured)](#status)
 - [Matching (experimental)](#matching)
     - [Get all offers for one demand (unsecured)](#get-all-offers-for-one-demand)
