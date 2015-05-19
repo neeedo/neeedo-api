@@ -14,7 +14,7 @@ trait WireDependencies {
 
   lazy val configLoader = new ConfigLoader(Play.current.configuration)
   lazy val productTypeDrafts = wire[ProductTypeDrafts]
-  lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) MockProductTypes else wire[SphereProductTypes]
+  lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) wire[MockProductTypes] else wire[SphereProductTypes]
 
   // Factories
   val esFactory: ElasticsearchClientFactory = wire[ElasticsearchClientFactory]

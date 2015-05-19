@@ -8,6 +8,7 @@ import model.{Offer, OfferId}
 import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
+import org.specs2.specification.Scope
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import play.api.test.WithApplication

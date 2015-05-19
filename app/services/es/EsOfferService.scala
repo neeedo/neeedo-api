@@ -16,8 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
+  // TODO
   def addImageToOffer(id: OfferId, image: ExternalImage): Future[Offer] = ???
-
 
   def getOffersByUserId(id: UserId): Future[List[Offer]] = {
      elasticsearch.client

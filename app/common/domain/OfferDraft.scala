@@ -1,5 +1,7 @@
 package common.domain
 
+import java.util.UUID
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -11,7 +13,7 @@ case class OfferDraft(
 
 object OfferDraft {
 
-  def generateName(offerDraft: OfferDraft) = "Biete: " + offerDraft.tags.mkString(" ")
+  def generateName(offerDraft: OfferDraft) = s"Biete: ${offerDraft.tags.mkString(" ")} ${UUID.randomUUID()}"
 
   implicit val offerDraftReads: Reads[OfferDraft] = (
     (JsPath \ "userId").read[String] and
