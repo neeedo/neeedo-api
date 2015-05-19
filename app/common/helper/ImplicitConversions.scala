@@ -26,6 +26,7 @@ object ImplicitConversions {
         case e: ElasticSearchQueryFailed => InternalServerError(errorJson(x.getMessage))
         case e: CustomerAlreadyExists => Conflict(x.getMessage)
         case e: InvalidJson => BadRequest(errorJson(x.getMessage))
+        case e: Unauthorized => Unauthorized(errorJson(x.getMessage))
         case _ => InternalServerError(errorJson(x.getMessage))
       }
     }

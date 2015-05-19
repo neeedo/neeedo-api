@@ -5,7 +5,7 @@ import common.domain._
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
 import io.sphere.sdk.customers.queries.CustomerQuery
-import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName}
+import io.sphere.sdk.customers.{CustomerSignInResult, Customer, CustomerDraft, CustomerName}
 import io.sphere.sdk.customers.commands._
 import io.sphere.sdk.models.Versioned
 import io.sphere.sdk.queries.PagedQueryResult
@@ -53,29 +53,30 @@ class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
     }
   }
 
-  def authorizeUser(credentials: UserCredentials): Future[Boolean] = {
-    val cachedUserCredentials: Option[UserCredentials] =
-      Cache.getAs[UserCredentials](credentials.cacheKey)
+  def authorizeUser(credentials: UserCredentials): Future[Option[UserId]] = {
+    val cachedUserCredentials: Option[EncryptedUserCredentials] =
+      Cache.getAs[EncryptedUserCredentials](credentials.cacheKey)
 
     cachedUserCredentials match {
-      case Some(result) => Future.successful(result.password == credentials.password)
-      case None => sphereSignIn(credentials)
+      case Some(result) if result.md5 == PasswordHash(credentials.password) => Future.successful(Some(result.id))
+      case _ => sphereSignIn(credentials)
     }
   }
 
-  def sphereSignIn(credentials: UserCredentials): Future[Boolean] = {
+  def sphereSignIn(credentials: UserCredentials): Future[Option[UserId]] = {
     val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password.value)
 
     sphereClient.execute(signInQuery).map {
-      _ => {
-        Cache.set(credentials.cacheKey, EncryptedUserCredentials(credentials))
-        true
+      res: CustomerSignInResult => {
+        val userId = UserId(res.getCustomer.getId)
+        Cache.set(credentials.cacheKey, EncryptedUserCredentials(userId, credentials))
+        Some(userId)
       }
-    } recover { case e: Exception => false }
+    } recover { case e: Exception => None }
   }
 }
 
 object UserService {
-  def authorizeUser(userCredentials: UserCredentials): Future[Boolean] =
+  def authorizeUser(userCredentials: UserCredentials): Future[Option[UserId]] =
     Global.wired.lookupSingleOrThrow(classOf[UserService]).authorizeUser(userCredentials)
 }

@@ -1,7 +1,6 @@
 package services
 
 import common.domain._
-import common.exceptions.SphereDeleteFailed
 import model.{Offer, OfferId}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services.es.EsOfferService
