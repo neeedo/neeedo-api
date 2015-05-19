@@ -1,26 +1,27 @@
 package services.sphere
 
-import java.util.{Locale}
+import java.util.Locale
 
 import com.github.slugify.Slugify
-import common.domain.{ExternalImage, Version, OfferDraft}
-import common.exceptions.{ProductNotFound, SphereIndexFailed}
+import common.domain.{ExternalImage, OfferDraft, Version}
+import common.exceptions.{SphereDeleteFailed, ProductNotFound, SphereIndexFailed}
+import common.helper.ImplicitConversions.OptionConverter
 import common.logger.OfferLogger
-import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
+import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.attributes.Attribute
-import io.sphere.sdk.models.{Versioned, LocalizedStrings}
-import io.sphere.sdk.products.commands.updateactions.AddExternalImage
-import io.sphere.sdk.products.commands.{ProductUpdateCommand, ProductDeleteCommand, ProductCreateCommand}
-import io.sphere.sdk.products.queries.ProductByIdFetch
+import io.sphere.sdk.models.{LocalizedStrings, Versioned}
 import io.sphere.sdk.products._
+import io.sphere.sdk.products.commands.updateactions.AddExternalImage
+import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand, ProductUpdateCommand}
+import io.sphere.sdk.products.queries.ProductByIdFetch
 import io.sphere.sdk.utils.MoneyImpl
-import model.{OfferId, Offer}
+import model.{Offer, OfferId}
 import play.api.libs.json.Json
+
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import common.helper.ImplicitConversions.OptionConverter
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.collection.JavaConverters._
 
 
 class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts, productTypes: ProductTypes) {
@@ -64,6 +65,8 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     sphereClient.execute(ProductDeleteCommand.of(product)) map {
       // TODO Exception Nullpointer
       Offer.fromProduct(_).get
+    } recover {
+      case e: Exception => throw new SphereDeleteFailed("Offer could not be deleted")
     }
   }
 

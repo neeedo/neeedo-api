@@ -8,15 +8,16 @@ import common.helper.ConfigLoader
 import common.sphere.{MockProductTypes, ProductTypeDrafts, RemoteSphereClient}
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings}
-import io.sphere.sdk.products.{ProductVariantBuilder, ProductBuilder, ProductCatalogDataBuilder, ProductDataBuilder}
+import io.sphere.sdk.products
 import io.sphere.sdk.products.commands.ProductCreateCommand
-import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
+import io.sphere.sdk.products.{ProductBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductVariantBuilder}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{Offer, OfferId}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
 import play.api.test.WithApplication
+
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -36,6 +37,14 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future(offerProduct)
 
       Await.result(service.createOffer(draft), Duration.Inf) must beEqualTo(offer)
+      there was one (sphereClientMock).execute(any[ProductCreateCommand])
+    }
+
+    "createOffer must throw SphereIndexFailed when SphereClient returns invalid product" in new SphereOfferServiceContext {
+      sphereClientMock.execute(any[ProductCreateCommand]) returns
+        Future(mockProduct)
+
+      Await.result(service.createOffer(draft), Duration.Inf) must throwA[SphereIndexFailed]
       there was one (sphereClientMock).execute(any[ProductCreateCommand])
     }
 
@@ -109,5 +118,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       .of(productTypes.offer, productMasterData)
       .id(offer.id.value)
       .build()
+
+    val mockProduct = mock[products.Product]
   }
 }

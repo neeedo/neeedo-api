@@ -46,6 +46,36 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (sphereOfferServiceMock).createOffer(any[OfferDraft])
       there was one (esOfferServiceMock).createOffer(any[Offer])
     }
+
+    "deleteOffer must throw correct exception when SphereOfferService fails" in new OfferServiceContext {
+      sphereOfferServiceMock.deleteOffer(any[OfferId], any[Version]) returns
+        Future.failed(new Exception())
+      esOfferServiceMock.deleteOffer(any[OfferId]) returns Future(offer.id)
+
+      Await.result(service.deleteOffer(offer.id, offer.version), Duration.Inf) must
+        throwA[Exception]
+      there was one (esOfferServiceMock).deleteOffer(offer.id)
+      there was one (sphereOfferServiceMock).deleteOffer(offer.id, offer.version)
+    }
+
+    "deleteOffer must throw exception when EsOfferService fails" in new OfferServiceContext {
+      esOfferServiceMock.deleteOffer(any[OfferId]) returns Future.failed(new Exception())
+
+      Await.result(service.deleteOffer(offer.id, offer.version), Duration.Inf) must
+        throwA[Exception]
+      there was one (esOfferServiceMock).deleteOffer(offer.id)
+      there was no (sphereOfferServiceMock).deleteOffer(offer.id, offer.version)
+    }
+
+    "deleteOffer must return offer if es and sphere succeed" in new OfferServiceContext {
+      esOfferServiceMock.deleteOffer(any[OfferId]) returns Future(offer.id)
+      sphereOfferServiceMock.deleteOffer(any[OfferId], any[Version]) returns Future(offer)
+
+      Await.result(service.deleteOffer(offer.id, offer.version), Duration.Inf) must
+        beEqualTo(offer)
+      there was one (esOfferServiceMock).deleteOffer(offer.id)
+      there was one (sphereOfferServiceMock).deleteOffer(offer.id, offer.version)
+    }
   }
 
   trait OfferServiceContext extends Scope {
