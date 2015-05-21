@@ -16,8 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
+  // TODO
   def addImageToOffer(id: OfferId, image: ExternalImage): Future[Offer] = ???
-
 
   def getOffersByUserId(id: UserId): Future[List[Offer]] = {
      elasticsearch.client
@@ -59,22 +59,22 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
   }
 
   def deleteOffer(id: OfferId): Future[OfferId] = {
-    def throwAndLogEsDeleteFailed = {
-      OfferLogger.error(s"Offer with id: ${id.value} could not be deleted from Elasticsearch")
+    def throwAndLogEsDeleteFailed(e: Exception) = {
+      OfferLogger.error(s"Offer with id: ${id.value} could not be deleted from Elasticsearch. " +
+        s"Exception: ${e.getMessage}")
       throw new ElasticSearchDeleteFailed("Error while deleting offer from Elasticsearch")
     }
 
-    val deleteResult = elasticsearch.client
-      .prepareDelete(config.offerIndex.value, config.offerIndex.toTypeName.value, id.value)
-      .execute()
-      .asScala
+    val deleteResult = elasticsearch
+      .deleteDocument(id.value, config.offerIndex, config.offerIndex.toTypeName)
 
     deleteResult map {
-      deleteReq =>
-        if (deleteReq.isFound) id
+      isFound =>
+        if (isFound) id
         else throw new ProductNotFound(s"No offer with id: ${id.value} found")
     } recover {
-      case e: Exception => throwAndLogEsDeleteFailed
+      case e: ProductNotFound => throw e
+      case e: Exception => throwAndLogEsDeleteFailed(e)
     }
   }
 }

@@ -1,6 +1,6 @@
 package common.helper
 
-import common.exceptions.{SphereIndexFailed, ElasticSearchQueryFailed, ElasticSearchIndexFailed, ProductNotFound}
+import common.exceptions._
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 import play.api.libs.json.Json
 import play.api.mvc.Result
@@ -24,7 +24,10 @@ object ImplicitConversions {
         case e: ProductNotFound => NotFound(errorJson(x.getMessage))
         case e: ElasticSearchIndexFailed => InternalServerError(errorJson(x.getMessage))
         case e: ElasticSearchQueryFailed => InternalServerError(errorJson(x.getMessage))
-        case _ => BadRequest(errorJson(x.getMessage))
+        case e: CustomerAlreadyExists => Conflict(x.getMessage)
+        case e: InvalidJson => BadRequest(errorJson(x.getMessage))
+        case e: Unauthorized => Unauthorized(errorJson(x.getMessage))
+        case _ => InternalServerError(errorJson(x.getMessage))
       }
     }
 

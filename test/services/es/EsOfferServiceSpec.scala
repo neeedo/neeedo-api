@@ -2,14 +2,15 @@ package services.es
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
-import common.exceptions.ElasticSearchIndexFailed
+import common.exceptions.{ProductNotFound, ElasticSearchDeleteFailed, ElasticSearchIndexFailed}
 import common.helper.ConfigLoader
 import model.{Offer, OfferId}
+import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.WithApplication
 import services.EsCompletionService
 
@@ -25,7 +26,25 @@ class EsOfferServiceSpec extends Specification with Mockito {
 
       Await.result(service.createOffer(offer), Duration.Inf) must
         throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
-      there was one (esClientMock).indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue])
+      there was one (esClientMock).indexDocument(offer.id.value, indexName, typeName, service.buildEsOfferJson(offer))
+    }
+
+    "createOffer must throw IndexFailedException when elasticsearch throws an exception" in new EsOfferServiceContext {
+      esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
+        Future.failed(new IllegalArgumentException())
+
+      Await.result(service.createOffer(offer), Duration.Inf) must
+        throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
+      there was one (esClientMock).indexDocument(offer.id.value, indexName, typeName, service.buildEsOfferJson(offer))
+    }
+
+    "createOffer must return offer when everything succeeeds" in new EsOfferServiceContext {
+      esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
+        Future(positiveIndexResponse)
+
+      Await.result(service.createOffer(offer), Duration.Inf) must beEqualTo(offer)
+      there was one (esClientMock)
+        .indexDocument(offer.id.value, indexName, typeName, service.buildEsOfferJson(offer))
     }
 
     "parseIndexResponse must throw exception for negative indexResponse" in new EsOfferServiceContext {
@@ -37,21 +56,29 @@ class EsOfferServiceSpec extends Specification with Mockito {
       service.parseIndexResponse(positiveIndexResponse, offer) must beEqualTo(offer)
     }
 
-    "createOffer must throw IndexFailedException when elasticsearch throws an exception" in new EsOfferServiceContext {
-      esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
-        Future.failed(new IllegalArgumentException())
+    "deleteOffer must throw EsDeleteFailed when elasticsearch throws an exception" in new EsOfferServiceContext {
+      esClientMock.deleteDocument(anyString, any[IndexName], any[TypeName]) returns
+        Future.failed(new Exception())
 
-      Await.result(service.createOffer(offer), Duration.Inf) must
-        throwA(new ElasticSearchIndexFailed("Error while saving offer in elasticsearch"))
-      there was one (esClientMock).indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue])
+      Await.result(service.deleteOffer(offer.id), Duration.Inf) must throwA[ElasticSearchDeleteFailed]
+      there was one (esClientMock)
+        .deleteDocument(offer.id.value, indexName, typeName)
     }
 
-    "createOffer must return offer when everything succeeeds" in new EsOfferServiceContext {
-      esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
-        Future(positiveIndexResponse)
+    "deleteOffer must throw ProductNotFound when elasticsearch returns not found" in new EsOfferServiceContext {
+      esClientMock.deleteDocument(anyString, any[IndexName], any[TypeName]) returns Future(false)
 
-      Await.result(service.createOffer(offer), Duration.Inf) must beEqualTo(offer)
-      there was one (esClientMock).indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue])
+      Await.result(service.deleteOffer(offer.id), Duration.Inf) must throwA[ProductNotFound]
+      there was one (esClientMock)
+        .deleteDocument(offer.id.value, indexName, typeName)
+    }
+
+    "deleteOffer must return offerId when elasticsearch returns deleted" in new EsOfferServiceContext {
+      esClientMock.deleteDocument(anyString, any[IndexName], any[TypeName]) returns Future(true)
+
+      Await.result(service.deleteOffer(offer.id), Duration.Inf) must beEqualTo(offer.id)
+      there was one (esClientMock)
+        .deleteDocument(offer.id.value, indexName, typeName)
     }
   }
 
@@ -59,6 +86,8 @@ class EsOfferServiceSpec extends Specification with Mockito {
 
     val config = Map("offer.typeName" -> "offer")
     val configLoader = new ConfigLoader(Configuration.from(config))
+    val indexName = configLoader.offerIndex
+    val typeName = indexName.toTypeName
     val esClientMock = mock[ElasticsearchClient]
     val esCompletionServiceMock = mock[EsCompletionService]
     val service = new EsOfferService(esClientMock, configLoader, esCompletionServiceMock)
@@ -75,6 +104,5 @@ class EsOfferServiceSpec extends Specification with Mockito {
       Price(50.00),
       List()
     )
-
   }
 }

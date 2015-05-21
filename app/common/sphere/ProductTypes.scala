@@ -28,7 +28,7 @@ class SphereProductTypes(sphereClient: SphereClient, configloader: ConfigLoader)
   }
 }
 
-object MockProductTypes extends ProductTypes {
-  val demand: ProductType = ProductTypeBuilder.of("id", "name", "desc", List.empty[AttributeDefinition].asJava).build()
-  val offer: ProductType = ProductTypeBuilder.of("id", "name", "desc", List.empty[AttributeDefinition].asJava).build()
+class MockProductTypes(productTypeDrafts: ProductTypeDrafts) extends ProductTypes {
+  lazy val demand: ProductType = ProductTypeBuilder.of("id", productTypeDrafts.demand).build()
+  lazy val offer: ProductType = ProductTypeBuilder.of("id", productTypeDrafts.offer).build()
 }

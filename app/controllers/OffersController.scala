@@ -1,9 +1,8 @@
 package controllers
 
 import common.domain._
-import common.helper.ControllerUtils._
 import common.helper.ImplicitConversions.ExceptionToResultConverter
-import common.helper.SecuredAction
+import common.helper.{ControllerUtils, SecuredAction}
 import model.{Offer, OfferId}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
@@ -12,10 +11,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class OffersController(service: OfferService) extends Controller {
+class OffersController(service: OfferService) extends Controller with ControllerUtils {
 
   def createOffer = SecuredAction.async { implicit request =>
-    val offerDraft = bindRequestJsonBody(request.body)(OfferDraft.offerDraftReads)
+    val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
 
     offerDraft match {
       case Success(draft) => service.createOffer(draft) map {
@@ -43,7 +42,7 @@ class OffersController(service: OfferService) extends Controller {
   }
 
   def updateOffer(id: OfferId, version: Version) = SecuredAction.async { implicit request =>
-    val offerDraft = bindRequestJsonBody(request.body)(OfferDraft.offerDraftReads)
+    val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
 
     offerDraft match {
       case Success(o) =>
@@ -64,7 +63,7 @@ class OffersController(service: OfferService) extends Controller {
   }
 
   def addImageToOffer(id: OfferId) = SecuredAction.async { implicit request =>
-    val image = bindRequestJsonBody(request.body)(ExternalImage.imageReads)
+    val image = bindRequestJsonBody(request)(ExternalImage.imageReads)
 
     image match {
       case Success(img) =>
@@ -77,5 +76,4 @@ class OffersController(service: OfferService) extends Controller {
       case Failure(e) => Future(e.asResult)
     }
   }
-
  }

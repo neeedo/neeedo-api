@@ -9,9 +9,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import ControllerUtils.bindRequestJsonBody
 
-class UsersController(userService: UserService) extends Controller {
+class UsersController(userService: UserService) extends Controller with ControllerUtils {
 
   def getUserByMail(mail: Email) = SecuredAction.async {
     userService.getUserByEmail(mail).map {
@@ -21,7 +20,7 @@ class UsersController(userService: UserService) extends Controller {
   }
 
   def createUser = Action.async { implicit request =>
-    val userDraft = bindRequestJsonBody(request.body)(UserDraft.userDraftReads)
+    val userDraft = bindRequestJsonBody(request)(UserDraft.userDraftReads)
 
     userDraft match {
       case Success(u) =>

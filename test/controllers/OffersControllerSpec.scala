@@ -14,7 +14,7 @@ import test.{TestData, TestApplications}
 
 import scala.concurrent.Future
 
-class OffersSpec extends Specification with Mockito {
+class OffersControllerSpec extends Specification with Mockito {
   "Offers Controller" should {
 
     val emptyBodyRequestWithWrongCredentials = new FakeRequest[AnyContent](
@@ -92,7 +92,7 @@ class OffersSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.createOffer()(emptyBodyCreateFakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body json object\"}")
     }
 
     "createOffer must return 400 cannot parse json for post requests with invalid offerdraft" in TestApplications.loggingOffApp() {
@@ -112,7 +112,7 @@ class OffersSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.createOffer()(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Invalid json body\"}")
     }
 
     "createOffer must return InternalServerError offerService returns ElasticSearchFailedException" in TestApplications.loggingOffApp() {
@@ -196,14 +196,14 @@ class OffersSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(emptyBodyDeleteFakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body json object\"}")
     }
 
     "updateOffers must return 400 cannot parse json for put requests with invalid offer draft" in TestApplications.loggingOffApp() {
       val offerService = mock[OfferService]
       val ctrl = new OffersController(offerService)
       val offerDraftJson: JsObject = Json.obj(
-        "userId" -> "testUid",
+        "userId" -> "123",
         "tags" -> "testTags",
         "location" -> Json.obj(
           "lon" -> 20.0
@@ -214,7 +214,7 @@ class OffersSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.updateOffer(OfferId("1"), Version(1L))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Invalid json body\"}")
     }
 
     "updateOffers must return 500 internal server error when offerService returns elasticsearchIndexException" in TestApplications.loggingOffApp() {

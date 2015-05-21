@@ -11,18 +11,18 @@ import io.sphere.sdk.utils.MoneyImpl
 import scala.collection.JavaConverters._
 
 class ProductTypeDrafts(configloader: ConfigLoader) {
-  val demand = ProductTypeDraft
+  lazy val demand = ProductTypeDraft
     .of(configloader.getString("demand.typeName"),
       "desc",
       demandAttributes)
-  val offer = ProductTypeDraft
+  lazy val offer = ProductTypeDraft
     .of(configloader.getString("offer.typeName"),
       "desc",
       offerAttributes)
 
+  //TODO move later to refactored demandservice (dumb doman classes, clever models, clever services)
   def buildDemandAttributes(demandDraft: DemandDraft) = List(
     Attribute.of("userId", demandDraft.uid.value),
-    // Todo save as SetType in sphere, this is just an ugly workaround
     Attribute.of("mustTags", demandDraft.mustTags.mkString(";")),
     Attribute.of("shouldTags", demandDraft.shouldTags.mkString(";")),
     Attribute.of("longitude", demandDraft.location.lon.value),
@@ -30,15 +30,6 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
     Attribute.of("distance", demandDraft.distance.value),
     Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demandDraft.priceMin.value).bigDecimal, "EUR")),
     Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demandDraft.priceMax.value).bigDecimal, "EUR"))
-  ).asJava
-
-  def buildOfferAttributes(offerDraft: OfferDraft) = List(
-    Attribute.of("userId", offerDraft.uid.value),
-    // Todo save as SetType in sphere, this is just an ugly workaround
-    Attribute.of("tags", offerDraft.tags.mkString(";")),
-    Attribute.of("longitude", offerDraft.location.lon.value),
-    Attribute.of("latitude", offerDraft.location.lat.value),
-    Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR"))
   ).asJava
 
   private def demandAttributes: java.util.List[AttributeDefinition] =

@@ -4,9 +4,9 @@ case class UserCredentials(email: Email, password: Password) {
   val cacheKey =  s"userCredentials.${email.value}"
 }
 
-case class EncryptedUserCredentials(email: Email, md5: PasswordHash)
+case class EncryptedUserCredentials(id: UserId, email: Email, md5: PasswordHash)
 
 object EncryptedUserCredentials {
-  def apply(u: UserCredentials): EncryptedUserCredentials =
-    EncryptedUserCredentials(u.email, PasswordHash(u.password))
+  def apply(userId: UserId, u: UserCredentials): EncryptedUserCredentials =
+    EncryptedUserCredentials(userId, u.email, PasswordHash(u.password))
 }

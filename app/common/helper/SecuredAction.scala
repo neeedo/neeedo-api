@@ -1,10 +1,9 @@
 package common.helper
 
-import common.domain.{Password, Email, UserCredentials}
+import common.domain._
 import org.apache.commons.codec.binary.Base64
-import play.api.{Mode, Play}
 import play.api.http.HeaderNames._
-import play.api.mvc.{Action, Result, Request, ActionBuilder}
+import play.api.mvc._
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc.Results._
 import services.UserService
@@ -12,54 +11,29 @@ import services.UserService
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SecuredAction extends ActionBuilder[Request] {
+object SecuredAction extends ActionBuilder[SecuredRequest] {
 
-  def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-    block(request)
+  def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
+    if (request.secure) authorize(request, block)
+    else redirectHttps(request)
   }
 
-  override def composeAction[A](action: Action[A]) = new SecuredAction(action)
-}
-
-case class SecuredAction[A](action: Action[A]) extends Action[A] {
-
-  lazy val parser = action.parser
-
-  def apply(request: Request[A]): Future[Result] = {
-    if (isUnsecure(request)) redirectHttps(request)
-    else authorize(request)
+  def redirectHttps[A](request: Request[A]): Future[Result] = {
+    Future.successful(MovedPermanently(s"https://${request.domain}${request.uri}"))
   }
 
-  def isAuthorized(userCredentials: UserCredentials): Future[Boolean] = {
-    if (Play.current.mode == Mode.Test)
-      Future { userCredentials.email == Email("test") && userCredentials.password == Password("test") }
-    else
-      UserService.authorizeUser(userCredentials)
-  }
-
-  def authorize(request: Request[A]): Future[Result] = {
+  def authorize[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
     val authHeader: String = request.headers.get(AUTHORIZATION).getOrElse("")
     val userCredentialsOption = getCredentialsFromAuthHeader(authHeader)
     userCredentialsOption match {
       case Some(userCredentials) =>
         isAuthorized(userCredentials).flatMap {
-          result =>
-            if (result) action(request)
-            else Future.successful(Forbidden)
+          case Some(userId) => block(new SecuredRequest[A](userId, request))
+          case None => Future.successful(Forbidden)
         }
       case None => requestAuthorization
     }
   }
-
-  def redirectHttps(request: Request[A]): Future[Result] = {
-    Future.successful(MovedPermanently(s"https://${request.domain}${request.uri}"))
-  }
-
-  def requestAuthorization: Future[Result] = {
-    Future.successful(Unauthorized.withHeaders(WWW_AUTHENTICATE -> """Basic realm="Secured""""))
-  }
-
-  def isUnsecure(request: Request[A]) = !request.secure
 
   def getCredentialsFromAuthHeader(authHeader: String): Option[UserCredentials] = {
     def getToken(authHeader: String): Option[String] = authHeader.split(" ").drop(1).headOption
@@ -71,5 +45,14 @@ case class SecuredAction[A](action: Action[A]) extends Action[A] {
       }
     }
   }
+
+  def isAuthorized(userCredentials: UserCredentials): Future[Option[UserId]] = {
+    UserService.authorizeUser(userCredentials)
+  }
+
+  def requestAuthorization: Future[Result] = {
+    Future.successful(Unauthorized.withHeaders(WWW_AUTHENTICATE -> """Basic realm="Secured""""))
+  }
 }
 
+class SecuredRequest[A](val userId: UserId, request: Request[A]) extends WrappedRequest[A](request)
