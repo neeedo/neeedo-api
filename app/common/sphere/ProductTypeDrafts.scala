@@ -46,14 +46,17 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
 
   private def tags: AttributeDefinition = AttributeDefinitionBuilder
     .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), SetType.of(TextType.of()))
+    .isSearchable(false)
     .build()
 
   private def mustTags: AttributeDefinition = AttributeDefinitionBuilder
     .of("mustTags", LocalizedStrings.of(Locale.ENGLISH, "mustTags"), SetType.of(TextType.of()))
+    .isSearchable(false)
     .build()
 
   private def shouldTags: AttributeDefinition = AttributeDefinitionBuilder
     .of("shouldTags", LocalizedStrings.of(Locale.ENGLISH, "shouldTags"), SetType.of(TextType.of()))
+    .isSearchable(false)
     .build()
 
   private def longitude: AttributeDefinition = AttributeDefinitionBuilder
@@ -88,6 +91,7 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
 
   private def images: AttributeDefinition = AttributeDefinitionBuilder
     .of("images", LocalizedStrings.of(Locale.ENGLISH, "images"), SetType.of(TextType.of()))
+    .isSearchable(false)
     .build()
 
 }
