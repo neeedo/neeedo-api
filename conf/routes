@@ -18,7 +18,6 @@ OPTIONS        /demands                     @controllers.StaticController.delive
 GET            /offers/:id                  @controllers.OffersController.getOffer(id: model.OfferId)
 GET            /offers/users/:id            @controllers.OffersController.getOffersByUserId(id: common.domain.UserId)
 POST           /offers                      @controllers.OffersController.createOffer()
-POST           /offers/images/:id           @controllers.OffersController.addImageToOffer(id: model.OfferId)
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()

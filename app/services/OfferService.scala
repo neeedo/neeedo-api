@@ -41,14 +41,6 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
       case e: Exception => throw e
     }
   }
-
-  def addImageToOffer(id: OfferId, img: ExternalImage): Future[Offer] = {
-    addImageToOffer(id, img) flatMap {
-      offer => esOfferService.addImageToOffer(offer.id, img)
-    } recover {
-      case e: Exception => throw e
-    }
-  }
 }
 
 
