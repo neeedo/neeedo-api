@@ -53,7 +53,7 @@ object Offer extends ModelUtils with OfferImplicits {
         OfferId(product.getId),
         Version(product.getVersion),
         UserId(readStringAttribute(variant, "userId")),
-        readStringAttribute(variant, "tags").split(";").toSet,
+        readStringSetAttribute(variant, "tags"),
         Location(
           Longitude(readDoubleAttribute(variant, "longitude")),
           Latitude(readDoubleAttribute(variant, "latitude"))

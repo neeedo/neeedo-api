@@ -221,7 +221,7 @@ object TestData {
 
   val offerProductAttributeList = List(
     Attribute.of("userId", userId.value),
-    Attribute.of("tags", tags.mkString(";")),
+    Attribute.of("tags", tags),
     Attribute.of("longitude", location.lon.value),
     Attribute.of("latitude", location.lat.value),
     Attribute.of("price", MoneyImpl.of(BigDecimal(price.value).bigDecimal, DefaultCurrencyUnits.EUR)),

@@ -116,7 +116,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
 
     val productAttributeList = List(
       Attribute.of("userId", offer.uid.value),
-      Attribute.of("tags", offer.tags.mkString(";")),
+      Attribute.of("tags", offer.tags.asJava),
       Attribute.of("longitude", offer.location.lon.value),
       Attribute.of("latitude", offer.location.lat.value),
       Attribute.of(

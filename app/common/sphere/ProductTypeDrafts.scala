@@ -45,9 +45,7 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
     .build()
 
   private def tags: AttributeDefinition = AttributeDefinitionBuilder
-    .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), TextType.of())
-    .isRequired(true)
-    .inputHint(TextInputHint.SINGLE_LINE)
+    .of("tags", LocalizedStrings.of(Locale.ENGLISH, "tags"), SetType.of(TextType.of()))
     .build()
 
   private def mustTags: AttributeDefinition = AttributeDefinitionBuilder

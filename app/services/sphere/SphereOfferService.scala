@@ -53,7 +53,7 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
 
   private[sphere] def buildOfferAttributes(offerDraft: OfferDraft) = List(
     Attribute.of("userId", offerDraft.uid.value),
-    Attribute.of("tags", offerDraft.tags.mkString(";")),
+    Attribute.of("tags", offerDraft.tags.asJava),
     Attribute.of("longitude", offerDraft.location.lon.value),
     Attribute.of("latitude", offerDraft.location.lat.value),
     Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR")),
