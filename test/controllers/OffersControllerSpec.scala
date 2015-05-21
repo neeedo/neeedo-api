@@ -151,7 +151,7 @@ class OffersControllerSpec extends Specification with Mockito {
       val offer = TestData.offer
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option(offer))
 
-      val res: Future[Result] = ctrl.getOffer(OfferId("1"))(emptyBodyGetFakeRequest)
+      val res: Future[Result] = ctrl.getOfferById(OfferId("1"))(emptyBodyGetFakeRequest)
 
       Helpers.status(res) must equalTo(200)
       Helpers.contentAsString(res) must equalTo(Json.obj("offer" -> Json.toJson(offer)).toString())
@@ -162,7 +162,7 @@ class OffersControllerSpec extends Specification with Mockito {
       val ctrl = new OffersController(offerService)
       offerService.getOfferById(OfferId("1")) returns Future.successful(Option.empty[Offer])
 
-      val res: Future[Result] = ctrl.getOffer(OfferId("1"))(emptyBodyGetFakeRequest)
+      val res: Future[Result] = ctrl.getOfferById(OfferId("1"))(emptyBodyGetFakeRequest)
 
       Helpers.status(res) must equalTo(404)
       Helpers.contentAsString(res) must equalTo(Json.obj("error" -> "Offer not found").toString())

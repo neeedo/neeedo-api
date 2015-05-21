@@ -15,7 +15,7 @@ DELETE         /demands/:id/:version        @controllers.DemandsController.delet
 OPTIONS        /demands                     @controllers.StaticController.deliverCorsHeaders()
 
 # Offers
-GET            /offers/:id                  @controllers.OffersController.getOffer(id: model.OfferId)
+GET            /offers/:id                  @controllers.OffersController.getOfferById(id: model.OfferId)
 GET            /offers/users/:id            @controllers.OffersController.getOffersByUserId(id: common.domain.UserId)
 POST           /offers                      @controllers.OffersController.createOffer()
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
