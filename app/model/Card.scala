@@ -21,8 +21,8 @@ object Demand extends ModelUtils with DemandImplicits {
           DemandId(product.getId),
           Version(product.getVersion),
           UserId(readStringAttribute(variant, "userId")),
-          readStringAttribute(variant, "mustTags").split(";").toSet,
-          readStringAttribute(variant, "shouldTags").split(";").toSet,
+          readStringSetAttribute(variant, "mustTags"),
+          readStringSetAttribute(variant, "shouldTags"),
           Location(
             Longitude(readDoubleAttribute(variant, "longitude")),
             Latitude(readDoubleAttribute(variant, "latitude"))

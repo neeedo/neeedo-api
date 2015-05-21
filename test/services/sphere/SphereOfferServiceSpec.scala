@@ -60,7 +60,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     "buildOfferAttributes must return valid AttributeList" in new SphereOfferServiceContext {
       val offerAttributes = service.buildOfferAttributes(draft).asScala
       offerAttributes must contain(Attribute.of("userId", draft.uid.value))
-      offerAttributes must contain(Attribute.of("tags", draft.tags.mkString(";")))
+      offerAttributes must contain(Attribute.of("tags", draft.tags.asJava))
       offerAttributes must contain(Attribute.of("longitude", draft.location.lon.value))
       offerAttributes must contain(Attribute.of("latitude", draft.location.lat.value))
       offerAttributes must contain(Attribute.of("price", MoneyImpl.of(BigDecimal(draft.price.value).bigDecimal, "EUR")))

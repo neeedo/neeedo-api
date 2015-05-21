@@ -23,8 +23,8 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
   //TODO move later to refactored demandservice (dumb doman classes, clever models, clever services)
   def buildDemandAttributes(demandDraft: DemandDraft) = List(
     Attribute.of("userId", demandDraft.uid.value),
-    Attribute.of("mustTags", demandDraft.mustTags.mkString(";")),
-    Attribute.of("shouldTags", demandDraft.shouldTags.mkString(";")),
+    Attribute.of("mustTags", demandDraft.mustTags.asJava),
+    Attribute.of("shouldTags", demandDraft.shouldTags.asJava),
     Attribute.of("longitude", demandDraft.location.lon.value),
     Attribute.of("latitude", demandDraft.location.lat.value),
     Attribute.of("distance", demandDraft.distance.value),
@@ -49,15 +49,11 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
     .build()
 
   private def mustTags: AttributeDefinition = AttributeDefinitionBuilder
-    .of("mustTags", LocalizedStrings.of(Locale.ENGLISH, "mustTags"), TextType.of())
-    .isRequired(true)
-    .inputHint(TextInputHint.SINGLE_LINE)
+    .of("mustTags", LocalizedStrings.of(Locale.ENGLISH, "mustTags"), SetType.of(TextType.of()))
     .build()
 
   private def shouldTags: AttributeDefinition = AttributeDefinitionBuilder
-    .of("shouldTags", LocalizedStrings.of(Locale.ENGLISH, "shouldTags"), TextType.of())
-    .isRequired(true)
-    .inputHint(TextInputHint.SINGLE_LINE)
+    .of("shouldTags", LocalizedStrings.of(Locale.ENGLISH, "shouldTags"), SetType.of(TextType.of()))
     .build()
 
   private def longitude: AttributeDefinition = AttributeDefinitionBuilder

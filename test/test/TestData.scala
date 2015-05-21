@@ -132,8 +132,8 @@ object TestData {
 
   val demandProductAttributeList = List(
     Attribute.of("userId", userId.value),
-    Attribute.of("mustTags", tags.mkString(";")),
-    Attribute.of("shouldTags", shouldTags.mkString(";")),
+    Attribute.of("mustTags", tags.asJava),
+    Attribute.of("shouldTags", shouldTags.asJava),
     Attribute.of("longitude", location.lon.value),
     Attribute.of("latitude", location.lat.value),
     Attribute.of("distance", distance.value),
@@ -221,11 +221,11 @@ object TestData {
 
   val offerProductAttributeList = List(
     Attribute.of("userId", userId.value),
-    Attribute.of("tags", tags),
+    Attribute.of("tags", tags.asJava),
     Attribute.of("longitude", location.lon.value),
     Attribute.of("latitude", location.lat.value),
     Attribute.of("price", MoneyImpl.of(BigDecimal(price.value).bigDecimal, DefaultCurrencyUnits.EUR)),
-    Attribute.of("images", images)
+    Attribute.of("images", images.asJava)
   ).asJava
 
 }
