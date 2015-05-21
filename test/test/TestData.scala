@@ -26,6 +26,7 @@ object TestData {
   val price = Price(50)
   val priceMin = Price(0)
   val priceMax = Price(500)
+  val images = Set.empty[String]
 
   val demand = Demand(
     demandId,
@@ -147,7 +148,7 @@ object TestData {
     tags,
     location,
     price,
-    List.empty)
+    images)
 
   val offerJson: JsObject = Json.obj(
     "id" -> offerId.value,
@@ -158,7 +159,8 @@ object TestData {
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
     ),
-    "price" -> price.value
+    "price" -> price.value,
+    "images" -> images
   )
 
   val offerJsonWithCompletionTags: JsObject = Json.obj(
@@ -171,7 +173,8 @@ object TestData {
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
     ),
-    "price" -> price.value
+    "price" -> price.value,
+    "images" -> images
   )
 
   val offerJsonWithWhitespaces: JsObject = Json.obj(
@@ -183,14 +186,16 @@ object TestData {
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
     ),
-    "price" -> price.value
+    "price" -> price.value,
+    "images" -> images
   )
 
   val offerDraft = OfferDraft(
     userId,
     tags,
     location,
-    price)
+    price,
+    images)
 
   val offerDraftJson: JsObject = Json.obj(
     "userId" -> userId.value,
@@ -199,7 +204,8 @@ object TestData {
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
     ),
-    "price" -> price.value
+    "price" -> price.value,
+    "images" -> images
   )
 
   val offerDraftJsonWithWhitespaces: JsObject = Json.obj(
@@ -209,7 +215,8 @@ object TestData {
       "lat" -> location.lat.value,
       "lon" -> location.lon.value
     ),
-    "price" -> price.value
+    "price" -> price.value,
+    "images" -> images
   )
 
   val offerProductAttributeList = List(
@@ -217,7 +224,8 @@ object TestData {
     Attribute.of("tags", tags.mkString(";")),
     Attribute.of("longitude", location.lon.value),
     Attribute.of("latitude", location.lat.value),
-    Attribute.of("price", MoneyImpl.of(BigDecimal(price.value).bigDecimal, DefaultCurrencyUnits.EUR))
+    Attribute.of("price", MoneyImpl.of(BigDecimal(price.value).bigDecimal, DefaultCurrencyUnits.EUR)),
+    Attribute.of("images", images)
   ).asJava
 
 }

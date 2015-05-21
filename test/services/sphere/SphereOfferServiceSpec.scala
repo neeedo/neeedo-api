@@ -64,9 +64,10 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       offerAttributes must contain(Attribute.of("longitude", draft.location.lon.value))
       offerAttributes must contain(Attribute.of("latitude", draft.location.lat.value))
       offerAttributes must contain(Attribute.of("price", MoneyImpl.of(BigDecimal(draft.price.value).bigDecimal, "EUR")))
+      offerAttributes must contain(Attribute.of("images", draft.images.asJava))
     }
 
-    "deleteDraft must return SphereDeleteFailed when an exception occurs" in new SphereOfferServiceContext {
+    "deleteOffer must return SphereDeleteFailed when an exception occurs" in new SphereOfferServiceContext {
       sphereClientMock.execute(any[ProductDeleteCommand]) returns
         Future.failed(new Exception())
 
@@ -76,7 +77,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
         .execute(ProductDeleteCommand.of(Versioned.of(offer.id.value, offer.version.value)))
     }
 
-    "deleteDraft must return offer when sphere succeeds" in new SphereOfferServiceContext {
+    "deleteOffer must return offer when sphere succeeds" in new SphereOfferServiceContext {
       sphereClientMock.execute(any[ProductDeleteCommand]) returns Future(offerProduct)
 
       Await.result(service.deleteOffer(offer.id, offer.version), Duration.Inf) must
@@ -102,14 +103,15 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       Set("Socken Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),
       Price(50.00),
-      List()
+      Set.empty
     )
 
     val draft = OfferDraft(
       UserId("abc"),
       Set("Socken Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00)
+      Price(50.00),
+      Set.empty
     )
 
     val productAttributeList = List(
@@ -120,7 +122,8 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       Attribute.of(
         "price",
         MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal,
-          DefaultCurrencyUnits.EUR))
+          DefaultCurrencyUnits.EUR)),
+      Attribute.of("images", offer.images.asJava)
     ).asJava
 
     val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()

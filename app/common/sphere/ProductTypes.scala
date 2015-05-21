@@ -1,10 +1,8 @@
 package common.sphere
 
 import common.helper.ConfigLoader
-import io.sphere.sdk.attributes.AttributeDefinition
 import io.sphere.sdk.producttypes.{ProductTypeBuilder, ProductType}
 import io.sphere.sdk.producttypes.queries.ProductTypeQuery
-import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 

@@ -1,9 +1,9 @@
 package model
 
 import common.domain._
-import io.sphere.sdk.models.{Image => SphereImage}
 import io.sphere.sdk.products.Product
 import play.api.Logger
+
 
 import scala.util.Try
 
@@ -42,7 +42,7 @@ object Demand extends ModelUtils with DemandImplicits {
 
 
 case class Offer(id: OfferId, version: Version, uid: UserId, tags: Set[String],
-                 location: Location, price: Price, images: List[ExternalImage]) extends Card
+                 location: Location, price: Price, images: Set[String]) extends Card
 
 object Offer extends ModelUtils with OfferImplicits {
 
@@ -59,7 +59,7 @@ object Offer extends ModelUtils with OfferImplicits {
           Latitude(readDoubleAttribute(variant, "latitude"))
         ),
         Price(readMoneyAttribute(variant, "price").getNumber.doubleValue()),
-        readImages(variant)
+        readStringSetAttribute(variant, "images")
       )
     }
   }

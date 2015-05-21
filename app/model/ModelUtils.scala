@@ -1,8 +1,8 @@
 package model
 
-import common.domain.ExternalImage
 import io.sphere.sdk.attributes.AttributeAccess
 import io.sphere.sdk.products.ProductVariant
+import java.util
 import scala.collection.JavaConverters._
 
 trait ModelUtils {
@@ -18,6 +18,9 @@ trait ModelUtils {
   def readMoneyAttribute(variant: ProductVariant, name: String) =
     getAttribute(variant, name).getValue(AttributeAccess.ofMoney().attributeMapper())
 
-  def readImages(variant: ProductVariant) =
-    variant.getImages.asScala.toList map {img => ExternalImage.fromSphereImage(img)}
+  def readStringSetAttribute(variant: ProductVariant, name: String) = {
+    val s: util.Set[String] = getAttribute(variant, name).getValue(AttributeAccess.ofStringSet().attributeMapper())
+    collection.immutable.Seq(s.asScala.toSeq: _*).toSet
+  }
+
 }

@@ -61,7 +61,8 @@ class ControllerUtilsSpec extends Specification {
       userId,
       Set("Socken"),
       Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00)
+      Price(50.00),
+      Set.empty
     )
 
     val jsonWithUserId = Json.toJson(draft)

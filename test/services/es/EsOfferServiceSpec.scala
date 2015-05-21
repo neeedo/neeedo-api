@@ -102,7 +102,7 @@ class EsOfferServiceSpec extends Specification with Mockito {
       Set("Socken"),
       Location(Longitude(12.2), Latitude(15.5)),
       Price(50.00),
-      List()
+      Set.empty
     )
   }
 }

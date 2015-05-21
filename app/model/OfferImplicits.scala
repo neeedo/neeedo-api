@@ -13,9 +13,10 @@ trait OfferImplicits {
     (JsPath \ "tags").read[Set[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
     (JsPath \ "location" \ "lon").read[Double] and
-    (JsPath \ "price").read[Double]
+    (JsPath \ "price").read[Double] and
+    (JsPath \ "images").read[Set[String]]
     ) {
-    (id, version, uid, tags, lat, lon, price) =>
+    (id, version, uid, tags, lat, lon, price, images) =>
       Offer(
         OfferId(id),
         Version(version),
@@ -26,7 +27,7 @@ trait OfferImplicits {
           Latitude(lat)
         ),
         Price(price),
-        List.empty
+        images.map(x => x.trim).filter(_ != "")
       )
   }
 
@@ -40,7 +41,8 @@ trait OfferImplicits {
         "lat" -> o.location.lat.value,
         "lon" -> o.location.lon.value
       ),
-      "price" -> o.price.value
+      "price" -> o.price.value,
+      "images" ->o.images
     )
   }
 

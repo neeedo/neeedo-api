@@ -2,7 +2,7 @@ package common.sphere
 
 import java.util.Locale
 
-import common.domain.{OfferDraft, DemandDraft}
+import common.domain.{DemandDraft}
 import common.helper.ConfigLoader
 import io.sphere.sdk.attributes._
 import io.sphere.sdk.models.LocalizedStrings
@@ -36,7 +36,7 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
     List(userId, mustTags, shouldTags, longitude, latitude, distance, priceMin, priceMax).asJava
 
   private def offerAttributes: java.util.List[AttributeDefinition] =
-    List(userId, tags, longitude, latitude, price).asJava
+    List(userId, tags, longitude, latitude, price, images).asJava
 
   private def userId: AttributeDefinition = AttributeDefinitionBuilder
     .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextType.of())
@@ -91,4 +91,9 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
     .of("priceMax", LocalizedStrings.of(Locale.ENGLISH, "priceMax"), MoneyType.of())
     .isRequired(false)
     .build()
+
+  private def images: AttributeDefinition = AttributeDefinitionBuilder
+    .of("images", LocalizedStrings.of(Locale.ENGLISH, "images"), SetType.of(TextType.of()))
+    .build()
+
 }

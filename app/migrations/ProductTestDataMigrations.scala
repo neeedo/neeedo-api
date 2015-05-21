@@ -52,10 +52,10 @@ class ProductTestDataMigrations(sphereClient: SphereClient, demandService: Deman
   }
 
   def createOffers(): Future[Unit] = {
-    val offerDraft1 = OfferDraft(UserId("1"), Set("smartphone", "neuwertig", "iphone"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95))
-    val offerDraft2 = OfferDraft(UserId("1"), Set("playstation3", "gebraucht"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95))
-    val offerDraft3 = OfferDraft(UserId("1"), Set("bürostuhl", "armlehnen", "schwarz"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95))
-    val offerDraft4 = OfferDraft(UserId("1"), Set("iphone", "gebraucht"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95))
+    val offerDraft1 = OfferDraft(UserId("1"), Set("smartphone", "neuwertig", "iphone"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95), Set())
+    val offerDraft2 = OfferDraft(UserId("1"), Set("playstation3", "gebraucht"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95), Set())
+    val offerDraft3 = OfferDraft(UserId("1"), Set("bürostuhl", "armlehnen", "schwarz"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95), Set())
+    val offerDraft4 = OfferDraft(UserId("1"), Set("iphone", "gebraucht"), Location(Longitude(52.468562), Latitude(13.534212)), Price(299.95), Set())
     val offerDrafts = offerDraft1 :: offerDraft2 :: offerDraft3 :: offerDraft4 :: Nil
 
     Future.sequence { offerDrafts.map(offerService.createOffer) }.map { x => MigrationsLogger.info("-> Creating Test Offers")}

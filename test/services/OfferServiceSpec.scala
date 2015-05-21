@@ -26,11 +26,10 @@ class OfferServiceSpec extends Specification with Mockito {
       there was no (esOfferServiceMock).createOffer(offer)
     }
 
-    "createOffer must return EsIndexFailed when sphereOfferService fails" in new OfferServiceContext {
+    "createOffer must return EsIndexFailed when esOfferService fails" in new OfferServiceContext {
       sphereOfferServiceMock.createOffer(any[OfferDraft]) returns Future(offer)
+      esOfferServiceMock.createOffer(any[Offer]) returns Future.failed(new ElasticSearchIndexFailed(""))
       sphereOfferServiceMock.deleteOffer(any[OfferId], any[Version]) returns Future(offer)
-      esOfferServiceMock.createOffer(any[Offer]) returns
-        Future.failed(new ElasticSearchIndexFailed(""))
 
       Await.result(service.createOffer(draft), Duration.Inf) must throwA[ElasticSearchIndexFailed]
       there was one (sphereOfferServiceMock).createOffer(draft)
@@ -38,9 +37,9 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (sphereOfferServiceMock).deleteOffer(offer.id, offer.version)
     }
 
-    "createOffer must return offer if es and sphere are succeeding" in new OfferServiceContext {
-      sphereOfferServiceMock.createOffer(any[OfferDraft]) returns Future(offer)
-      esOfferServiceMock.createOffer(any[Offer]) returns Future(offer)
+    "createOffer must return offer if elasticsearch and sphere succeed" in new OfferServiceContext {
+      sphereOfferServiceMock.createOffer(draft) returns Future(offer)
+      esOfferServiceMock.createOffer(offer) returns Future(offer)
 
       Await.result(service.createOffer(draft), Duration.Inf) must beEqualTo(offer)
       there was one (sphereOfferServiceMock).createOffer(draft)
@@ -87,7 +86,8 @@ class OfferServiceSpec extends Specification with Mockito {
       UserId("abc"),
       Set("Socken"),
       Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00)
+      Price(50.00),
+      Set.empty
     )
 
     val offer = Offer(
@@ -97,7 +97,7 @@ class OfferServiceSpec extends Specification with Mockito {
       Set("Socken"),
       Location(Longitude(12.2), Latitude(15.5)),
       Price(50.00),
-      List()
+      Set.empty
     )
   }
 }

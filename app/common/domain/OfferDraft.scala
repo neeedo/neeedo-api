@@ -9,7 +9,8 @@ case class OfferDraft(
   uid: UserId,
   tags: Set[String],
   location: Location,
-  price: Price)
+  price: Price,
+  images: Set[String])
 
 object OfferDraft {
 
@@ -20,9 +21,10 @@ object OfferDraft {
     (JsPath \ "tags").read[Set[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
     (JsPath \ "location" \ "lon").read[Double] and
-    (JsPath \ "price").read[Double]
+    (JsPath \ "price").read[Double] and
+    (JsPath \ "images").read[Set[String]]
   ) {
-    (uid, tags, lat, lon, price) =>
+    (uid, tags, lat, lon, price, images) =>
       OfferDraft(
         UserId(uid),
         tags.map(x => x.trim).filter(!_.equals("")),
@@ -30,7 +32,8 @@ object OfferDraft {
           Longitude(lon),
           Latitude(lat)
         ),
-        Price(price)
+        Price(price),
+        images.map(x => x.trim).filter(!_.equals(""))
       )
   }
 
@@ -42,7 +45,8 @@ object OfferDraft {
         "lat" -> o.location.lat.value,
         "lon" -> o.location.lon.value
       ),
-      "price" -> o.price.value
+      "price" -> o.price.value,
+      "images" ->o.images
     )
   }
 }
