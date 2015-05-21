@@ -56,7 +56,8 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     Attribute.of("tags", offerDraft.tags.mkString(";")),
     Attribute.of("longitude", offerDraft.location.lon.value),
     Attribute.of("latitude", offerDraft.location.lat.value),
-    Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR"))
+    Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR")),
+    Attribute.of("images", offerDraft.images.asJava)
   ).asJava
 
   def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
