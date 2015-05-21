@@ -25,17 +25,11 @@ class UploadService(s3Client: S3Client) {
   def uploadFile(image: FilePart[TemporaryFile]): Future[String] = {
     def getExtension(filename: String) = filename.substring(filename.lastIndexOf("."))
 
-    val filename = image.filename
-    val uniqueFile = new File(s"resources/${UUID.randomUUID}_$filename")
-    image.ref.moveTo(uniqueFile)
+    val newFilename = UUID.randomUUID + getExtension(image.filename)
+    val newFile = new File(s"resources/$newFilename")
+    image.ref.moveTo(newFile)
 
-    val fileHash = FileHash(uniqueFile)
-    val fileExt = getExtension(uniqueFile.getName)
-    val newFilename = fileHash.value + fileExt
-
-    val res: Future[String] = s3Client.putObject(newFilename, uniqueFile).map(_ => newFilename)
-    uniqueFile.delete()
-    res
+    s3Client.putObject(newFilename, newFile).map(_ => newFilename)
   }
 
   def deleteFile(fileHash: FileHash) = {
