@@ -69,7 +69,7 @@ class DemandService(elasticsearch: ElasticsearchClient, sphereClient: SphereClie
   }
 
   def writeDemandToSphere(demandDraft: DemandDraft): Future[Option[Demand]] = {
-    val name  = DemandDraft.generateName(demandDraft) + " " + Random.nextInt(1000)
+    val name  = DemandDraft.generateName(demandDraft)
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
     val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()

@@ -1,22 +1,22 @@
 package common.domain
 
+import java.util.UUID
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
-import scala.util.Random
 
 case class DemandDraft(
 	uid: UserId,
 	mustTags: Set[String],
   shouldTags: Set[String],
 	location: Location,
-distance: Distance,
-priceMin: Price,
-priceMax: Price)
+	distance: Distance,
+	priceMin: Price,
+	priceMax: Price)
 
 object DemandDraft {
 
-	def generateName(demandDraft: DemandDraft) = "Suche: " + demandDraft.mustTags.mkString(" ")
+	def generateName(demandDraft: DemandDraft) = s"Suche: ${demandDraft.mustTags.mkString(" ")} ${UUID.randomUUID()}"
 
 	implicit val demandReads: Reads[DemandDraft] = (
 		(JsPath \ "userId").read[String] and
