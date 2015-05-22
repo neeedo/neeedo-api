@@ -2,9 +2,8 @@ package services
 
 import java.util.UUID
 
-import com.amazonaws.services.s3.model.{ObjectMetadata, S3Object}
 import common.amazon.S3Client
-import common.domain.FileHash
+import common.domain.ImageId
 import java.io.File
 
 import play.api.libs.Files.TemporaryFile
@@ -13,16 +12,14 @@ import play.api.mvc.MultipartFormData.FilePart
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UploadService(s3Client: S3Client) {
+class ImageService(s3Client: S3Client) {
 
-  def getFile(filename: String): Future[File] = {
-    val file = new File(s"resources/$filename")
-    s3Client.getObject(filename, file) map {
-      _ => file
-    }
+  def getImageById(id: ImageId): Future[File] = {
+    val image = new File(s"resources/${id.value}")
+    s3Client.getObject(id.value, image) map { _ => image }
   }
 
-  def uploadFile(image: FilePart[TemporaryFile]): Future[String] = {
+  def createImage(image: FilePart[TemporaryFile]): Future[String] = {
     def getExtension(filename: String) = filename.substring(filename.lastIndexOf("."))
 
     val newFilename = UUID.randomUUID + getExtension(image.filename)
@@ -32,8 +29,5 @@ class UploadService(s3Client: S3Client) {
     s3Client.putObject(newFilename, newFile).map(_ => newFilename)
   }
 
-  def deleteFile(fileHash: FileHash) = {
-    s3Client.deleteObject(fileHash.value)
-  }
-
+  def deleteFile(id: ImageId) = s3Client.deleteObject(id.value)
 }

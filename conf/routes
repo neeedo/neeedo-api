@@ -42,8 +42,9 @@ PUT            /users/:id/:version          @controllers.UsersController.updateU
 DELETE         /users/:id/:version          @controllers.UsersController.deleteUser(id: common.domain.UserId, version: common.domain.Version)
 
 #
-GET            /images/:id                  @controllers.ImagesController.getImage(id: String)
-POST           /images                      @controllers.ImagesController.upload()
+GET            /images/:id                  @controllers.ImagesController.getImageById(id: common.domain.ImageId)
+POST           /images                      @controllers.ImagesController.createImage()
+DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                controllers.Assets.at(path="/public", file)
