@@ -13,7 +13,7 @@ GET            /demands/users/:id           @controllers.DemandsController.getDe
 POST           /demands                     @controllers.DemandsController.createDemand()
 PUT            /demands/:id/:version        @controllers.DemandsController.updateDemand(id: model.DemandId, version: common.domain.Version)
 DELETE         /demands/:id/:version        @controllers.DemandsController.deleteDemand(id: model.DemandId, version: common.domain.Version)
-DELETE         /demands/all                  @controllers.DemandsController.deleteAllDemands()
+#DELETE         /demands/all                  @controllers.DemandsController.deleteAllDemands()
 OPTIONS        /demands                     @controllers.StaticController.deliverCorsHeaders()
 
 # Offers
@@ -22,7 +22,7 @@ GET            /offers/users/:id            @controllers.OffersController.getOff
 POST           /offers                      @controllers.OffersController.createOffer()
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
-DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
+#DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching
