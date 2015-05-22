@@ -77,4 +77,22 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
       case e: Exception => throwAndLogEsDeleteFailed(e)
     }
   }
+
+  def getAllOffers(): Future[List[Offer]] = {
+    elasticsearch.client
+      .prepareSearch(config.offerIndex.value)
+      .execute()
+      .asScala
+      .map {
+        response => elasticsearch.searchresponseAs[Offer](response)
+      }
+  }
+
+  def deleteAllOffers() = {
+    getAllOffers() map {
+      (offers: List[Offer]) => {
+        offers map { (offer: Offer) => deleteOffer(offer.id) }
+      }
+    }
+  }
 }

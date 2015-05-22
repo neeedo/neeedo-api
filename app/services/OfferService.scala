@@ -41,6 +41,11 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
       case e: Exception => throw e
     }
   }
+
+  def deleteAllOffers(): Future[Any] = {
+    esOfferService.deleteAllOffers()
+    sphereOfferService.deleteAllOffers()
+  }
 }
 
 

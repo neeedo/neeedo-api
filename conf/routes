@@ -20,6 +20,7 @@ GET            /offers/users/:id            @controllers.OffersController.getOff
 POST           /offers                      @controllers.OffersController.createOffer()
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
+DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching

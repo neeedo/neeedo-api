@@ -10,4 +10,5 @@ class SphereDeleteFailed(message: String) extends Exception(message)
 class InvalidConfiguration(message: String) extends Exception(message)
 class InvalidJson(message: String) extends Exception(message)
 class Unauthorized(message: String) extends Exception(message)
+class MalformedOffer(message: String) extends Exception(message)
 

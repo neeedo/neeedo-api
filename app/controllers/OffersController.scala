@@ -61,4 +61,10 @@ class OffersController(service: OfferService) extends Controller with Controller
         case e: Exception => e.asResult
       }
   }
+
+  def deleteAllOffers() = SecuredAction.async {
+    service.deleteAllOffers()
+      .map(_ => Ok)
+      .recover { case e: Exception => e.asResult }
+  }
 }

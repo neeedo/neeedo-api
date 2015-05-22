@@ -3,17 +3,16 @@ package services.sphere
 import java.util.Locale
 
 import com.github.slugify.Slugify
-import common.domain.{ExternalImage, OfferDraft, Version}
-import common.exceptions.{SphereDeleteFailed, ProductNotFound, SphereIndexFailed}
+import common.domain.{OfferDraft, Version}
+import common.exceptions.{MalformedOffer, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
 import common.logger.OfferLogger
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.{LocalizedStrings, Versioned}
 import io.sphere.sdk.products._
-import io.sphere.sdk.products.commands.updateactions.AddExternalImage
-import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand, ProductUpdateCommand}
-import io.sphere.sdk.products.queries.ProductByIdFetch
+import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand}
+import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{Offer, OfferId}
 import play.api.libs.json.Json
@@ -21,10 +20,20 @@ import play.api.libs.json.Json
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 
 class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts, productTypes: ProductTypes) {
+
+  def getOfferById(id: OfferId): Future[Option[Offer]] = {
+    getProductById(id) map {
+      case Some(product) => Offer.fromProduct(product).toOption
+      case None => None
+    }
+  }
+
+  private def getProductById(id: OfferId): Future[Option[Product]] = {
+    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
+  }
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
     def throwAndReportSphereIndexFailed(e: Exception) = {
@@ -63,22 +72,31 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
   def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
     val product: Versioned[Product] = Versioned.of(id.value, version.value)
 
-    sphereClient.execute(ProductDeleteCommand.of(product)) map {
-      // TODO Exception Nullpointer
-      Offer.fromProduct(_).get
-    } recover {
+    deleteProduct(product) map {
+      Offer.fromProduct(_)
+        .getOrElse(throw new MalformedOffer("Could not create Offer from Product"))
+    }
+  }
+
+  def deleteProduct(product: Versioned[Product]) = {
+    sphereClient.execute(ProductDeleteCommand.of(product))
+      .recover {
       case e: Exception => throw new SphereDeleteFailed("Offer could not be deleted")
     }
   }
 
-  private def getProductById(id: OfferId): Future[Option[Product]] = {
-    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
+  def getAllOffers(): Future[List[Product]] = {
+    val productQuery = ProductQuery.of().byProductType(productTypes.offer)
+
+    sphereClient.execute(productQuery)
+      .map { res => res.getResults.asScala.toList }
   }
 
-  def getOfferById(id: OfferId): Future[Option[Offer]] = {
-    getProductById(id) map {
-      case Some(product) => Offer.fromProduct(product).toOption
-      case None => None
+  def deleteAllOffers() = {
+    getAllOffers() map {
+      (offers: List[Product]) => {
+        offers map { product => deleteProduct(Versioned.of(product.getId, product.getVersion)) }
+      }
     }
   }
 }
