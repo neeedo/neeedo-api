@@ -4,6 +4,7 @@ import common.domain.{UserId, CompletionTag}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ProductNotFound, ElasticSearchIndexFailed}
 import common.helper.ConfigLoader
+import common.logger.DemandLogger
 import model.{DemandId, Demand}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.QueryBuilders
@@ -41,8 +42,8 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
 
   def createDemand(demand: Demand): Future[Demand] = {
     def throwAndReportEsIndexFailed(e: Exception) = {
-//      DemandLogger.error(s"Demand: ${Json.toJson(demand)} could not be saved in Elasticsearch" +
-//        s" Exception: ${e.getMessage}")
+      DemandLogger.error(s"Demand: ${Json.toJson(demand)} could not be saved in Elasticsearch" +
+        s" Exception: ${e.getMessage}")
       throw new ElasticSearchIndexFailed("Error while saving demand in elasticsearch")
     }
 
@@ -57,8 +58,8 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
 
   def deleteDemand(id: DemandId): Future[DemandId] = {
     def throwAndLogEsDeleteFailed(e: Exception) = {
-//      DemandLogger.error(s"Demand with id: ${id.value} could not be deleted from Elasticsearch. " +
-//        s"Exception: ${e.getMessage}")
+      DemandLogger.error(s"Demand with id: ${id.value} could not be deleted from Elasticsearch. " +
+        s"Exception: ${e.getMessage}")
       throw new ElasticSearchDeleteFailed("Error while deleting demand from Elasticsearch")
     }
 

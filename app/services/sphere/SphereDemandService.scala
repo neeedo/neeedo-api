@@ -6,6 +6,7 @@ import com.github.slugify.Slugify
 import common.domain.{Version, DemandDraft}
 import common.exceptions.{MalformedDemand, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
+import common.logger.DemandLogger
 import common.sphere.{ProductTypes, ProductTypeDrafts, SphereClient}
 import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.{Versioned, LocalizedStrings}
@@ -15,6 +16,7 @@ import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder}
 import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{CardId, DemandId, Demand}
+import play.api.libs.json.Json
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -42,8 +44,8 @@ class SphereDemandService(sphereClient: SphereClient, productTypeDrafts: Product
 
   def createDemand(draft: DemandDraft): Future[Demand] = {
     def throwAndReportSphereIndexFailed(e: Exception) = {
-//      DemandLogger.error(s"Demand: ${Json.toJson(draft)} could not be saved in Sphere. " +
-//        s"Exception: ${e.getMessage}")
+      DemandLogger.error(s"Demand: ${Json.toJson(draft)} could not be saved in Sphere. " +
+        s"Exception: ${e.getMessage}")
       throw new SphereIndexFailed("Error while saving demand in sphere")
     }
 

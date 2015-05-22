@@ -14,3 +14,7 @@ object EsLogger extends LoggerLike {
 object OfferLogger extends LoggerLike {
   override val logger: Logger = LoggerFactory.getLogger("Offer")
 }
+
+object DemandLogger extends LoggerLike {
+  override val logger: Logger = LoggerFactory.getLogger("Demand")
+}
