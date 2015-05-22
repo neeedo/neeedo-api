@@ -18,7 +18,7 @@ object DemandDraft {
 
 	def generateName(demandDraft: DemandDraft) = s"Suche: ${demandDraft.mustTags.mkString(" ")} ${UUID.randomUUID()}"
 
-	implicit val demandReads: Reads[DemandDraft] = (
+	implicit val demandDraftReads: Reads[DemandDraft] = (
 		(JsPath \ "userId").read[String] and
 		(JsPath \ "mustTags").read[Set[String]] and
 		(JsPath \ "shouldTags").read[Set[String]] and
@@ -40,7 +40,7 @@ object DemandDraft {
       )
 		}
 
-	implicit val demandWrites = new Writes[DemandDraft] {
+	implicit val demandDraftWrites = new Writes[DemandDraft] {
 		def writes(d: DemandDraft) = Json.obj(
 		  "userId" -> d.uid.value,
 		  "mustTags" -> d.mustTags,

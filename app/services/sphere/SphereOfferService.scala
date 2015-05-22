@@ -14,7 +14,7 @@ import io.sphere.sdk.products._
 import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand}
 import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
 import io.sphere.sdk.utils.MoneyImpl
-import model.{Offer, OfferId}
+import model.{CardId, Offer, OfferId}
 import play.api.libs.json.Json
 
 import scala.collection.JavaConverters._
@@ -31,8 +31,15 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     }
   }
 
-  private def getProductById(id: OfferId): Future[Option[Product]] = {
+  private def getProductById(id: CardId): Future[Option[Product]] = {
     sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
+  }
+
+  def getAllOffers(): Future[List[Product]] = {
+    val productQuery = ProductQuery.of().byProductType(productTypes.offer)
+
+    sphereClient.execute(productQuery)
+      .map { res => res.getResults.asScala.toList }
   }
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
@@ -46,6 +53,30 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
       product => Offer.fromProduct(product).get
     } recover {
       case e: Exception => throwAndReportSphereIndexFailed(e)
+    }
+  }
+
+  def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
+    val product: Versioned[Product] = Versioned.of(id.value, version.value)
+
+    deleteProduct(product) map {
+      Offer.fromProduct(_)
+        .getOrElse(throw new MalformedOffer("Could not create Offer from Product"))
+    }
+  }
+
+  def deleteProduct(product: Versioned[Product]) = {
+    sphereClient.execute(ProductDeleteCommand.of(product))
+      .recover {
+      case e: Exception => throw new SphereDeleteFailed("Offer could not be deleted")
+    }
+  }
+
+  def deleteAllOffers() = {
+    getAllOffers() map {
+      (offers: List[Product]) => {
+        offers map { product => deleteProduct(Versioned.of(product.getId, product.getVersion)) }
+      }
     }
   }
 
@@ -68,35 +99,4 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR")),
     Attribute.of("images", offerDraft.images.asJava)
   ).asJava
-
-  def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
-    val product: Versioned[Product] = Versioned.of(id.value, version.value)
-
-    deleteProduct(product) map {
-      Offer.fromProduct(_)
-        .getOrElse(throw new MalformedOffer("Could not create Offer from Product"))
-    }
-  }
-
-  def deleteProduct(product: Versioned[Product]) = {
-    sphereClient.execute(ProductDeleteCommand.of(product))
-      .recover {
-      case e: Exception => throw new SphereDeleteFailed("Offer could not be deleted")
-    }
-  }
-
-  def getAllOffers(): Future[List[Product]] = {
-    val productQuery = ProductQuery.of().byProductType(productTypes.offer)
-
-    sphereClient.execute(productQuery)
-      .map { res => res.getResults.asScala.toList }
-  }
-
-  def deleteAllOffers() = {
-    getAllOffers() map {
-      (offers: List[Product]) => {
-        offers map { product => deleteProduct(Versioned.of(product.getId, product.getVersion)) }
-      }
-    }
-  }
 }

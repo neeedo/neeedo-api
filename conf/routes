@@ -8,10 +8,12 @@ GET            /status                      @controllers.StaticController.status
 GET            /doc                         @controllers.StaticController.showDocumentation()
 
 # Demands
-GET            /demands/:id                 @controllers.DemandsController.getDemand(id: model.DemandId)
+GET            /demands/:id                 @controllers.DemandsController.getDemandById(id: model.DemandId)
+GET            /demands/users/:id           @controllers.DemandsController.getDemandsByUserId(id: common.domain.UserId)
 POST           /demands                     @controllers.DemandsController.createDemand()
 PUT            /demands/:id/:version        @controllers.DemandsController.updateDemand(id: model.DemandId, version: common.domain.Version)
 DELETE         /demands/:id/:version        @controllers.DemandsController.deleteDemand(id: model.DemandId, version: common.domain.Version)
+DELETE         /demands/all                  @controllers.DemandsController.deleteAllDemands()
 OPTIONS        /demands                     @controllers.StaticController.deliverCorsHeaders()
 
 # Offers

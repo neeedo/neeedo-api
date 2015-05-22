@@ -20,18 +20,6 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
       "desc",
       offerAttributes)
 
-  //TODO move later to refactored demandservice (dumb doman classes, clever models, clever services)
-  def buildDemandAttributes(demandDraft: DemandDraft) = List(
-    Attribute.of("userId", demandDraft.uid.value),
-    Attribute.of("mustTags", demandDraft.mustTags.asJava),
-    Attribute.of("shouldTags", demandDraft.shouldTags.asJava),
-    Attribute.of("longitude", demandDraft.location.lon.value),
-    Attribute.of("latitude", demandDraft.location.lat.value),
-    Attribute.of("distance", demandDraft.distance.value),
-    Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demandDraft.priceMin.value).bigDecimal, "EUR")),
-    Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demandDraft.priceMax.value).bigDecimal, "EUR"))
-  ).asJava
-
   private def demandAttributes: java.util.List[AttributeDefinition] =
     List(userId, mustTags, shouldTags, longitude, latitude, distance, priceMin, priceMax).asJava
 

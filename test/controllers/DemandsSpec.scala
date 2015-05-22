@@ -2,6 +2,7 @@ package controllers
 
 
 import common.domain.Version
+import common.exceptions.{ElasticSearchIndexFailed, ProductNotFound}
 import model.{DemandId, Demand}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
@@ -58,6 +59,13 @@ class DemandsSpec extends Specification with Mockito {
     AnyContentAsEmpty,
     secure = true)
 
+  val emptyBodyGetFakeRequest = new FakeRequest[AnyContent](
+    Helpers.GET,
+    "offer/1",
+    FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
+    AnyContentAsEmpty,
+    secure = true)
+
   "Demands Controller" should {
 
     "demand controller must return 401 for wrong user credentials in secured actions" in TestApplications.loggingOffApp() {
@@ -92,7 +100,7 @@ class DemandsSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.createDemand()(emptyBodyCreateFakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body json object\"}")
     }
 
 
@@ -105,25 +113,25 @@ class DemandsSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.createDemand()(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Invalid json body\"}")
     }
 
-    "createDemand must return 400 unknown error when dermandService returns empty option" in TestApplications.loggingOffApp() {
+    "createDemand must return InternalServerError when dermandService returns empty option" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new DemandsController(demandService)
-      demandService.createDemand(demandDraft) returns Future.successful(Option.empty)
+      demandService.createDemand(demandDraft) returns Future.failed(new Exception("Unknown error"))
       val fakeRequest = emptyBodyCreateFakeRequest
         .withJsonBody(demandDraftJson)
       val res: Future[Result] = ctrl.createDemand()(fakeRequest)
 
-      Helpers.status(res) must equalTo(400)
+      Helpers.status(res) must equalTo(500)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Unknown error\"}")
     }
 
     "createDemand must return 200 when dermandService returns demand" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new DemandsController(demandService)
-      demandService.createDemand(demandDraft) returns Future.successful(Option(demand))
+      demandService.createDemand(demandDraft) returns Future(demand)
 
       val fakeRequest = emptyBodyCreateFakeRequest
         .withJsonBody(demandDraftJson)
@@ -138,7 +146,7 @@ class DemandsSpec extends Specification with Mockito {
       val ctrl = new DemandsController(demandService)
       demandService.getDemandById(demandId) returns Future.successful(Option(demand))
 
-      val res: Future[Result] = ctrl.getDemand(demandId)(FakeRequest())
+      val res: Future[Result] = ctrl.getDemandById(demandId)(emptyBodyGetFakeRequest)
 
       Helpers.status(res) must equalTo(200)
       Helpers.contentAsString(res) must equalTo(Json.obj("demand" -> demandJson).toString())
@@ -149,16 +157,16 @@ class DemandsSpec extends Specification with Mockito {
       val ctrl = new DemandsController(demandService)
       demandService.getDemandById(demandId) returns Future.successful(Option.empty[Demand])
 
-      val res: Future[Result] = ctrl.getDemand(demandId)(FakeRequest())
+      val res: Future[Result] = ctrl.getDemandById(demandId)(emptyBodyGetFakeRequest)
 
       Helpers.status(res) must equalTo(404)
-      Helpers.contentAsString(res) must equalTo(Json.obj("error" -> "Demand Entity not found").toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("error" -> "Demand not found").toString())
     }
 
     "deleteDemand must return 200 for a valid id and version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new DemandsController(demandService)
-      demandService.deleteDemand(demandId, demandVersion) returns Future.successful(Option(demand))
+      demandService.deleteDemand(demandId, demandVersion) returns Future(demand)
 
       val res: Future[Result] = ctrl.deleteDemand(demandId, demandVersion)(emptyBodyDeleteFakeRequest)
 
@@ -168,7 +176,7 @@ class DemandsSpec extends Specification with Mockito {
     "deleteDemand must return 404 for an invalid id or version" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new DemandsController(demandService)
-      demandService.deleteDemand(demandId, demandVersion) returns Future.successful(Option.empty[Demand])
+      demandService.deleteDemand(demandId, demandVersion) returns Future.failed(new ProductNotFound(""))
 
       val res: Future[Result] = ctrl.deleteDemand(demandId, demandVersion)(emptyBodyDeleteFakeRequest)
 
@@ -181,7 +189,7 @@ class DemandsSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(emptyBodyCreateFakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body json object\"}")
     }
 
 
@@ -194,25 +202,25 @@ class DemandsSpec extends Specification with Mockito {
       val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Invalid json body\"}")
     }
 
-    "updateDemands must return 400 unknown error when dermandService returns empty option" in TestApplications.loggingOffApp() {
+    "updateDemands must return 500 internal server error when dermandService returns elasticsearchIndexException" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new DemandsController(demandService)
-      demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.successful(Option.empty)
+      demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.failed(new ElasticSearchIndexFailed("Index Failed"))
       val fakeRequest = emptyBodyUpdateFakeRequest
         .withJsonBody(demandDraftJson)
       val res: Future[Result] = ctrl.updateDemand(demandId, demandVersion)(fakeRequest)
 
-      Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Unknown error\"}")
+      Helpers.status(res) must equalTo(500)
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Index Failed\"}")
     }
 
     "updateDemands must return 200 when dermandService returns demand" in TestApplications.loggingOffApp() {
       val demandService = mock[DemandService]
       val ctrl = new DemandsController(demandService)
-      demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future.successful(Option(demand))
+      demandService.updateDemand(demandId, demandVersion, demandDraft) returns Future(demand)
 
       val fakeRequest = emptyBodyUpdateFakeRequest
         .withJsonBody(demandDraftJson)

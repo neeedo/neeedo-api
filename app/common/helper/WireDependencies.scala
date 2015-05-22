@@ -6,8 +6,8 @@ import controllers._
 import migrations._
 import play.api.{Mode, Play}
 import services._
-import services.es.EsOfferService
-import services.sphere.SphereOfferService
+import services.es.{EsDemandService, EsOfferService}
+import services.sphere.{SphereDemandService, SphereOfferService}
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
@@ -31,12 +31,16 @@ trait WireDependencies {
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
   lazy val uploadService = wire[UploadService]
+
   //// Elasticsearch
   lazy val esOfferService = wire[EsOfferService]
+  lazy val esDemandService = wire[EsDemandService]
   lazy val esMatchingService = wire[EsMatchingService]
   lazy val esCompletionService = wire[EsCompletionService]
+
   //// Sphere
   lazy val sphereOfferService = wire[SphereOfferService]
+  lazy val sphereDemandService = wire[SphereDemandService]
 
   // Controllers
   lazy val demandController = wire[DemandsController]

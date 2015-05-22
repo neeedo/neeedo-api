@@ -14,27 +14,23 @@ case class Demand(id: DemandId, version: Version, uid: UserId, mustTags: Set[Str
 
 object Demand extends ModelUtils with DemandImplicits {
 
-  def fromProduct(product: Product): Option[Demand] = {
+  def fromProduct(product: Product): Try[Demand] = {
     val variant = product.getMasterData.getStaged.getMasterVariant
-    try {
-      Some(Demand(
-          DemandId(product.getId),
-          Version(product.getVersion),
-          UserId(readStringAttribute(variant, "userId")),
-          readStringSetAttribute(variant, "mustTags"),
-          readStringSetAttribute(variant, "shouldTags"),
-          Location(
-            Longitude(readDoubleAttribute(variant, "longitude")),
-            Latitude(readDoubleAttribute(variant, "latitude"))
-          ),
-          Distance(readDoubleAttribute(variant, "distance").intValue()),
-          Price(readMoneyAttribute(variant, "priceMin").getNumber.doubleValue()),
-          Price(readMoneyAttribute(variant, "priceMax").getNumber.doubleValue())
-      ))
-    } catch {
-      case e: Exception =>
-        Logger.error(s"Failed to parse product as a valid Demand.")
-        None
+    Try {
+      Demand(
+        DemandId(product.getId),
+        Version(product.getVersion),
+        UserId(readStringAttribute(variant, "userId")),
+        readStringSetAttribute(variant, "mustTags"),
+        readStringSetAttribute(variant, "shouldTags"),
+        Location(
+          Longitude(readDoubleAttribute(variant, "longitude")),
+          Latitude(readDoubleAttribute(variant, "latitude"))
+        ),
+        Distance(readDoubleAttribute(variant, "distance").intValue()),
+        Price(readMoneyAttribute(variant, "priceMin").getNumber.doubleValue()),
+        Price(readMoneyAttribute(variant, "priceMax").getNumber.doubleValue())
+      )
     }
   }
 

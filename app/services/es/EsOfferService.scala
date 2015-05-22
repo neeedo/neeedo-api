@@ -1,6 +1,6 @@
 package services.es
 
-import common.domain.{ExternalImage, CompletionTag, UserId}
+import common.domain.{CompletionTag, UserId}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.ConfigLoader
@@ -16,8 +16,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
-  // TODO
-  def addImageToOffer(id: OfferId, image: ExternalImage): Future[Offer] = ???
 
   def getOffersByUserId(id: UserId): Future[List[Offer]] = {
      elasticsearch.client
@@ -29,6 +27,16 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
        .map {
          response => elasticsearch.searchresponseAs[Offer](response)
        }
+  }
+
+  def getAllOffers(): Future[List[Offer]] = {
+    elasticsearch.client
+      .prepareSearch(config.offerIndex.value)
+      .execute()
+      .asScala
+      .map {
+      response => elasticsearch.searchresponseAs[Offer](response)
+    }
   }
 
   def createOffer(offer: Offer): Future[Offer] = {
@@ -45,17 +53,6 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
       .recover {
         case e: Exception => throwAndReportEsIndexFailed(e)
       }
-  }
-
-  private[es] def parseIndexResponse(indexResponse: IndexResponse, offer: Offer) = {
-    if (indexResponse.isCreated) {
-      esCompletionService.upsertCompletions(offer.tags.map(CompletionTag).toList)
-      offer
-    } else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
-  }
-
-  def buildEsOfferJson(offer: Offer) = {
-    Json.obj( "completionTags" -> offer.tags) ++ Json.toJson(offer).as[JsObject]
   }
 
   def deleteOffer(id: OfferId): Future[OfferId] = {
@@ -78,21 +75,22 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
     }
   }
 
-  def getAllOffers(): Future[List[Offer]] = {
-    elasticsearch.client
-      .prepareSearch(config.offerIndex.value)
-      .execute()
-      .asScala
-      .map {
-        response => elasticsearch.searchresponseAs[Offer](response)
-      }
-  }
-
   def deleteAllOffers() = {
     getAllOffers() map {
       (offers: List[Offer]) => {
         offers map { (offer: Offer) => deleteOffer(offer.id) }
       }
     }
+  }
+
+  private[es] def parseIndexResponse(indexResponse: IndexResponse, offer: Offer) = {
+    if (indexResponse.isCreated) {
+      esCompletionService.upsertCompletions(offer.tags.map(CompletionTag).toList)
+      offer
+    } else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
+  }
+
+  private[es] def buildEsOfferJson(offer: Offer) = {
+    Json.obj( "completionTags" -> offer.tags) ++ Json.toJson(offer).as[JsObject]
   }
 }
