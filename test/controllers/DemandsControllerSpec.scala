@@ -15,7 +15,7 @@ import test.{TestData, TestApplications}
 
 import scala.concurrent.Future
 
-class DemandsSpec extends Specification with Mockito {
+class DemandsControllerSpec extends Specification with Mockito {
 
   val demandId = TestData.demandId
   val demandVersion = TestData.version
