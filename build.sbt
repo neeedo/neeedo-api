@@ -30,7 +30,8 @@ libraryDependencies ++= Seq(
   "io.sphere.sdk.jvm" % "sphere-models" % "1.0.0-M13",
   "io.sphere.sdk.jvm" %% "sphere-scala-client" % "1.0.0-M13",
   "com.amazonaws" % "aws-java-sdk" % "1.9.6",
-  cache
+  cache,
+  ws
 )
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")

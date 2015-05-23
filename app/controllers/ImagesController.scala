@@ -1,29 +1,39 @@
 package controllers
 
 import common.domain.ImageId
-import common.helper.SecuredAction
 import common.helper.ImplicitConversions.ExceptionToResultConverter
-import play.api.libs.json.{JsString, Json}
-import play.api.mvc.Controller
-import scala.concurrent.ExecutionContext.Implicits.global
+import common.helper.SecuredAction
+import play.api.Play.current
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.json.Json
+import play.api.libs.ws.{WS, WSResponseHeaders}
+import play.api.mvc.{Action, Controller}
 import services.ImageService
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ImagesController(imageService: ImageService) extends Controller {
 
-  def getImageById(id: ImageId) = SecuredAction.async { request =>
-    imageService.getImageById(id)
-      .map { image => Ok.sendFile(image) }
-      .recover { case e: Exception => e.asResult }
+  def getImageById(id: ImageId) = Action.async { request =>
+    imageService.getImageById(id).flatMap {
+      image =>
+        val stream: Future[(WSResponseHeaders, Enumerator[Array[Byte]])] = WS.url(image).getStream()
+        stream.map {
+          case (header, data) =>
+            Ok.chunked(data).as("image/jpeg")
+        }
+    }.recover { case e: Exception => e.asResult }
   }
 
-  def createImage = SecuredAction.async(parse.multipartFormData) { request =>
+  def createImage = Action.async(parse.multipartFormData) { request =>
     request.body.file("image") map {
-      (image) => {
-//      if(!image.contentType.get.startsWith("image/")) //invalid contenttype
-        imageService.createImage(image)
-          .map { id => Created(Json.obj("image" -> JsString(id))) }
-          .recover { case e: Exception => e.asResult }
+      image => {
+        imageService.createImage(image).map {
+          imageId => Created(Json.toJson(imageId))
+        } recover {
+          case e: Exception => e.asResult
+        }
       }
     } getOrElse { Future(BadRequest("Missing Image")) }
   }

@@ -1,5 +1,6 @@
 package common.domain
 
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
 case class ImageId(value: String) extends AnyVal
@@ -15,5 +16,9 @@ object ImageId {
     }
 
     override def unbind(key: String, imageId: ImageId): String = imageId.value
+  }
+
+  implicit val imageIdWrites = new Writes[ImageId] {
+    def writes(i: ImageId) = Json.obj("image" -> i.value)
   }
 }
