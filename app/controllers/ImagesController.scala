@@ -26,7 +26,7 @@ class ImagesController(imageService: ImageService) extends Controller {
     }.recover { case e: Exception => e.asResult }
   }
 
-  def createImage = Action.async(parse.multipartFormData) { request =>
+  def createImage = SecuredAction.async(parse.multipartFormData) { request =>
     request.body.file("image") map {
       image => {
         imageService.createImage(image).map {

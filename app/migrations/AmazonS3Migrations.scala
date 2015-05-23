@@ -1,14 +1,14 @@
 package migrations
 
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.policy.Statement.Effect
 import com.amazonaws.auth.policy.actions.S3Actions
 import com.amazonaws.auth.policy.resources.S3ObjectResource
 import com.amazonaws.auth.policy.{Policy, Principal, Statement}
-import com.amazonaws.auth.policy.Statement.Effect
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.CannedAccessControlList
 import common.helper.ConfigLoader
 import common.logger.MigrationsLogger
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -29,7 +29,7 @@ class AmazonS3Migrations(configLoader: ConfigLoader) extends Migration {
       val allowPublicReadStatement = new Statement(Effect.Allow)
         .withPrincipals(Principal.AllUsers)
         .withActions(S3Actions.GetObject)
-        .withResources(new S3ObjectResource(bucketName, "*"));
+        .withResources(new S3ObjectResource(bucketName, "*"))
 
       val policy = new Policy().withStatements(allowPublicReadStatement)
       s3Client.createBucket(bucketName)
@@ -42,5 +42,4 @@ class AmazonS3Migrations(configLoader: ConfigLoader) extends Migration {
 
     Future(MigrationsLogger.info("# AmazonS3 Migrations finished"))
   }
-
 }
