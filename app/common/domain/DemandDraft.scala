@@ -16,7 +16,8 @@ case class DemandDraft(
 
 object DemandDraft {
 
-	def generateName(demandDraft: DemandDraft) = s"Suche: ${demandDraft.mustTags.mkString(" ")} ${UUID.randomUUID()}"
+	def generateName(demandDraft: DemandDraft) =
+		s"Suche: ${demandDraft.mustTags.mkString(" ")} ${UUID.randomUUID()}"
 
 	implicit val demandDraftReads: Reads[DemandDraft] = (
 		(JsPath \ "userId").read[String] and

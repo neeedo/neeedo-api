@@ -51,8 +51,8 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     "buildDraft must return valid product drafts" in new SphereDemandServiceContext {
       val productDraft = service.buildProductDraft(draft)
 
-      productDraft.getName.get(Locale.ENGLISH).get() must startWith("Biete: Socken Wolle")
-      productDraft.getSlug.get(Locale.ENGLISH).get() must startWith("biete-socken-wolle")
+      productDraft.getName.get(Locale.ENGLISH).get() must startWith("Suche: Socken Bekleidung")
+      productDraft.getSlug.get(Locale.ENGLISH).get() must startWith("suche-socken-bekleidung")
       productDraft.getProductType must beEqualTo(productTypes.demand.toReference)
       productDraft.getMasterVariant.getAttributes must beEqualTo(service.buildDemandAttributes(draft))
     }
@@ -60,13 +60,13 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     "buildDemandAttributes must return valid AttributeList" in new SphereDemandServiceContext {
       val demandAttributes = service.buildDemandAttributes(draft).asScala
       demandAttributes must contain(Attribute.of("userId", draft.uid.value))
-      demandAttributes must contain(Attribute.of("tags", draft.mustTags.asJava))
-      demandAttributes must contain(Attribute.of("tags", draft.shouldTags.asJava))
+      demandAttributes must contain(Attribute.of("mustTags", draft.mustTags.asJava))
+      demandAttributes must contain(Attribute.of("shouldTags", draft.shouldTags.asJava))
       demandAttributes must contain(Attribute.of("longitude", draft.location.lon.value))
       demandAttributes must contain(Attribute.of("latitude", draft.location.lat.value))
-      demandAttributes must contain(Attribute.of("latitude", draft.distance.value))
-      demandAttributes must contain(Attribute.of("price", MoneyImpl.of(BigDecimal(draft.priceMin.value).bigDecimal, "EUR")))
-      demandAttributes must contain(Attribute.of("price", MoneyImpl.of(BigDecimal(draft.priceMax.value).bigDecimal, "EUR")))
+      demandAttributes must contain(Attribute.of("distance", draft.distance.value))
+      demandAttributes must contain(Attribute.of("priceMin", MoneyImpl.of(BigDecimal(draft.priceMin.value).bigDecimal, "EUR")))
+      demandAttributes must contain(Attribute.of("priceMax", MoneyImpl.of(BigDecimal(draft.priceMax.value).bigDecimal, "EUR")))
     }
 
     "deleteDemand must return SphereDeleteFailed when an exception occurs" in new SphereDemandServiceContext {
@@ -135,8 +135,8 @@ class SphereDemandServiceSpec extends Specification with Mockito {
 
     val productMasterData = ProductCatalogDataBuilder.ofStaged(
       ProductDataBuilder.of(
-        LocalizedStrings.of(Locale.ENGLISH, "Biete: Socken Wolle"),
-        LocalizedStrings.of(Locale.ENGLISH, "biete-socken-wolle"),
+        LocalizedStrings.of(Locale.ENGLISH, "Suche: Socken Bekleidung"),
+        LocalizedStrings.of(Locale.ENGLISH, "suche-socken-bekleidung"),
         productVariant)
         .build())
       .build()
