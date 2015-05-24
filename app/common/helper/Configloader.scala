@@ -2,7 +2,8 @@ package common.helper
 
 import common.domain.IndexName
 import common.exceptions.InvalidConfiguration
-import play.api.{Configuration}
+import common.logger.ConfigLogger
+import play.api.{Logger, Configuration}
 
 import scala.util.{Failure, Success, Try}
 
@@ -37,8 +38,10 @@ class ConfigLoader(config: Configuration) {
   lazy val completionsIndex = readIndexFromConfig("completionsIndexName")
 
   def throwIllegalConfigException(key: String): Nothing = {
-    throw new InvalidConfiguration(s"Missing Config Key: '$key'! " +
+    val ex = new InvalidConfiguration(s"Missing Config Key: '$key'! " +
       s"Please check your Neeedo API Configuartion. " +
       s"Does your custom-application.conf file exist?")
+    ConfigLogger.error("Missing Config Key", ex)
+    throw ex
   }
 }

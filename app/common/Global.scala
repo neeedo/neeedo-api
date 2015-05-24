@@ -29,7 +29,7 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
   }
 
   override def onError(request: RequestHeader, e: Throwable) = {
-    Logger.error(e.getMessage)
+    Logger.error(e.getMessage, e)
     super.onError(request, e)
   }
 
