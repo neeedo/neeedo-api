@@ -8,7 +8,7 @@ import common.helper.{CrossOriginFilter, WireDependencies}
 import common.logger.MigrationsLogger
 import migrations._
 import play.api._
-import play.api.mvc.WithFilters
+import play.api.mvc.{RequestHeader, WithFilters}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.FiniteDuration
@@ -26,6 +26,11 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
 
   override def onStart(app: Application): Unit = {
     if (Play.current.mode != Mode.Test) migrations()
+  }
+
+  override def onError(request: RequestHeader, e: Throwable) = {
+    Logger.error(e.getMessage)
+    super.onError(request, e)
   }
 
   def migrations() = {
