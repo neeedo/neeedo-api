@@ -51,11 +51,15 @@ API-Documentation
     - [Get all offers for one demand (unsecured)](#get-all-offers-for-one-demand)
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
+	- [Query Demands for User](#query-demands-for-user)
+	- [Query all Demands](#query-all-demands)
 	- [Create Demand](#create-demand)
 	- [Update Demand](#update-demand)
 	- [Delete Demand](#delete-demand)
 - [Offers](#offers)
 	- [Query single Offer](#query-single-offer)
+ 	- [Query Offers for User](#query-offers-for-user)
+	- [Query all Offers](#query-all-offers)
 	- [Create Offer](#create-offer)
 	- [Update Offer](#update-offer)
 	- [Delete Offer](#delete-offer)
@@ -162,6 +166,40 @@ GET `/demands/{id}`
     }
     
 404 - Not Found
+
+## Query Demands for User
+### Resource
+GET `/demands/users/{userId}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| userId | Mandatory | alphanumeric |
+
+### Response
+200 Ok
+
+	{
+		"demands": [ 
+			{...},
+			{...}
+		]
+	}
+
+## Query all Demands
+### Resource
+GET `/demands`
+
+### Response
+200 Ok
+
+	{
+		"demands": [ 
+			{...},
+			{...}
+		]
+	}
 
 ## Create Demand
 ### Resource
@@ -330,6 +368,40 @@ GET `/offers/{id}`
     }
     
 404 - Not Found
+
+## Query Offers for User
+### Resource
+GET `/offers/users/{userId}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| userId | Mandatory | alphanumeric |
+
+### Response
+200 Ok
+
+	{
+		"offers": [ 
+			{...},
+			{...}
+		]
+	}
+
+## Query all Offers
+### Resource
+GET `/offers`
+
+### Response
+200 Ok
+
+	{
+		"offers": [ 
+			{...},
+			{...}
+		]
+	}
 
 ## Create Offer
 ### Resource
