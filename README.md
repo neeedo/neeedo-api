@@ -629,7 +629,7 @@ DELETE `/usersd/{id}/{version}`
 
 ## Upload Image
 ### Resource
-POST `/images/`
+POST `/images`
 
 The image must be sent in the body multipart/form-data encoded.
 
@@ -650,7 +650,7 @@ GET `/images/{filename}`
 | filename | Mandatory | example.jpg |
 
 ### Response
-Response of the action is a chunged http stream that returns the image with the correct mimetype.
+Response of the action is a chunked http stream that returns the image with the correct mimetype.
 This means you can use these url's as source in img tags for example.
 
 ## Delete Image
