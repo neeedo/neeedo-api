@@ -29,7 +29,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
        }
   }
 
-  def getAllOffers(): Future[List[Offer]] = {
+  def getAllOffers: Future[List[Offer]] = {
     elasticsearch.client
       .prepareSearch(config.offerIndex.value)
       .execute()
@@ -76,7 +76,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
   }
 
   def deleteAllOffers() = {
-    getAllOffers() map {
+    getAllOffers map {
       (offers: List[Offer]) => {
         offers map { (offer: Offer) => deleteOffer(offer.id) }
       }

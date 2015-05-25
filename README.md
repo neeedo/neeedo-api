@@ -65,6 +65,10 @@ API-Documentation
  	- [Create User (unsecured)](#create-user)
  	- [Update User](#update-user)
 	- [Delete User](#delete-user)
+- [Images](#images)
+    - [Upload Image](#upload-image)
+    - [Get Image](#get-image)
+    - [Delete Image](#delete-image)
 
 # Common Errors
 Each POST or PUT request sent to this api will respond with these error codes
@@ -341,8 +345,12 @@ The request body must contain a valid OfferDraft json object
             "lat":13.534212,
             "lon":52.468562
         },
-        "price":25.0
+        "price":25.0,
+        "images":["test.jpg", "blub.jpg"]
     }
+
+The images array can be empty. If you add imagenames make sure that you have [uploaded](#upload-image)
+the pictures and use the correct name that is returned by the api.
 
 ### Response
 201 Created
@@ -616,3 +624,43 @@ DELETE `/usersd/{id}/{version}`
 ### Example
 
     curl -XDELETE https://localhost:9443/users/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
+
+# Images
+
+## Upload Image
+### Resource
+POST `/images/`
+
+The image must be sent in the body multipart/form-data encoded.
+
+### Response
+201 Created
+
+    {
+        "image" : "10e5b696-2e21-488e-9857-29d94da95ee3.jpg"
+    }
+
+## Get Image
+GET `/images/{filename}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| filename | Mandatory | example.jpg |
+
+### Response
+Response of the action is a chunged http stream that returns the image with the correct mimetype.
+This means you can use these url's as source in img tags for example.
+
+## Delete Image
+GET `/images/{filename}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| filename | Mandatory | example.jpg |
+
+### Response
+200 Ok

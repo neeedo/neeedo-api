@@ -35,7 +35,7 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
   }
 
-  def getAllOffers(): Future[List[Product]] = {
+  def getAllOffers: Future[List[Product]] = {
     val productQuery = ProductQuery.of().byProductType(productTypes.offer)
 
     sphereClient.execute(productQuery)
@@ -73,7 +73,7 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
   }
 
   def deleteAllOffers() = {
-    getAllOffers() map {
+    getAllOffers map {
       (offers: List[Product]) => {
         offers map { product => deleteProduct(Versioned.of(product.getId, product.getVersion)) }
       }

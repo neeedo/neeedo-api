@@ -27,13 +27,13 @@ object OfferDraft {
     (uid, tags, lat, lon, price, images) =>
       OfferDraft(
         UserId(uid),
-        tags.map(x => x.trim).filter(!_.equals("")),
+        tags.map(x => x.trim).filterNot(_.equals("")),
         Location(
           Longitude(lon),
           Latitude(lat)
         ),
         Price(price),
-        images.map(x => x.trim).filter(!_.equals(""))
+        images.map(x => x.trim).filterNot(_.equals(""))
       )
   }
 
