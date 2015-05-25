@@ -28,6 +28,10 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
     esOfferService.getOffersByUserId(id)
   }
 
+  def getAllOffers(): Future[List[Offer]] = {
+    esOfferService.getAllOffers
+  }
+
   def updateOffer(id: OfferId, version: Version, draft: OfferDraft): Future[Offer] = {
     createOffer(draft) flatMap {
       offer => deleteOffer(id, version)

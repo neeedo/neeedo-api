@@ -27,14 +27,22 @@ class DemandsController(service: DemandService) extends Controller with Controll
   }
 
   def getDemandById(id: DemandId) = SecuredAction.async {
-    service.getDemandById(id).map {
+    service.getDemandById(id) map {
       case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
       case None => NotFound(Json.obj("error" -> "Demand not found"))
     }
   }
 
   def getDemandsByUserId(id: UserId) = SecuredAction.async {
-    service.getDemandsByUserId(id).map { demands: List[Demand] =>
+    service.getDemandsByUserId(id) map { demands: List[Demand] =>
+      Ok(Json.obj("demands" -> Json.toJson(demands)))
+    } recover {
+      case e: Exception => e.asResult
+    }
+  }
+
+  def getAllDemands() = SecuredAction.async {
+    service.getAllDemands() map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
       case e: Exception => e.asResult

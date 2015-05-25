@@ -27,14 +27,22 @@ class OffersController(service: OfferService) extends Controller with Controller
   }
 
   def getOfferById(id: OfferId) = SecuredAction.async {
-    service.getOfferById(id).map {
+    service.getOfferById(id) map {
       case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
       case None => NotFound(Json.obj("error" -> "Offer not found"))
     }
   }
 
   def getOffersByUserId(id: UserId) = SecuredAction.async {
-    service.getOffersByUserId(id).map { offers: List[Offer] =>
+    service.getOffersByUserId(id) map { offers: List[Offer] =>
+      Ok(Json.obj("offers" -> Json.toJson(offers)))
+    } recover {
+      case e: Exception => e.asResult
+    }
+  }
+
+  def getAllOffers() = SecuredAction.async {
+    service.getAllOffers() map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {
       case e: Exception => e.asResult

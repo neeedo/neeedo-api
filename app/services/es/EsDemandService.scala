@@ -33,6 +33,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
   def getAllDemands(): Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
+      .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
       .map {
