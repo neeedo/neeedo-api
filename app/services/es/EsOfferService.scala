@@ -20,7 +20,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
   def getOffersByUserId(id: UserId): Future[List[Offer]] = {
      elasticsearch.client
        .prepareSearch(config.offerIndex.value)
-       .setQuery(QueryBuilders.termQuery("userId", id.value))
+       .setQuery(QueryBuilders.matchQuery("userId", id.value))
        .addSort("_timestamp", SortOrder.DESC)
        .execute()
        .asScala

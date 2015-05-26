@@ -21,7 +21,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
   def getDemandsByUserId(id: UserId): Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
-      .setQuery(QueryBuilders.termQuery("userId", id.value))
+      .setQuery(QueryBuilders.matchQuery("userId", id.value))
       .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
@@ -33,7 +33,6 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
   def getAllDemands(): Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
-      .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
       .map {
