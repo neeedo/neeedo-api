@@ -5,7 +5,7 @@ import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
 import model.{Offer, OfferId}
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 import services.OfferService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,7 +41,7 @@ class OffersController(service: OfferService) extends Controller with Controller
     }
   }
 
-  def getAllOffers() = SecuredAction.async {
+  def getAllOffers = Action.async {
     service.getAllOffers() map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {

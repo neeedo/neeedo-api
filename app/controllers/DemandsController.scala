@@ -5,7 +5,7 @@ import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
 import model.{Demand, DemandId}
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 import services.DemandService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,7 +41,7 @@ class DemandsController(service: DemandService) extends Controller with Controll
     }
   }
 
-  def getAllDemands() = SecuredAction.async {
+  def getAllDemands = Action.async {
     service.getAllDemands() map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
