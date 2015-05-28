@@ -11,9 +11,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class MessagesController(service: MessageService) extends Controller with ControllerUtils {
+class MessagesController(service: MessageService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
-  def createMessage() = SecuredAction.async { implicit request =>
+  def createMessage() = securedAction.async { implicit request =>
     val maybeDraft = bindRequestJsonBody(request)(MessageDraft.messageDraftReads)
 
     maybeDraft match {

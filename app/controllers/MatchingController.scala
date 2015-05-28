@@ -9,7 +9,7 @@ import services.MatchingService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MatchingController(matchingService: MatchingService) extends Controller {
+class MatchingController(matchingService: MatchingService, securedAction: SecuredAction) extends Controller {
 
   /* TODO diese methode noch umbauen in ListDemands bzw ListOffers als Schnupperaction
    * TODO für nicht registrierte (In den Login / die Registrierung treiben */
@@ -19,7 +19,7 @@ class MatchingController(matchingService: MatchingService) extends Controller {
     }
   }
 
-  def matchDemand(from: From, pageSize: PageSize) = SecuredAction.async {
+  def matchDemand(from: From, pageSize: PageSize) = securedAction.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[Demand] match {
         case Some(demand) =>

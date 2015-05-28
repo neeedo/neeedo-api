@@ -12,9 +12,11 @@ import services.sphere.{SphereDemandService, SphereOfferService}
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
 
+  // Common
   lazy val configLoader = new ConfigLoader(Play.current.configuration)
   lazy val productTypeDrafts = wire[ProductTypeDrafts]
   lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) wire[MockProductTypes] else wire[SphereProductTypes]
+  lazy val securedAction = wire[SecuredAction]
 
   // Factories
   val esFactory: ElasticsearchClientFactory = wire[ElasticsearchClientFactory]

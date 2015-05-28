@@ -10,9 +10,9 @@ import common.helper.ImplicitConversions.ExceptionToResultConverter
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class UsersController(userService: UserService) extends Controller with ControllerUtils {
+class UsersController(userService: UserService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
-  def getUserByMail(mail: Email) = SecuredAction.async {
+  def getUserByMail(mail: Email) = securedAction.async {
     userService.getUserByEmail(mail).map {
       case Some(user) => Ok(Json.toJson(user))
       case None => NotFound
@@ -33,7 +33,7 @@ class UsersController(userService: UserService) extends Controller with Controll
     }
   }
 
-  def updateUser(id: UserId, version: Version) = SecuredAction.async { implicit request =>
+  def updateUser(id: UserId, version: Version) = securedAction.async { implicit request =>
     request.body.asJson match {
       case Some(json) => json.asOpt[UserDraft] match {
         case Some(draft) =>
@@ -48,7 +48,7 @@ class UsersController(userService: UserService) extends Controller with Controll
     }
   }
 
-  def deleteUser(id: UserId, version: Version) = SecuredAction.async {
+  def deleteUser(id: UserId, version: Version) = securedAction.async {
     userService.deleteUser(id, version).map {
       case Some(_) => Ok
       case None => NotFound

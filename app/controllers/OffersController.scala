@@ -11,9 +11,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class OffersController(service: OfferService) extends Controller with ControllerUtils {
+class OffersController(service: OfferService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
-  def createOffer = SecuredAction.async { implicit request =>
+  def createOffer = securedAction.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
 
     offerDraft match {
@@ -26,14 +26,14 @@ class OffersController(service: OfferService) extends Controller with Controller
     }
   }
 
-  def getOfferById(id: OfferId) = SecuredAction.async {
+  def getOfferById(id: OfferId) = securedAction.async {
     service.getOfferById(id) map {
       case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
       case None => NotFound(Json.obj("error" -> "Offer not found"))
     }
   }
 
-  def getOffersByUserId(id: UserId) = SecuredAction.async {
+  def getOffersByUserId(id: UserId) = securedAction.async {
     service.getOffersByUserId(id) map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {
@@ -49,7 +49,7 @@ class OffersController(service: OfferService) extends Controller with Controller
     }
   }
 
-  def updateOffer(id: OfferId, version: Version) = SecuredAction.async { implicit request =>
+  def updateOffer(id: OfferId, version: Version) = securedAction.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
 
     offerDraft match {
@@ -62,7 +62,7 @@ class OffersController(service: OfferService) extends Controller with Controller
   }
 
 
-  def deleteOffer(id: OfferId, version: Version) = SecuredAction.async {
+  def deleteOffer(id: OfferId, version: Version) = securedAction.async {
     service.deleteOffer(id, version)
       .map(_ => Ok)
       .recover {
@@ -70,7 +70,7 @@ class OffersController(service: OfferService) extends Controller with Controller
       }
   }
 
-  def deleteAllOffers() = SecuredAction.async {
+  def deleteAllOffers() = securedAction.async {
     service.deleteAllOffers()
       .map(_ => Ok)
       .recover { case e: Exception => e.asResult }

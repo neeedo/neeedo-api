@@ -11,7 +11,7 @@ import services.UserService
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SecuredAction extends ActionBuilder[SecuredRequest] {
+class SecuredAction(userService: UserService) extends ActionBuilder[SecuredRequest] {
 
   def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
     if (request.secure) authorize(request, block)
@@ -47,7 +47,7 @@ object SecuredAction extends ActionBuilder[SecuredRequest] {
   }
 
   def isAuthorized(userCredentials: UserCredentials): Future[Option[UserId]] = {
-    UserService.authorizeUser(userCredentials)
+    userService.authorizeUser(userCredentials)
   }
 
   def requestAuthorization: Future[Result] = {

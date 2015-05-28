@@ -76,10 +76,3 @@ class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
     } recover { case e: Exception => None }
   }
 }
-
-object UserService {
-  def authorizeUser(userCredentials: UserCredentials): Future[Option[UserId]] = {
-    if (Play.mode == Mode.Test) Future(Some(UserId("123")))
-    else Global.wired.lookupSingleOrThrow(classOf[UserService]).authorizeUser(userCredentials)
-  }
-}
