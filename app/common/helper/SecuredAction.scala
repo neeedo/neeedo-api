@@ -1,12 +1,14 @@
 package common.helper
 
 import common.domain._
+import common.exceptions.NetworkProblem
 import org.apache.commons.codec.binary.Base64
 import play.api.http.HeaderNames._
 import play.api.mvc._
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc.Results._
 import services.UserService
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,9 +29,11 @@ class SecuredAction(userService: UserService) extends ActionBuilder[SecuredReque
     val userCredentialsOption = getCredentialsFromAuthHeader(authHeader)
     userCredentialsOption match {
       case Some(userCredentials) =>
-        isAuthorized(userCredentials).flatMap {
+        userService.authorizeUser(userCredentials).flatMap {
           case Some(userId) => block(new SecuredRequest[A](userId, request))
           case None => Future.successful(Forbidden)
+        } recover {
+          case e: NetworkProblem => e.asResult
         }
       case None => requestAuthorization
     }
@@ -44,10 +48,6 @@ class SecuredAction(userService: UserService) extends ActionBuilder[SecuredReque
         case _ => None
       }
     }
-  }
-
-  def isAuthorized(userCredentials: UserCredentials): Future[Option[UserId]] = {
-    userService.authorizeUser(userCredentials)
   }
 
   def requestAuthorization: Future[Result] = {
