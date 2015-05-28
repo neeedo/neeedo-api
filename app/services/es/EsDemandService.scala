@@ -30,7 +30,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
     }
   }
 
-  def getAllDemands(): Future[List[Demand]] = {
+  def getAllDemands: Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
       .execute()
@@ -77,7 +77,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
   }
 
   def deleteAllDemands() = {
-    getAllDemands() map {
+    getAllDemands map {
       (demands: List[Demand]) => {
         demands map { (demand: Demand) => deleteDemand(demand.id) }
       }

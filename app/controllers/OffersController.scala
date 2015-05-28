@@ -42,7 +42,7 @@ class OffersController(service: OfferService) extends Controller with Controller
   }
 
   def getAllOffers = Action.async {
-    service.getAllOffers() map { offers: List[Offer] =>
+    service.getAllOffers map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {
       case e: Exception => e.asResult
