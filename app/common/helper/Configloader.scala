@@ -36,6 +36,7 @@ class ConfigLoader(config: Configuration) {
   lazy val demandIndex = readIndexFromConfig("demand.typeName")
   lazy val offerIndex = readIndexFromConfig("offer.typeName")
   lazy val completionsIndex = readIndexFromConfig("completionsIndexName")
+  lazy val messagesIndex = readIndexFromConfig("messagesIndexName")
 
   def throwIllegalConfigException(key: String): Nothing = {
     val ex = new InvalidConfiguration(s"Missing Config Key: '$key'! " +
