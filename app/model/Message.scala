@@ -1,15 +1,32 @@
 package model
 
-import common.domain.UserId
+import java.util.UUID
+
+import common.domain.{MessageDraft, UserId}
 import play.api.mvc.PathBindable
 
 case class Message(id: MessageId, senderId: UserId, recipientId: UserId,
-  body: String, timestamp: Long, read: Boolean) extends MessageImplicits
+  body: String, timestamp: Long, read: Boolean)
+
+object Message extends MessageImplicits {
+
+  def apply(draft: MessageDraft): Message = {
+    Message(
+      MessageId(UUID.randomUUID.toString),
+      draft.senderId,
+      draft.recipientId,
+      draft.body,
+      System.currentTimeMillis,
+      false
+    )
+  }
+}
 
 
 case class MessageId(value: String)
 
 object MessageId {
+
   implicit def pathBindable: PathBindable[MessageId] = new PathBindable[MessageId] {
     override def bind(key: String, value: String): Either[String, MessageId] = {
       MessageId(value) match {

@@ -6,7 +6,7 @@ import controllers._
 import migrations._
 import play.api.{Mode, Play}
 import services._
-import services.es.{EsDemandService, EsOfferService}
+import services.es.{EsMessageService, EsDemandService, EsOfferService}
 import services.sphere.{SphereDemandService, SphereOfferService}
 
 trait WireDependencies {
@@ -30,13 +30,15 @@ trait WireDependencies {
   lazy val matchingService = wire[MatchingService]
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
-  lazy val uploadService = wire[ImageService]
+  lazy val imageService = wire[ImageService]
+  lazy val messageService = wire[MessageService]
 
   //// Elasticsearch
   lazy val esOfferService = wire[EsOfferService]
   lazy val esDemandService = wire[EsDemandService]
   lazy val esMatchingService = wire[EsMatchingService]
   lazy val esCompletionService = wire[EsCompletionService]
+  lazy val esMessageService = wire[EsMessageService]
 
   //// Sphere
   lazy val sphereOfferService = wire[SphereOfferService]
@@ -50,6 +52,7 @@ trait WireDependencies {
   lazy val staticController = wire[StaticController]
   lazy val userController = wire[UsersController]
   lazy val imagesController = wire[ImagesController]
+  lazy val messageController = wire[MessagesController]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]

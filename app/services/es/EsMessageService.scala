@@ -8,6 +8,7 @@ import model.Message
 import org.elasticsearch.action.index.IndexResponse
 import play.api.libs.json.{JsObject, Json}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader) {
@@ -15,6 +16,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader)
   def createMessage(message: Message): Future[Message] = {
     val index = config.messagesIndex
     val typeName = config.messagesIndex.toTypeName
+
     elasticsearch.indexDocument(message.id.value, index, typeName, buildEsMessageJson(message))
       .map(parseIndexResponse(_, message))
   }

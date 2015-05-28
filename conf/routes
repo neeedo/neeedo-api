@@ -48,5 +48,13 @@ GET            /images/:id                  @controllers.ImagesController.getIma
 POST           /images                      @controllers.ImagesController.createImage()
 DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
 
+# Conversations
+# GET /conversations/:userId
+
+# Messages
+# GET /messages/:userId1/:userId2           @controllers.MessagesController.getMessagesForUsers(userId1: common.domain.UserId, userId2: common.domain.UserId)
+POST /messages                              @controllers.MessagesController.createMessage()
+# PUT /messages/:id                         @controllers.MessagesController.markMessageRead(id: MessageId)
+
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                controllers.Assets.at(path="/public", file)
