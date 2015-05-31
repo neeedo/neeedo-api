@@ -6,7 +6,7 @@ import controllers._
 import migrations._
 import play.api.{Mode, Play}
 import services._
-import services.es.{EsMessageService, EsDemandService, EsOfferService}
+import services.es._
 import services.sphere.{SphereDemandService, SphereOfferService}
 
 trait WireDependencies {
@@ -40,6 +40,7 @@ trait WireDependencies {
   lazy val esDemandService = wire[EsDemandService]
   lazy val esMatchingService = wire[EsMatchingService]
   lazy val esCompletionService = wire[EsCompletionService]
+  lazy val esSuggestionService = wire[EsSuggestionService]
   lazy val esMessageService = wire[EsMessageService]
 
   //// Sphere

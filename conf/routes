@@ -34,8 +34,8 @@ OPTIONS        /matching/demand             @controllers.StaticController.delive
 OPTIONS        /matching/demand/0/0         @controllers.StaticController.deliverCorsHeaders()
 
 # Completion
-GET            /completion/tag/:tag             @controllers.CompletionController.completeTag(tag: String)
-GET            /completion/:type/phrase/:phrase @controllers.CompletionController.suggestTags(type: String, phrase: String)
+GET            /completion/tag/:tag         @controllers.CompletionController.completeTag(tag: String)
+GET            /completion/suggest/:phrase  @controllers.CompletionController.suggestTags(phrase: String)
 
 # Users
 GET            /users/mail/:mail            @controllers.UsersController.getUserByMail(mail: common.domain.Email)
