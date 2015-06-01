@@ -3,6 +3,7 @@ package controllers
 import common.domain.MessageDraft
 import common.helper.{ControllerUtils, SecuredAction}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
+import model.MessageId
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import services.MessageService
@@ -23,6 +24,14 @@ class MessagesController(service: MessageService) extends Controller with Contro
         case e: Exception => e.asResult
       }
       case Failure(e) => Future(e.asResult)
+    }
+  }
+
+  def markMessageRead(id: MessageId) = SecuredAction.async {
+    service.markMessageRead(id) map {
+      messageId: MessageId => Ok(Json.toJson(messageId))
+    } recover {
+      case e: Exception => e.asResult
     }
   }
 

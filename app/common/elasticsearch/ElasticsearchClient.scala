@@ -8,6 +8,7 @@ import common.logger.EsLogger
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.{Settings, ImmutableSettings}
 import org.elasticsearch.common.unit.TimeValue
@@ -34,6 +35,14 @@ sealed trait ElasticsearchClient {
       .setSource(doc.toString())
       .setId(id)
       .execute()
+      .asScala
+
+  // Todo get doc as param
+  def updateDocument(id: String, esIndex: IndexName, esType: TypeName): Future[UpdateResponse] =
+    client
+      .prepareUpdate(esIndex.value, esType.value, id)
+      .setDoc("read", true)
+      .execute
       .asScala
 
   def search(esIndex: IndexName, esType: TypeName, query: QueryBuilder): Future[SearchResponse] =

@@ -3,6 +3,7 @@ package model
 import java.util.UUID
 
 import common.domain.{MessageDraft, UserId}
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
 case class Message(id: MessageId, senderId: UserId, recipientId: UserId,
@@ -36,5 +37,9 @@ object MessageId {
     }
 
     override def unbind(key: String, messageId: MessageId): String = messageId.value
+  }
+
+  implicit val messageIdWrites = new Writes[MessageId] {
+    def writes(m: MessageId) = Json.obj("messageId" -> m.value)
   }
 }
