@@ -47,7 +47,7 @@ API-Documentation
 ----------
 - [Common Errors](#common-errors)
 - [Status (unsecured)](#status)
-- [Matching (experimental)](#matching)
+- [Matching](#matching)
     - [Get all offers for one demand (unsecured)](#get-all-offers-for-one-demand)
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
@@ -63,7 +63,6 @@ API-Documentation
 	- [Create Offer](#create-offer)
 	- [Update Offer](#update-offer)
 	- [Delete Offer](#delete-offer)
-	- [Add Image to Offer (experimental)](#add-image-to-offer)
 - [Users](#users)
 	- [Query singer User](#query-single-user-by-email)
  	- [Create User (unsecured)](#create-user)
@@ -522,50 +521,6 @@ DELETE `/offers/{id}/{version}`
 ### Example
 
     curl -XDELETE https://localhost:9443/offers/9dfa3c90-85c8-46ce-b50c-3ecde596bc90/2 -v
-
-## Add Image to Offer
-### Resource
-POST `/offers/images/:id`
-
-### URL Parameters
-
-| Name | Mandatory | Value Type | Description |
-| ---- | --------- | ---------- | ----------- |
-| id | Mandatory | alphanumeric | Id of the Offer, the Image should be added to|
-
-### Body
-The request body must contain a valid ExternalImage json object
-
-    {
-        "url":"http://www.commercetools.com/assets/img/ct_logo_farbe.gif",
-        "width":"460",
-        "height":"102"
-    }
-
-### Response
-201 Created
-
-    {
-        "offer": {
-            "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 1
-            "userId": "1",
-            "tags":["socken", "bekleidung", "wolle"],
-            "location": {
-                "lat":13.534212,
-                "lon":52.468562
-            },
-            "price":25.0
-        }
-    }
-    
-400 Bad Request - Empty Body
-
-400 Bad Request - Invalid Json
-
-### Example
-
-    curl -XPOST -H "Content-Type: application/json" -d '{"url":"http://www.commercetools.com/assets/img/ct_logo_farbe.gif","label":"Kindersocken"}' https://localhost:9443/offers/images/9dfa3c90-85c8-46ce-b50c-3ecde596bc90 -v
     
 # Users
 ## Query single User by Email
