@@ -58,6 +58,7 @@ trait WireDependencies {
   lazy val productTypeMigration = wire[ProductTypeMigrations]
   lazy val productTypeEsMigration = wire[ProductTypeEsMigrations]
   lazy val completionsEsMigration = wire[CompletionsEsMigrations]
+  lazy val messagesEsMigration = wire[MessagesEsMigrations]
   lazy val productTestDataMigration = wire[ProductTestDataMigrations]
   lazy val amazons3Migration = wire[AmazonS3Migrations]
 }

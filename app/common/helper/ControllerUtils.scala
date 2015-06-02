@@ -13,7 +13,7 @@ trait ControllerUtils {
         case Some(json) =>
           json.asOpt[T] match {
             case Some(draft) => handleSecuredRequest(request, draft)
-            case None => throw new InvalidJson(s"Invalid json body")
+            case None => throw new InvalidJson("Invalid json body")
           }
         case None => throw new InvalidJson("Missing body json object")
       }

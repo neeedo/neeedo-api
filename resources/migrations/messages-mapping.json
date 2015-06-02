@@ -1,0 +1,27 @@
+{
+  "_timestamp" : {
+    "enabled" : true,
+    "store" : true
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "senderId": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "recipientId": {
+      "type": "string",
+      "index": "not_analyzed"
+    },
+    "body": {
+      "type": "string",
+      "index": "analyzed"
+    },
+    "read": {
+      "type": "boolean"
+    }
+  }
+}

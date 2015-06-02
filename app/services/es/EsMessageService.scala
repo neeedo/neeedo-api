@@ -1,13 +1,13 @@
 package services.es
 
-import common.domain.{UserId}
+import common.domain.UserId
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.ElasticSearchIndexFailed
 import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
-import model.{MessageId, Message}
+import model.{Message, MessageId}
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.{OrFilterBuilder, AndFilterBuilder, TermFilterBuilder, FilteredQueryBuilder}
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
 
@@ -27,7 +27,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader)
   def getMessagesForUsers(u1: UserId, u2: UserId) = {
     elasticsearch.client
       .prepareSearch(config.messagesIndex.value)
-      .setQuery(QueryBuilders.termsQuery("senderId", u1.value))
+      .setQuery(buildQuery(u1, u2))
       .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
@@ -52,5 +52,18 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader)
   }
 
   private[es] def buildEsMessageJson(message: Message) = Json.toJson(message).as[JsObject]
+
+  private[es] def buildQuery(u1: UserId, u2: UserId) = {
+    val and1 = new AndFilterBuilder(
+      new TermFilterBuilder("senderId", u1.value),
+      new TermFilterBuilder("recipientId", u2.value))
+
+    val and2 = new AndFilterBuilder(
+      new TermFilterBuilder("senderId", u2.value),
+      new TermFilterBuilder("recipientId", u1.value))
+
+    val or = new OrFilterBuilder(and1, and2)
+    new FilteredQueryBuilder(null, or)
+  }
 
 }
