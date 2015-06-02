@@ -52,14 +52,14 @@ API-Documentation
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
 	- [Query Demands for User](#query-demands-for-user)
-	- [Query all Demands](#query-all-demands)
+	- [Query all Demands (unsecured)](#query-all-demands)
 	- [Create Demand](#create-demand)
 	- [Update Demand](#update-demand)
 	- [Delete Demand](#delete-demand)
 - [Offers](#offers)
 	- [Query single Offer](#query-single-offer)
  	- [Query Offers for User](#query-offers-for-user)
-	- [Query all Offers](#query-all-offers)
+	- [Query all Offers (unsecured)](#query-all-offers)
 	- [Create Offer](#create-offer)
 	- [Update Offer](#update-offer)
 	- [Delete Offer](#delete-offer)
@@ -71,8 +71,7 @@ API-Documentation
 	- [Delete User](#delete-user)
 - [Images](#images)
     - [Upload Image](#upload-image)
-    - [Get Image](#get-image)
-    - [Delete Image](#delete-image)
+    - [Get Image (unsecured)](#get-image)
 
 # Common Errors
 Each POST or PUT request sent to this api will respond with these error codes
@@ -724,15 +723,3 @@ GET `/images/{filename}`
 ### Response
 Response of the action is a chunked http stream that returns the image with the correct mimetype.
 This means you can use these url's as source in img tags for example.
-
-## Delete Image
-GET `/images/{filename}`
-
-### URL Parameters
-
-| Name | Mandatory | Value Type |
-| ---- | --------- | ---------- |
-| filename | Mandatory | example.jpg |
-
-### Response
-200 Ok
