@@ -24,6 +24,64 @@ import scala.concurrent.{Await, Future}
 
 class SphereOfferServiceSpec extends Specification with Mockito {
 
+  trait SphereOfferServiceContext extends WithApplication {
+
+    val config = Map("offer.typeName" -> "offer")
+    val configLoader = new ConfigLoader(Configuration.from(config))
+    val productTypeDrafts = new ProductTypeDrafts(configLoader)
+    val productTypes = new MockProductTypes(productTypeDrafts)
+    val sphereClientMock = mock[RemoteSphereClient]
+    val service = new SphereOfferService(sphereClientMock, productTypeDrafts, productTypes)
+
+    val draft = OfferDraft(
+      UserId("abc"),
+      Set("Socken Wolle"),
+      Location(Longitude(12.2), Latitude(15.5)),
+      Price(50.00),
+      Set.empty
+    )
+
+    val offer = Offer(
+    OfferId("123"),
+    Version(1),
+    draft.uid,
+    draft.tags,
+    draft.location,
+    draft.price,
+    Set("xyz.jpg")
+    )
+
+
+    val productAttributeList = List(
+      Attribute.of("userId", offer.uid.value),
+      Attribute.of("tags", offer.tags.asJava),
+      Attribute.of("longitude", offer.location.lon.value),
+      Attribute.of("latitude", offer.location.lat.value),
+      Attribute.of(
+        "price",
+        MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal,
+          DefaultCurrencyUnits.EUR)),
+      Attribute.of("images", offer.images.asJava)
+    ).asJava
+
+    val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
+
+    val productMasterData = ProductCatalogDataBuilder.ofStaged(
+      ProductDataBuilder.of(
+        LocalizedStrings.of(Locale.ENGLISH, "Biete: Socken Wolle"),
+        LocalizedStrings.of(Locale.ENGLISH, "biete-socken-wolle"),
+        productVariant)
+        .build())
+      .build()
+
+    val offerProduct = ProductBuilder
+      .of(productTypes.offer, productMasterData)
+      .id(offer.id.value)
+      .build()
+
+    val mockProduct = mock[products.Product]
+  }
+
   "SphereOfferService" should {
     "createOffer must throw SphereIndexFailed when SphereClient fails" in new SphereOfferServiceContext {
       sphereClientMock.execute(any[ProductCreateCommand]) returns
@@ -85,62 +143,5 @@ class SphereOfferServiceSpec extends Specification with Mockito {
       there was one (sphereClientMock)
         .execute(ProductDeleteCommand.of(Versioned.of(offer.id.value, offer.version.value)))
     }
-  }
-
-  trait SphereOfferServiceContext extends WithApplication {
-
-    val config = Map("offer.typeName" -> "offer")
-    val configLoader = new ConfigLoader(Configuration.from(config))
-    val productTypeDrafts = new ProductTypeDrafts(configLoader)
-    val productTypes = new MockProductTypes(productTypeDrafts)
-    val sphereClientMock = mock[RemoteSphereClient]
-    val service = new SphereOfferService(sphereClientMock, productTypeDrafts, productTypes)
-
-    val offer = Offer(
-      OfferId("123"),
-      Version(1),
-      UserId("abc"),
-      Set("Socken Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00),
-      Set("xyz.jpg")
-    )
-
-    val draft = OfferDraft(
-      UserId("abc"),
-      Set("Socken Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00),
-      Set.empty
-    )
-
-    val productAttributeList = List(
-      Attribute.of("userId", offer.uid.value),
-      Attribute.of("tags", offer.tags.asJava),
-      Attribute.of("longitude", offer.location.lon.value),
-      Attribute.of("latitude", offer.location.lat.value),
-      Attribute.of(
-        "price",
-        MoneyImpl.of(BigDecimal(offer.price.value).bigDecimal,
-          DefaultCurrencyUnits.EUR)),
-      Attribute.of("images", offer.images.asJava)
-    ).asJava
-
-    val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
-
-    val productMasterData = ProductCatalogDataBuilder.ofStaged(
-      ProductDataBuilder.of(
-        LocalizedStrings.of(Locale.ENGLISH, "Biete: Socken Wolle"),
-        LocalizedStrings.of(Locale.ENGLISH, "biete-socken-wolle"),
-        productVariant)
-        .build())
-      .build()
-
-    val offerProduct = ProductBuilder
-      .of(productTypes.offer, productMasterData)
-      .id(offer.id.value)
-      .build()
-
-    val mockProduct = mock[products.Product]
   }
 }

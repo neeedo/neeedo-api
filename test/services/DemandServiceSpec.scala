@@ -15,6 +15,46 @@ import scala.concurrent.duration._
 
 class DemandServiceSpec extends Specification with Mockito {
 
+  trait DemandServiceContext extends Scope {
+    val esDemandServiceMock = mock[EsDemandService]
+    val sphereDemandServiceMock = mock[SphereDemandService]
+    val service = new DemandService(sphereDemandServiceMock, esDemandServiceMock)
+
+    val draft = DemandDraft(
+      UserId("abc"),
+      Set("Socken", "Bekleidung"),
+      Set("Wolle"),
+      Location(Longitude(12.2), Latitude(15.5)),
+      Distance(100),
+      Price(0.00),
+      Price(10.00)
+    )
+
+    val demand1 = Demand(
+      DemandId("123"),
+      Version(1),
+      draft.uid,
+      draft.mustTags,
+      draft.shouldTags,
+      draft.location,
+      draft.distance,
+      draft.priceMin,
+      draft.priceMax
+    )
+
+    val demand2 = Demand(
+      DemandId("456"),
+      Version(1),
+      UserId("hans"),
+      Set("Fahrrad", "rot"),
+      Set("fixie"),
+      Location(Longitude(14.2), Latitude(9.5)),
+      Distance(50),
+      Price(40.00),
+      Price(800.00)
+    )
+  }
+
   "DemandService" should {
 
     "createDemand must throw SphereIndexFailed when sphereDemandService fails" in new DemandServiceContext {
@@ -124,46 +164,6 @@ class DemandServiceSpec extends Specification with Mockito {
       there was one (sphereDemandServiceMock).createDemand(draft)
       there was one (esDemandServiceMock).createDemand(demand2)
     }
-  }
-
-  trait DemandServiceContext extends Scope {
-    val esDemandServiceMock = mock[EsDemandService]
-    val sphereDemandServiceMock = mock[SphereDemandService]
-    val service = new DemandService(sphereDemandServiceMock, esDemandServiceMock)
-
-    val draft = DemandDraft(
-      UserId("abc"),
-      Set("Socken", "Bekleidung"),
-      Set("Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Distance(100),
-      Price(0.00),
-      Price(10.00)
-    )
-
-    val demand1 = Demand(
-      DemandId("123"),
-      Version(1),
-      UserId("abc"),
-      Set("Socken", "Bekleidung"),
-      Set("Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Distance(100),
-      Price(0.00),
-      Price(10.00)
-    )
-
-    val demand2 = Demand(
-      DemandId("456"),
-      Version(1),
-      UserId("hans"),
-      Set("Fahrrad", "rot"),
-      Set("fixie"),
-      Location(Longitude(14.2), Latitude(9.5)),
-      Distance(50),
-      Price(40.00),
-      Price(800.00)
-    )
   }
 }
 

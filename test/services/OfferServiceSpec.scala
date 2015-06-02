@@ -15,6 +15,40 @@ import scala.concurrent.duration._
 
 class OfferServiceSpec extends Specification with Mockito {
 
+  trait OfferServiceContext extends Scope {
+    val esOfferServiceMock = mock[EsOfferService]
+    val sphereOfferServiceMock = mock[SphereOfferService]
+    val service = new OfferService(sphereOfferServiceMock, esOfferServiceMock)
+
+    val draft = OfferDraft(
+      UserId("abc"),
+      Set("Socken"),
+      Location(Longitude(12.2), Latitude(15.5)),
+      Price(50.00),
+      Set.empty
+    )
+
+    val offer1 = Offer(
+      OfferId("123"),
+      Version(1),
+      draft.uid,
+      draft.tags,
+      draft.location,
+      draft.price,
+      draft.images
+    )
+
+    val offer2 = Offer(
+      OfferId("456"),
+      Version(1),
+      UserId("horst"),
+      Set("Fahrrad"),
+      Location(Longitude(8.2), Latitude(13.5)),
+      Price(149.00),
+      Set.empty
+    )
+  }
+
   "OfferService" should {
 
     "createOffer must throw SphereIndexFailed when sphereOfferService fails" in new OfferServiceContext {
@@ -115,40 +149,6 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (sphereOfferServiceMock).createOffer(draft)
       there was one (esOfferServiceMock).createOffer(offer2)
     }
-  }
-
-  trait OfferServiceContext extends Scope {
-    val esOfferServiceMock = mock[EsOfferService]
-    val sphereOfferServiceMock = mock[SphereOfferService]
-    val service = new OfferService(sphereOfferServiceMock, esOfferServiceMock)
-
-    val draft = OfferDraft(
-      UserId("abc"),
-      Set("Socken"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00),
-      Set.empty
-    )
-
-    val offer1 = Offer(
-      OfferId("123"),
-      Version(1),
-      UserId("abc"),
-      Set("Socken"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00),
-      Set.empty
-    )
-
-    val offer2 = Offer(
-      OfferId("456"),
-      Version(1),
-      UserId("horst"),
-      Set("Fahrrad"),
-      Location(Longitude(8.2), Latitude(13.5)),
-      Price(149.00),
-      Set.empty
-    )
   }
 }
 

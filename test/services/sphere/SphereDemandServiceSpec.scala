@@ -24,6 +24,66 @@ import scala.concurrent.{Await, Future}
 
 class SphereDemandServiceSpec extends Specification with Mockito {
 
+  trait SphereDemandServiceContext extends WithApplication {
+
+    val config = Map("demand.typeName" -> "demand")
+    val configLoader = new ConfigLoader(Configuration.from(config))
+    val productTypeDrafts = new ProductTypeDrafts(configLoader)
+    val productTypes = new MockProductTypes(productTypeDrafts)
+    val sphereClientMock = mock[RemoteSphereClient]
+    val service = new SphereDemandService(sphereClientMock, productTypeDrafts, productTypes)
+
+    val draft = DemandDraft(
+      UserId("abc"),
+      Set("Socken", "Bekleidung"),
+      Set("Wolle"),
+      Location(Longitude(12.2), Latitude(15.5)),
+      Distance(100),
+      Price(0.00),
+      Price(10.00)
+    )
+
+    val demand = Demand(
+      DemandId("123"),
+      Version(1),
+      draft.uid,
+      draft.mustTags,
+      draft.shouldTags,
+      draft.location,
+      draft.distance,
+      draft.priceMin,
+      draft.priceMax
+    )
+
+    val productAttributeList = List(
+      Attribute.of("userId", demand.uid.value),
+      Attribute.of("mustTags", demand.mustTags.asJava),
+      Attribute.of("shouldTags", demand.shouldTags.asJava),
+      Attribute.of("longitude", demand.location.lon.value),
+      Attribute.of("latitude", demand.location.lat.value),
+      Attribute.of("distance", demand.distance.value),
+      Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demand.priceMin.value).bigDecimal, "EUR")),
+      Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demand.priceMax.value).bigDecimal, "EUR"))
+    ).asJava
+
+    val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
+
+    val productMasterData = ProductCatalogDataBuilder.ofStaged(
+      ProductDataBuilder.of(
+        LocalizedStrings.of(Locale.ENGLISH, "Suche: Socken Bekleidung"),
+        LocalizedStrings.of(Locale.ENGLISH, "suche-socken-bekleidung"),
+        productVariant)
+        .build())
+      .build()
+
+    val demandProduct = ProductBuilder
+      .of(productTypes.demand, productMasterData)
+      .id(demand.id.value)
+      .build()
+
+    val mockProduct = mock[products.Product]
+  }
+
   "SphereDemandService" should {
     "createDemand must throw SphereIndexFailed when SphereClient fails" in new SphereDemandServiceContext {
       sphereClientMock.execute(any[ProductCreateCommand]) returns
@@ -87,65 +147,5 @@ class SphereDemandServiceSpec extends Specification with Mockito {
       there was one (sphereClientMock)
         .execute(ProductDeleteCommand.of(Versioned.of(demand.id.value, demand.version.value)))
     }
-  }
-
-  trait SphereDemandServiceContext extends WithApplication {
-
-    val config = Map("demand.typeName" -> "demand")
-    val configLoader = new ConfigLoader(Configuration.from(config))
-    val productTypeDrafts = new ProductTypeDrafts(configLoader)
-    val productTypes = new MockProductTypes(productTypeDrafts)
-    val sphereClientMock = mock[RemoteSphereClient]
-    val service = new SphereDemandService(sphereClientMock, productTypeDrafts, productTypes)
-
-    val demand = Demand(
-      DemandId("123"),
-      Version(1),
-      UserId("abc"),
-      Set("Socken", "Bekleidung"),
-      Set("Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Distance(100),
-      Price(0.00),
-      Price(10.00)
-    )
-
-    val draft = DemandDraft(
-      UserId("abc"),
-      Set("Socken", "Bekleidung"),
-      Set("Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Distance(100),
-      Price(0.00),
-      Price(10.00)
-    )
-
-    val productAttributeList = List(
-      Attribute.of("userId", demand.uid.value),
-      Attribute.of("mustTags", demand.mustTags.asJava),
-      Attribute.of("shouldTags", demand.shouldTags.asJava),
-      Attribute.of("longitude", demand.location.lon.value),
-      Attribute.of("latitude", demand.location.lat.value),
-      Attribute.of("distance", demand.distance.value),
-      Attribute.of("priceMin", MoneyImpl.of(BigDecimal(demand.priceMin.value).bigDecimal, "EUR")),
-      Attribute.of("priceMax", MoneyImpl.of(BigDecimal(demand.priceMax.value).bigDecimal, "EUR"))
-    ).asJava
-
-    val productVariant = ProductVariantBuilder.of(1).attributes(productAttributeList).build()
-
-    val productMasterData = ProductCatalogDataBuilder.ofStaged(
-      ProductDataBuilder.of(
-        LocalizedStrings.of(Locale.ENGLISH, "Suche: Socken Bekleidung"),
-        LocalizedStrings.of(Locale.ENGLISH, "suche-socken-bekleidung"),
-        productVariant)
-        .build())
-      .build()
-
-    val demandProduct = ProductBuilder
-      .of(productTypes.demand, productMasterData)
-      .id(demand.id.value)
-      .build()
-
-    val mockProduct = mock[products.Product]
   }
 }

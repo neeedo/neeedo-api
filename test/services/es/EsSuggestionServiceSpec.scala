@@ -21,37 +21,6 @@ import scala.collection.JavaConverters._
 
 class EsSuggestionServiceSpec extends Specification with Mockito {
 
-  "EsSuggestionServic" should {
-    "calcShouldMatch must calculate the correct should amount" in new EsSuggestionServiceContext {
-      val shouldMatches = List(1, 2, 2, 3, 3, 3, 3, 4, 4)
-      val calcShouldMatches = (1 until 10) map service.calcShouldMatch toList
-
-      calcShouldMatches must be equalTo shouldMatches
-    }
-
-    "buildPhraseCompletionQuery must return correct query" in new EsSuggestionServiceContext {
-      val query = service.buildPhraseCompletionQuery(completionPhrase)
-
-      Json.parse(query.toString) must be equalTo Json.obj("terms" ->
-        Json.obj(
-          "completionTags" -> completionPhrase.value,
-          "minimum_should_match" -> completionPhrase.value.length.toString)
-      )
-    }
-
-    "buildAggregation must return correct aggregation" in new EsSuggestionServiceContext {
-      val builder: XContentBuilder = XContentFactory.jsonBuilder.prettyPrint()
-      service.buildAggregation.toXContent(builder, ToXContent.EMPTY_PARAMS)
-
-      builder.string must be equalTo "\n\"tags\"{\n  \"significant_terms\" : {\n    \"field\" : \"completionTags\",\n    \"size\" : 20,\n    \"min_doc_count\" : 2,\n    \"chi_square\" : {\n      \"include_negatives\" : false,\n      \"background_is_superset\" : false\n    }\n  }\n}"
-    }
-
-    "getBucketsFromSearchresponse must return correct result" in new EsSuggestionServiceContext {
-      service.getBucketsFromSearchresponse(searchResponse, completionPhrase) must
-        beEqualTo(List("iphone", "test"))
-    }
-  }
-
   trait EsSuggestionServiceContext extends WithApplication with SearchResponseContext {
     val config = Map(
       "offer.typeName" -> "offer",
@@ -82,5 +51,36 @@ class EsSuggestionServiceSpec extends Specification with Mockito {
       null, false, false)
 
     val searchResponse = new SearchResponse(internalSearchResponse, "scrollId", 1, 1, 1000, shardFailures)
+  }
+
+  "EsSuggestionServic" should {
+    "calcShouldMatch must calculate the correct should amount" in new EsSuggestionServiceContext {
+      val shouldMatches = List(1, 2, 2, 3, 3, 3, 3, 4, 4)
+      val calcShouldMatches = (1 until 10) map service.calcShouldMatch toList
+
+      calcShouldMatches must be equalTo shouldMatches
+    }
+
+    "buildPhraseCompletionQuery must return correct query" in new EsSuggestionServiceContext {
+      val query = service.buildPhraseCompletionQuery(completionPhrase)
+
+      Json.parse(query.toString) must be equalTo Json.obj("terms" ->
+        Json.obj(
+          "completionTags" -> completionPhrase.value,
+          "minimum_should_match" -> completionPhrase.value.length.toString)
+      )
+    }
+
+    "buildAggregation must return correct aggregation" in new EsSuggestionServiceContext {
+      val builder: XContentBuilder = XContentFactory.jsonBuilder.prettyPrint()
+      service.buildAggregation.toXContent(builder, ToXContent.EMPTY_PARAMS)
+
+      builder.string must be equalTo "\n\"tags\"{\n  \"significant_terms\" : {\n    \"field\" : \"completionTags\",\n    \"size\" : 20,\n    \"min_doc_count\" : 2,\n    \"chi_square\" : {\n      \"include_negatives\" : false,\n      \"background_is_superset\" : false\n    }\n  }\n}"
+    }
+
+    "getBucketsFromSearchresponse must return correct result" in new EsSuggestionServiceContext {
+      service.getBucketsFromSearchresponse(searchResponse, completionPhrase) must
+        beEqualTo(List("iphone", "test"))
+    }
   }
 }

@@ -18,6 +18,29 @@ import scala.concurrent.{Await, Future}
 
 class EsOfferServiceSpec extends Specification with Mockito {
 
+  trait EsOfferServiceContext extends WithApplication {
+    val config = Map("offer.typeName" -> "offer")
+    val configLoader = new ConfigLoader(Configuration.from(config))
+    val indexName = configLoader.offerIndex
+    val typeName = indexName.toTypeName
+    val esClientMock = mock[ElasticsearchClient]
+    val esCompletionServiceMock = mock[EsCompletionService]
+    val service = new EsOfferService(esClientMock, configLoader, esCompletionServiceMock)
+
+    val negativeIndexResponse = new IndexResponse("", "", "", 1L, false)
+    val positiveIndexResponse = new IndexResponse("", "", "", 1L, true)
+
+    val offer = Offer(
+      OfferId("123"),
+      Version(1),
+      UserId("abc"),
+      Set("Socken"),
+      Location(Longitude(12.2), Latitude(15.5)),
+      Price(50.00),
+      Set.empty
+    )
+  }
+
   "EsOfferService" should {
     "createOffer must throw IndexFailedException when IndexResponse is negative" in new EsOfferServiceContext {
       esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
@@ -79,29 +102,5 @@ class EsOfferServiceSpec extends Specification with Mockito {
       there was one (esClientMock)
         .deleteDocument(offer.id.value, indexName, typeName)
     }
-  }
-
-  trait EsOfferServiceContext extends WithApplication {
-
-    val config = Map("offer.typeName" -> "offer")
-    val configLoader = new ConfigLoader(Configuration.from(config))
-    val indexName = configLoader.offerIndex
-    val typeName = indexName.toTypeName
-    val esClientMock = mock[ElasticsearchClient]
-    val esCompletionServiceMock = mock[EsCompletionService]
-    val service = new EsOfferService(esClientMock, configLoader, esCompletionServiceMock)
-
-    val negativeIndexResponse = new IndexResponse("", "", "", 1L, false)
-    val positiveIndexResponse = new IndexResponse("", "", "", 1L, true)
-
-    val offer = Offer(
-      OfferId("123"),
-      Version(1),
-      UserId("abc"),
-      Set("Socken"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Price(50.00),
-      Set.empty
-    )
   }
 }

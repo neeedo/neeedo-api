@@ -10,6 +10,15 @@ import play.api.test.WithApplication
 
 class EsMessageServiceSpec extends Specification with Mockito {
 
+  trait EsMessageServiceContext extends WithApplication {
+    val esMock = mock[ElasticsearchClient]
+    val config = mock[ConfigLoader]
+    val service = new EsMessageService(esMock, config)
+
+    val u1 = UserId("u1")
+    val u2 = UserId("u2")
+  }
+  
   "EsMessageService" should {
 
     "buildQuery should return valid query for userIds" in new EsMessageServiceContext {
@@ -39,14 +48,4 @@ class EsMessageServiceSpec extends Specification with Mockito {
     }
 
   }
-
-  trait EsMessageServiceContext extends WithApplication {
-    val esMock = mock[ElasticsearchClient]
-    val config = mock[ConfigLoader]
-    val service = new EsMessageService(esMock, config)
-
-    val u1 = UserId("u1")
-    val u2 = UserId("u2")
-  }
-
 }

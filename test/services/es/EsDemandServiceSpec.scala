@@ -18,6 +18,31 @@ import scala.concurrent.{Await, Future}
 
 class EsDemandServiceSpec extends Specification with Mockito {
 
+  trait EsDemandServiceContext extends WithApplication {
+    val config = Map("demand.typeName" -> "demand")
+    val configLoader = new ConfigLoader(Configuration.from(config))
+    val indexName = configLoader.demandIndex
+    val typeName = indexName.toTypeName
+    val esClientMock = mock[ElasticsearchClient]
+    val esCompletionServiceMock = mock[EsCompletionService]
+    val service = new EsDemandService(esClientMock, configLoader, esCompletionServiceMock)
+
+    val negativeIndexResponse = new IndexResponse("", "", "", 1L, false)
+    val positiveIndexResponse = new IndexResponse("", "", "", 1L, true)
+
+    val demand = Demand(
+      DemandId("123"),
+      Version(1),
+      UserId("abc"),
+      Set("Socken", "Bekleidung"),
+      Set("Wolle"),
+      Location(Longitude(12.2), Latitude(15.5)),
+      Distance(100),
+      Price(0.00),
+      Price(10.00)
+    )
+  }
+
   "EsDemandService" should {
     "createDemand must throw IndexFailedException when IndexResponse is negative" in new EsDemandServiceContext {
       esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
@@ -79,31 +104,5 @@ class EsDemandServiceSpec extends Specification with Mockito {
       there was one (esClientMock)
         .deleteDocument(demand.id.value, indexName, typeName)
     }
-  }
-
-  trait EsDemandServiceContext extends WithApplication {
-
-    val config = Map("demand.typeName" -> "demand")
-    val configLoader = new ConfigLoader(Configuration.from(config))
-    val indexName = configLoader.demandIndex
-    val typeName = indexName.toTypeName
-    val esClientMock = mock[ElasticsearchClient]
-    val esCompletionServiceMock = mock[EsCompletionService]
-    val service = new EsDemandService(esClientMock, configLoader, esCompletionServiceMock)
-
-    val negativeIndexResponse = new IndexResponse("", "", "", 1L, false)
-    val positiveIndexResponse = new IndexResponse("", "", "", 1L, true)
-
-    val demand = Demand(
-      DemandId("123"),
-      Version(1),
-      UserId("abc"),
-      Set("Socken", "Bekleidung"),
-      Set("Wolle"),
-      Location(Longitude(12.2), Latitude(15.5)),
-      Distance(100),
-      Price(0.00),
-      Price(10.00)
-    )
   }
 }
