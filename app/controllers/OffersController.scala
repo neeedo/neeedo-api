@@ -1,7 +1,6 @@
 package controllers
 
 import common.domain._
-import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
 import model.{Offer, OfferId}
 import play.api.libs.json.Json
@@ -10,6 +9,7 @@ import services.OfferService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 
 class OffersController(service: OfferService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 

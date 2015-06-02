@@ -1,17 +1,17 @@
 package controllers
 
 import common.domain._
-import common.exceptions.{ProductNotFound, ElasticSearchIndexFailed}
+import common.exceptions.{ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.SecuredAction
-import model.{OfferId, Offer}
+import model.{Offer, OfferId}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{AnyContentAsJson, AnyContentAsEmpty, AnyContent, Result}
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, AnyContentAsJson, Result}
 import play.api.test.Helpers.defaultAwaitTimeout
-import play.api.test.{WithApplication, Helpers, FakeHeaders, FakeRequest}
-import services.{UserService, OfferService}
-import test.{TestData, TestApplications}
+import play.api.test.{FakeHeaders, FakeRequest, Helpers, WithApplication}
+import services.{OfferService, UserService}
+import test.TestData
 
 import scala.concurrent.Future
 
@@ -57,7 +57,6 @@ class OffersControllerSpec extends Specification with Mockito {
     "createOffer must return InternalServerError when offerService returns ElasticSearchFailedException" in new OffersControllerContext {
       offerService.createOffer(any[OfferDraft]) returns Future.failed(new ElasticSearchIndexFailed("bla"))
       val fakeRequest = emptyBodyCreateFakeRequest
-        .withHeaders(("Content-Type","application/json"))
         .withJsonBody(Json.toJson(offerDraft))
       val res: Future[Result] = ctrl.createOffer()(fakeRequest)
 
@@ -69,7 +68,6 @@ class OffersControllerSpec extends Specification with Mockito {
       offerService.createOffer(any[OfferDraft]) returns Future.successful(offer)
 
       val fakeRequest = emptyBodyCreateFakeRequest
-        .withHeaders(("Content-Type","application/json"))
         .withJsonBody(Json.toJson(offerDraft))
       val res: Future[Result] = ctrl.createOffer()(fakeRequest)
 
@@ -175,7 +173,7 @@ class OffersControllerSpec extends Specification with Mockito {
       "/offer",
       FakeHeaders(Seq(Helpers.AUTHORIZATION -> Seq(TestData.basicAuthToken))),
       AnyContentAsEmpty,
-      secure = true)
+      secure = true).withHeaders(("Content-Type","application/json"))
 
     val emptyBodyDeleteFakeRequest = new FakeRequest[AnyContent](
       Helpers.DELETE,

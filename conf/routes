@@ -46,7 +46,7 @@ DELETE         /users/:id/:version          @controllers.UsersController.deleteU
 # Images
 GET            /images/:id                  @controllers.ImagesController.getImageById(id: common.domain.ImageId)
 POST           /images                      @controllers.ImagesController.createImage()
-DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
+# DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
 
 # Conversations
 # GET /conversations/:userId
