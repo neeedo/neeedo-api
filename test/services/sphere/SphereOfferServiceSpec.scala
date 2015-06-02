@@ -25,7 +25,6 @@ import scala.concurrent.{Await, Future}
 class SphereOfferServiceSpec extends Specification with Mockito {
 
   trait SphereOfferServiceContext extends WithApplication {
-
     val config = Map("offer.typeName" -> "offer")
     val configLoader = new ConfigLoader(Configuration.from(config))
     val productTypeDrafts = new ProductTypeDrafts(configLoader)
@@ -42,13 +41,13 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     )
 
     val offer = Offer(
-    OfferId("123"),
-    Version(1),
-    draft.uid,
-    draft.tags,
-    draft.location,
-    draft.price,
-    Set("xyz.jpg")
+      OfferId("123"),
+      Version(1),
+      draft.uid,
+      draft.tags,
+      draft.location,
+      draft.price,
+      Set("xyz.jpg")
     )
 
 

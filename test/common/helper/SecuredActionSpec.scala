@@ -15,6 +15,17 @@ import scala.concurrent.duration.Duration
 
 class SecuredActionSpec extends Specification with Mockito {
 
+  trait SecuredActionContext extends Scope {
+    val httpRequest = new FakeRequest[AnyContent](
+      Helpers.POST,
+      "/users",
+      FakeHeaders(),
+      AnyContentAsEmpty)
+
+    val userService = mock[UserService]
+    val securedAction = new SecuredAction(userService)
+  }
+
   "SecuredAction" should {
     "redirectHttps must return moved directly request with https domain" in new SecuredActionContext {
       Await.result(securedAction.redirectHttps(httpRequest), Duration.Inf).toString() must
@@ -35,16 +46,5 @@ class SecuredActionSpec extends Specification with Mockito {
       Await.result(securedAction.requestAuthorization, Duration.Inf).toString() must
         beEqualTo(Unauthorized.withHeaders(WWW_AUTHENTICATE -> """Basic realm="Secured"""").toString())
     }
-  }
-
-  trait SecuredActionContext extends Scope {
-    val httpRequest = new FakeRequest[AnyContent](
-      Helpers.POST,
-      "/users",
-      FakeHeaders(),
-      AnyContentAsEmpty)
-
-    val userService = mock[UserService]
-    val securedAction = new SecuredAction(userService)
   }
 }
