@@ -11,16 +11,16 @@ trait MessageImplicits {
       (JsPath \ "senderId").read[String] and
       (JsPath \ "recipientId").read[String] and
       (JsPath \ "body").read[String] and
-      (JsPath \ "timestamp").read[Long] and
-      (JsPath \ "read" \ "lat").read[Boolean]
+//      (JsPath \ "timestamp").read[Long] and
+      (JsPath \ "read").read[Boolean]
     ) {
-    (id, sid, rid, body, timestamp, read) =>
+    (id, sid, rid, body, read) =>
       Message(
         MessageId(id),
         UserId(sid),
         UserId(rid),
         body,
-        timestamp,
+//        timestamp,
         read
       )
   }
@@ -31,7 +31,7 @@ trait MessageImplicits {
       "senderId" -> m.senderId.value,
       "recipientId" -> m.recipientId.value,
       "body" -> m.body,
-      "timestamp" -> m.timestamp,
+//      "timestamp" -> m.timestamp,
       "read" -> m.read
     )
   }

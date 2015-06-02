@@ -1,6 +1,6 @@
 package services
 
-import common.domain.MessageDraft
+import common.domain.{UserId, MessageDraft}
 import model.{MessageId, Message}
 import services.es.EsMessageService
 
@@ -14,6 +14,8 @@ class MessageService(esMessageService: EsMessageService) {
   def markMessageRead(id: MessageId): Future[MessageId] =
     esMessageService.markMessageRead(id)
 
-
+  def getMessagesForUsers(u1: UserId, u2: UserId): Future[List[Message]] = {
+    esMessageService.getMessagesForUsers(u1, u2)
+  }
 
 }

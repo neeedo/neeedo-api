@@ -1,9 +1,9 @@
 package controllers
 
-import common.domain.MessageDraft
+import common.domain.{UserId, MessageDraft}
 import common.helper.{ControllerUtils, SecuredAction}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
-import model.MessageId
+import model.{Message, MessageId}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import services.MessageService
@@ -24,6 +24,15 @@ class MessagesController(service: MessageService) extends Controller with Contro
         case e: Exception => e.asResult
       }
       case Failure(e) => Future(e.asResult)
+    }
+  }
+
+
+  def getMessagesForUsers(u1: UserId, u2: UserId) = SecuredAction.async {
+    service.getMessagesForUsers(u1, u2) map {
+      messages: List[Message] => Ok(Json.obj("messages" -> Json.toJson(messages)))
+    } recover {
+      case e: Exception => e.asResult
     }
   }
 
