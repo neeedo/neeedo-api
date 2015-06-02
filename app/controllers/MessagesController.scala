@@ -27,8 +27,7 @@ class MessagesController(service: MessageService, securedAction: SecuredAction) 
     }
   }
 
-
-  def getMessagesForUsers(u1: UserId, u2: UserId) = SecuredAction.async {
+  def getMessagesForUsers(u1: UserId, u2: UserId) = securedAction.async {
     service.getMessagesForUsers(u1, u2) map {
       messages: List[Message] => Ok(Json.obj("messages" -> Json.toJson(messages)))
     } recover {
@@ -36,7 +35,7 @@ class MessagesController(service: MessageService, securedAction: SecuredAction) 
     }
   }
 
-  def markMessageRead(id: MessageId) = SecuredAction.async {
+  def markMessageRead(id: MessageId) = securedAction.async {
     service.markMessageRead(id) map {
       messageId: MessageId => Ok(Json.toJson(messageId))
     } recover {

@@ -4,14 +4,14 @@ import common.domain.{CompletionTag, UserId}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.ConfigLoader
+import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import common.logger.OfferLogger
 import model.{Offer, OfferId}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
-import common.helper.ImplicitConversions.ActionListenableFutureConverter
-import services.es.EsCompletionService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
