@@ -16,8 +16,8 @@ class CompletionController(completionService: CompletionService) extends Control
     }
   }
 
-  def suggestTags(offerOrDemand: String, phrase: String) = Action.async {
-    completionService.suggestTags(offerOrDemand, CompletionPhrase(phrase)) map {
+  def suggestTags(phrase: String) = Action.async {
+    completionService.suggestTags(CompletionPhrase(phrase)) map {
       res => Ok(Json.toJson(res))
     } recover {
       case e: Exception => e.asResult

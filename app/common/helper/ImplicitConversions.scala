@@ -1,5 +1,7 @@
 package common.helper
 
+import java.util.concurrent.CompletionException
+
 import common.exceptions._
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 import play.api.libs.json.Json
@@ -27,6 +29,7 @@ object ImplicitConversions {
         case e: CustomerAlreadyExists => Conflict(x.getMessage)
         case e: InvalidJson => BadRequest(errorJson(x.getMessage))
         case e: Unauthorized => Unauthorized(errorJson(x.getMessage))
+        case e: NetworkProblem => ServiceUnavailable(errorJson(x.getMessage))
         case _ => InternalServerError(errorJson(x.getMessage))
       }
     }

@@ -5,15 +5,15 @@ import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
 import model.{Demand, DemandId}
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 import services.DemandService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class DemandsController(service: DemandService) extends Controller with ControllerUtils {
+class DemandsController(service: DemandService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
-  def createDemand = SecuredAction.async { implicit request =>
+  def createDemand = securedAction.async { implicit request =>
     val demandDraft = bindRequestJsonBody(request)(DemandDraft.demandDraftReads)
 
     demandDraft match {
@@ -26,14 +26,14 @@ class DemandsController(service: DemandService) extends Controller with Controll
     }
   }
 
-  def getDemandById(id: DemandId) = SecuredAction.async {
+  def getDemandById(id: DemandId) = securedAction.async {
     service.getDemandById(id) map {
       case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
       case None => NotFound(Json.obj("error" -> "Demand not found"))
     }
   }
 
-  def getDemandsByUserId(id: UserId) = SecuredAction.async {
+  def getDemandsByUserId(id: UserId) = securedAction.async {
     service.getDemandsByUserId(id) map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
@@ -41,15 +41,15 @@ class DemandsController(service: DemandService) extends Controller with Controll
     }
   }
 
-  def getAllDemands() = SecuredAction.async {
-    service.getAllDemands() map { demands: List[Demand] =>
+  def getAllDemands = Action.async {
+    service.getAllDemands map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
       case e: Exception => e.asResult
     }
   }
 
-  def updateDemand(id: DemandId, version: Version) = SecuredAction.async { implicit request =>
+  def updateDemand(id: DemandId, version: Version) = securedAction.async { implicit request =>
     val demandDraft = bindRequestJsonBody(request)(DemandDraft.demandDraftReads)
 
     demandDraft match {
@@ -62,7 +62,7 @@ class DemandsController(service: DemandService) extends Controller with Controll
   }
 
 
-  def deleteDemand(id: DemandId, version: Version) = SecuredAction.async {
+  def deleteDemand(id: DemandId, version: Version) = securedAction.async {
     service.deleteDemand(id, version)
       .map(_ => Ok)
       .recover {
@@ -70,7 +70,7 @@ class DemandsController(service: DemandService) extends Controller with Controll
     }
   }
 
-  def deleteAllDemands() = SecuredAction.async {
+  def deleteAllDemands() = securedAction.async {
     service.deleteAllDemands()
       .map(_ => Ok)
       .recover { case e: Exception => e.asResult }

@@ -1,19 +1,18 @@
 package services.es
 
-import common.domain.{UserId, CompletionTag}
+import common.domain.{CompletionTag, UserId}
 import common.elasticsearch.ElasticsearchClient
-import common.exceptions.{ElasticSearchDeleteFailed, ProductNotFound, ElasticSearchIndexFailed}
+import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.ConfigLoader
+import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import common.logger.DemandLogger
-import model.{DemandId, Demand}
+import model.{Demand, DemandId}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
-import services.EsCompletionService
-import common.helper.ImplicitConversions.ActionListenableFutureConverter
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
@@ -30,7 +29,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
     }
   }
 
-  def getAllDemands(): Future[List[Demand]] = {
+  def getAllDemands: Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
       .execute()
@@ -77,7 +76,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
   }
 
   def deleteAllDemands() = {
-    getAllDemands() map {
+    getAllDemands map {
       (demands: List[Demand]) => {
         demands map { (demand: Demand) => deleteDemand(demand.id) }
       }

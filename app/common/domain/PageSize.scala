@@ -2,7 +2,7 @@ package common.domain
 
 import play.api.mvc.PathBindable
 
-case class PageSize(value: Int) extends AnyVal
+case class PageSize(value: Int)
 object PageSize {
   implicit def pathBinder: PathBindable[PageSize] = new PathBindable[PageSize] {
     override def bind(key: String, value: String): Either[String, PageSize] = {
@@ -16,7 +16,7 @@ object PageSize {
   }
 }
 
-case class From(value: Int) extends AnyVal
+case class From(value: Int)
 object From {
   implicit def pathBinder: PathBindable[From] = new PathBindable[From] {
     override def bind(key: String, value: String): Either[String, From] = {
