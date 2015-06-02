@@ -13,7 +13,7 @@ import services.ImageService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ImagesController(imageService: ImageService) extends Controller {
+class ImagesController(imageService: ImageService, securedAction: SecuredAction) extends Controller {
 
   def getImageById(id: ImageId) = Action.async { request =>
     imageService.getImageById(id).flatMap {
@@ -26,7 +26,7 @@ class ImagesController(imageService: ImageService) extends Controller {
     }.recover { case e: Exception => e.asResult }
   }
 
-  def createImage = SecuredAction.async(parse.multipartFormData) { request =>
+  def createImage = securedAction.async(parse.multipartFormData) { request =>
     request.body.file("image") map {
       image => {
         imageService.createImage(image).map {
@@ -38,7 +38,7 @@ class ImagesController(imageService: ImageService) extends Controller {
     } getOrElse { Future(BadRequest("Missing Image")) }
   }
 
-  def deleteImage(id: ImageId) = SecuredAction.async {
+  def deleteImage(id: ImageId) = securedAction.async {
     imageService.deleteFile(id)
       .map { _ => Ok }
       .recover { case e: Exception =>e.asResult }

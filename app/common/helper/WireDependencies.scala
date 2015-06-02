@@ -6,15 +6,17 @@ import controllers._
 import migrations._
 import play.api.{Mode, Play}
 import services._
-import services.es.{EsMessageService, EsDemandService, EsOfferService}
+import services.es._
 import services.sphere.{SphereDemandService, SphereOfferService}
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
 
+  // Common
   lazy val configLoader = new ConfigLoader(Play.current.configuration)
   lazy val productTypeDrafts = wire[ProductTypeDrafts]
   lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) wire[MockProductTypes] else wire[SphereProductTypes]
+  lazy val securedAction = wire[SecuredAction]
 
   // Factories
   val esFactory: ElasticsearchClientFactory = wire[ElasticsearchClientFactory]
@@ -38,6 +40,7 @@ trait WireDependencies {
   lazy val esDemandService = wire[EsDemandService]
   lazy val esMatchingService = wire[EsMatchingService]
   lazy val esCompletionService = wire[EsCompletionService]
+  lazy val esSuggestionService = wire[EsSuggestionService]
   lazy val esMessageService = wire[EsMessageService]
 
   //// Sphere

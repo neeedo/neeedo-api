@@ -28,13 +28,14 @@ class DemandService(sphereDemandService: SphereDemandService, esDemandService: E
     esDemandService.getDemandsByUserId(id)
   }
 
-  def getAllDemands(): Future[List[Demand]] = {
+  def getAllDemands: Future[List[Demand]] = {
     esDemandService.getAllDemands
   }
 
   def updateDemand(id: DemandId, version: Version, draft: DemandDraft): Future[Demand] = {
     createDemand(draft) flatMap {
-      demand => deleteDemand(id, version)
+      demand =>
+        deleteDemand(id, version) map(_ => demand)
     }
   }
 

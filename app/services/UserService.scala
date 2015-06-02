@@ -1,19 +1,22 @@
 package services
 
-import common.Global
+import java.net.ConnectException
+import java.util.concurrent.CompletionException
+
 import common.domain._
+import common.exceptions.NetworkProblem
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
-import io.sphere.sdk.customers.queries.CustomerQuery
-import io.sphere.sdk.customers.{CustomerSignInResult, Customer, CustomerDraft, CustomerName}
 import io.sphere.sdk.customers.commands._
+import io.sphere.sdk.customers.queries.CustomerQuery
+import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName, CustomerSignInResult}
 import io.sphere.sdk.models.Versioned
 import io.sphere.sdk.queries.PagedQueryResult
-import play.api.{Play, Mode}
-import play.api.cache.Cache
 import play.api.Play.current
-import scala.concurrent.Future
+import play.api.cache.Cache
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
@@ -73,13 +76,11 @@ class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
         Cache.set(credentials.cacheKey, EncryptedUserCredentials(userId, credentials))
         Some(userId)
       }
-    } recover { case e: Exception => None }
-  }
-}
-
-object UserService {
-  def authorizeUser(userCredentials: UserCredentials): Future[Option[UserId]] = {
-    if (Play.mode == Mode.Test) Future(Some(UserId("123")))
-    else Global.wired.lookupSingleOrThrow(classOf[UserService]).authorizeUser(userCredentials)
+    } recover {
+      case e: CompletionException if e.getMessage.startsWith("java.net.ConnectException") =>
+        throw new NetworkProblem("Network is currently unreachable. Please try again later.")
+      case e: Exception =>
+        None
+    }
   }
 }

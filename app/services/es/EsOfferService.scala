@@ -10,8 +10,8 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
-import services.EsCompletionService
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
+import services.es.EsCompletionService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -29,7 +29,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
        }
   }
 
-  def getAllOffers(): Future[List[Offer]] = {
+  def getAllOffers: Future[List[Offer]] = {
     elasticsearch.client
       .prepareSearch(config.offerIndex.value)
       .addSort("_timestamp", SortOrder.DESC)

@@ -12,11 +12,12 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
     sphereOfferService.createOffer(draft).flatMap {
-      offer => esOfferService.createOffer(offer).recoverWith {
-        case e: Exception =>
-          sphereOfferService.deleteOffer(offer.id, offer.version)
-          throw e
-      }
+      offer =>
+        esOfferService.createOffer(offer).recoverWith {
+          case e: Exception =>
+            sphereOfferService.deleteOffer(offer.id, offer.version)
+            throw e
+        }
     }
   }
 
@@ -28,21 +29,19 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
     esOfferService.getOffersByUserId(id)
   }
 
-  def getAllOffers(): Future[List[Offer]] = {
+  def getAllOffers: Future[List[Offer]] = {
     esOfferService.getAllOffers
   }
 
   def updateOffer(id: OfferId, version: Version, draft: OfferDraft): Future[Offer] = {
     createOffer(draft) flatMap {
-      offer => deleteOffer(id, version)
+      offer => deleteOffer(id, version) map(_ => offer)
     }
   }
 
   def deleteOffer(id: OfferId, version: Version): Future[Offer] = {
     esOfferService.deleteOffer(id).flatMap {
       offerId => sphereOfferService.deleteOffer(offerId, version)
-    } recover {
-      case e: Exception => throw e
     }
   }
 

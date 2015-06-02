@@ -14,7 +14,7 @@ GET            /demands                     @controllers.DemandsController.getAl
 POST           /demands                     @controllers.DemandsController.createDemand()
 PUT            /demands/:id/:version        @controllers.DemandsController.updateDemand(id: model.DemandId, version: common.domain.Version)
 DELETE         /demands/:id/:version        @controllers.DemandsController.deleteDemand(id: model.DemandId, version: common.domain.Version)
-DELETE         /demands/all                  @controllers.DemandsController.deleteAllDemands()
+# DELETE         /demands/all                  @controllers.DemandsController.deleteAllDemands()
 OPTIONS        /demands                     @controllers.StaticController.deliverCorsHeaders()
 
 # Offers
@@ -24,7 +24,7 @@ GET            /offers                      @controllers.OffersController.getAll
 POST           /offers                      @controllers.OffersController.createOffer()
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
-DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
+# DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching
@@ -34,8 +34,8 @@ OPTIONS        /matching/demand             @controllers.StaticController.delive
 OPTIONS        /matching/demand/0/0         @controllers.StaticController.deliverCorsHeaders()
 
 # Completion
-GET            /completion/tag/:tag             @controllers.CompletionController.completeTag(tag: String)
-GET            /completion/:type/phrase/:phrase @controllers.CompletionController.suggestTags(type: String, phrase: String)
+GET            /completion/tag/:tag         @controllers.CompletionController.completeTag(tag: String)
+GET            /completion/suggest/:phrase  @controllers.CompletionController.suggestTags(phrase: String)
 
 # Users
 GET            /users/mail/:mail            @controllers.UsersController.getUserByMail(mail: common.domain.Email)
@@ -46,7 +46,7 @@ DELETE         /users/:id/:version          @controllers.UsersController.deleteU
 # Images
 GET            /images/:id                  @controllers.ImagesController.getImageById(id: common.domain.ImageId)
 POST           /images                      @controllers.ImagesController.createImage()
-DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
+# DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
 
 # Conversations
 # GET /conversations/:userId

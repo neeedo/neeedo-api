@@ -11,7 +11,7 @@ import org.specs2.mutable.Specification
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import play.api.test.WithApplication
-import services.EsCompletionService
+import services.es.EsCompletionService
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
