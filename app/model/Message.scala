@@ -7,9 +7,7 @@ import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
 case class Message(id: MessageId, senderId: UserId, recipientId: UserId,
-  body: String,
-//                   timestamp: Long,
-                   read: Boolean)
+  body: String, timestamp: Long, read: Boolean)
 
 object Message extends MessageImplicits {
 
@@ -19,7 +17,7 @@ object Message extends MessageImplicits {
       draft.senderId,
       draft.recipientId,
       draft.body,
-//      System.currentTimeMillis,
+      System.currentTimeMillis,
       false
     )
   }
