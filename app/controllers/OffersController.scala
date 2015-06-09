@@ -13,6 +13,9 @@ import common.helper.ImplicitConversions.ExceptionToResultConverter
 
 class OffersController(service: OfferService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
+  val pagerOffsetDefault = 0
+  val pagerLimitDefault = 20
+
   def createOffer = securedAction.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
 
@@ -33,8 +36,10 @@ class OffersController(service: OfferService, securedAction: SecuredAction) exte
     }
   }
 
-  def getOffersByUserId(id: UserId) = securedAction.async {
-    service.getOffersByUserId(id) map { offers: List[Offer] =>
+  def getOffersByUserId(id: UserId, pagerOption: Option[Pager]) = securedAction.async {
+    val pager = pagerOption.getOrElse(Pager(pagerLimitDefault, pagerOffsetDefault))
+
+    service.getOffersByUserId(id, pager) map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {
       case e: Exception => e.asResult

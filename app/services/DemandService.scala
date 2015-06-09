@@ -24,8 +24,8 @@ class DemandService(sphereDemandService: SphereDemandService, esDemandService: E
     sphereDemandService.getDemandById(id)
   }
 
-  def getDemandsByUserId(id: UserId): Future[List[Demand]] = {
-    esDemandService.getDemandsByUserId(id)
+  def getDemandsByUserId(id: UserId, pager: Pager): Future[List[Demand]] = {
+    esDemandService.getDemandsByUserId(id, pager)
   }
 
   def getAllDemands(pager: Pager): Future[List[Demand]] = {

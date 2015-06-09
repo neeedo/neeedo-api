@@ -17,10 +17,12 @@ import scala.concurrent.Future
 
 class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
 
-  def getDemandsByUserId(id: UserId): Future[List[Demand]] = {
+  def getDemandsByUserId(id: UserId, pager: Pager): Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
       .setQuery(QueryBuilders.matchQuery("userId", id.value))
+      .setFrom(pager.offset)
+      .setSize(pager.limit)
       .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala

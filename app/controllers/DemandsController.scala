@@ -13,6 +13,9 @@ import scala.util.{Success, Failure}
 
 class DemandsController(service: DemandService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
+  val pagerOffsetDefault = 0
+  val pagerLimitDefault = 20
+
   def createDemand = securedAction.async { implicit request =>
     val demandDraft = bindRequestJsonBody(request)(DemandDraft.demandDraftReads)
 
@@ -33,8 +36,9 @@ class DemandsController(service: DemandService, securedAction: SecuredAction) ex
     }
   }
 
-  def getDemandsByUserId(id: UserId) = securedAction.async {
-    service.getDemandsByUserId(id) map { demands: List[Demand] =>
+  def getDemandsByUserId(id: UserId, pagerOption: Option[Pager]) = securedAction.async {
+    val pager = pagerOption.getOrElse(Pager(pagerLimitDefault, pagerOffsetDefault))
+    service.getDemandsByUserId(id, pager) map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
       case e: Exception => e.asResult
@@ -42,7 +46,7 @@ class DemandsController(service: DemandService, securedAction: SecuredAction) ex
   }
 
   def getAllDemands(pagerOption: Option[Pager]) = Action.async {
-    val pager = pagerOption.getOrElse(Pager(20, 0))
+    val pager = pagerOption.getOrElse(Pager(pagerLimitDefault, pagerOffsetDefault))
     service.getAllDemands(pager) map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
