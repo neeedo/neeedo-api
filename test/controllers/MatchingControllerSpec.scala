@@ -19,7 +19,7 @@ class MatchingControllerSpec extends Specification with Mockito {
 
     "return 400 for POST request with missing body" in new MatchingControllerContext {
       val fakeRequest = emptyBodyFakeRequest.withHeaders(("Content-Type","application/json"))
-      val res: Future[Result] = ctrl.matchDemand(From(0), PageSize(0))(fakeRequest)
+      val res: Future[Result] = ctrl.matchDemand(Pager(0,0))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
@@ -29,7 +29,7 @@ class MatchingControllerSpec extends Specification with Mockito {
       val fakeRequest = emptyBodyFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(wrongDemandJson)
-      val res: Future[Result] = ctrl.matchDemand(From(0), PageSize(0))(fakeRequest)
+      val res: Future[Result] = ctrl.matchDemand(Pager(0,0))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
       Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
@@ -37,16 +37,16 @@ class MatchingControllerSpec extends Specification with Mockito {
 
 
     "return 200 if MatchingService returns a MatchingResult" in new MatchingControllerContext {
-      matchingService.matchDemand(any[From], any[PageSize], any[Demand]) returns
-        Future.successful(MatchingResult(0, From(0), PageSize(20), List.empty[Card]))
+      matchingService.matchDemand(any[Pager], any[Demand]) returns
+        Future.successful(MatchingResult(0, Pager(20, 0), List.empty[Card]))
 
       val fakeRequest = emptyBodyFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(Json.toJson(demand))
-      val res: Future[Result] = ctrl.matchDemand(From(0), PageSize(20))(fakeRequest)
+      val res: Future[Result] = ctrl.matchDemand(Pager(20, 0))(fakeRequest)
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo("{\"matches\":{\"total\":0,\"from\":0,\"pageSize\":20,\"matching\":[]}}")
+      Helpers.contentAsString(res) must equalTo("{\"matches\":{\"total\":0,\"offset\":0,\"limit\":20,\"matching\":[]}}")
     }
   }
 

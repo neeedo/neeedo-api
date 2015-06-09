@@ -41,8 +41,9 @@ class DemandsController(service: DemandService, securedAction: SecuredAction) ex
     }
   }
 
-  def getAllDemands = Action.async {
-    service.getAllDemands map { demands: List[Demand] =>
+  def getAllDemands(pagerOption: Option[Pager]) = Action.async {
+    val pager = pagerOption.getOrElse(Pager(20, 0))
+    service.getAllDemands(pager) map { demands: List[Demand] =>
       Ok(Json.obj("demands" -> Json.toJson(demands)))
     } recover {
       case e: Exception => e.asResult

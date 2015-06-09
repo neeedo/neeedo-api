@@ -1,6 +1,6 @@
 package services.es
 
-import common.domain.{CompletionTag, UserId}
+import common.domain.{Pager, CompletionTag, UserId}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.ConfigLoader
@@ -29,9 +29,11 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
        }
   }
 
-  def getAllOffers: Future[List[Offer]] = {
+  def getAllOffers(pager: Pager): Future[List[Offer]] = {
     elasticsearch.client
       .prepareSearch(config.offerIndex.value)
+      .setFrom(pager.offset)
+      .setSize(pager.limit)
       .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
@@ -77,7 +79,8 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
   }
 
   def deleteAllOffers() = {
-    getAllOffers map {
+    val pager = Pager(Integer.MAX_VALUE, 0)
+    getAllOffers(pager) map {
       (offers: List[Offer]) => {
         offers map { (offer: Offer) => deleteOffer(offer.id) }
       }

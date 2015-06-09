@@ -20,8 +20,8 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
                       productTypes: ProductTypes) {
 
   //TODO use from and size
-  def matchDemand(from: From, pageSize: PageSize, demand: Demand): Future[MatchingResult] = {
-    esMatching.matchOfferIdsFromEs(from, pageSize, demand).flatMap {
+  def matchDemand(pager: Pager, demand: Demand): Future[MatchingResult] = {
+    esMatching.matchOfferIdsFromEs(pager, demand).flatMap {
       esResult => {
         if (esResult.results.nonEmpty) {
           val predicate = ProductQuery.model().id().isIn(esResult.results.map(_.value).asJava)
@@ -32,9 +32,9 @@ class MatchingService(sphereClient: SphereClient, esMatching: EsMatchingService,
               pageQueryResult.getResults.asScala.toList.flatMap(Offer.fromProduct(_).toOption)
           }
 
-          offers.map(MatchingResult(esResult.hits, from, pageSize, _))
+          offers.map(MatchingResult(esResult.hits, pager, _))
         } else {
-          Future.successful(MatchingResult(0L, from, pageSize, List.empty[Offer]))
+          Future.successful(MatchingResult(0L, pager, List.empty[Offer]))
         }
       }
     }
@@ -67,12 +67,12 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
   def getMustTagsFilter(mustTags: Set[String]): FilterBuilder =
     new TermsFilterBuilder("tags", mustTags.asJava)
 
-  def matchOfferIdsFromEs(from: From, pageSize: PageSize, demand: Demand): Future[EsMatchingResult] = {
-    val query = buildQuery(demand, from, pageSize)
+  def matchOfferIdsFromEs(pager: Pager, demand: Demand): Future[EsMatchingResult] = {
+    val query = buildQuery(demand, pager)
     query.execute().asScala.map(searchResponseToEsMatchingResult)
   }
 
-  def buildQuery(card: Card, from: From, pageSize: PageSize): SearchRequestBuilder = {
+  def buildQuery(card: Card, pager: Pager): SearchRequestBuilder = {
     card match {
       case d: Demand =>
         val indexName = config.offerIndex

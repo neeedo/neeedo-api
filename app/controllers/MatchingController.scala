@@ -1,11 +1,12 @@
 package controllers
 
-import common.domain.{From, PageSize}
+import common.domain.Pager
 import common.helper.SecuredAction
 import model.Demand
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.MatchingService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -19,11 +20,11 @@ class MatchingController(matchingService: MatchingService, securedAction: Secure
     }
   }
 
-  def matchDemand(from: From, pageSize: PageSize) = securedAction.async {
+  def matchDemand(pager: Pager) = securedAction.async {
     implicit request => request.body.asJson match {
       case Some(json) => json.asOpt[Demand] match {
         case Some(demand) =>
-          matchingService.matchDemand(from, pageSize, demand).map {
+          matchingService.matchDemand(pager, demand).map {
             result => Ok(Json.toJson(result))
           }
         case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))

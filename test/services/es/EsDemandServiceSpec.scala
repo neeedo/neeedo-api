@@ -2,7 +2,7 @@ package services.es
 
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
-import common.exceptions.{ProductNotFound, ElasticSearchDeleteFailed, ElasticSearchIndexFailed}
+import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.ConfigLoader
 import model.{Demand, DemandId}
 import org.elasticsearch.action.index.IndexResponse
@@ -11,7 +11,6 @@ import org.specs2.mutable.Specification
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import play.api.test.WithApplication
-import services.es.EsCompletionService
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}

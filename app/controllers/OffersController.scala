@@ -41,8 +41,9 @@ class OffersController(service: OfferService, securedAction: SecuredAction) exte
     }
   }
 
-  def getAllOffers = Action.async {
-    service.getAllOffers map { offers: List[Offer] =>
+  def getAllOffers(p: Option[Pager]) = Action.async {
+    val pager = p.getOrElse(Pager(20, 0))
+    service.getAllOffers(pager) map { offers: List[Offer] =>
       Ok(Json.obj("offers" -> Json.toJson(offers)))
     } recover {
       case e: Exception => e.asResult
