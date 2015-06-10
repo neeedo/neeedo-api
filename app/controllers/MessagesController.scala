@@ -1,24 +1,24 @@
 package controllers
 
-import common.domain.{UserId, MessageDraft}
-import common.helper.{ControllerUtils, SecuredAction}
+import common.domain.{MessageDraft, UserId}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
+import common.helper.{ControllerUtils, SecuredAction}
 import model.{Message, MessageId}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
-import services.MessageService
+import services.es.EsMessageService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class MessagesController(service: MessageService, securedAction: SecuredAction) extends Controller with ControllerUtils {
+class MessagesController(esMessageService: EsMessageService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
   def createMessage() = securedAction.async { implicit request =>
     val maybeDraft = bindRequestJsonBody(request)(MessageDraft.messageDraftReads)
 
     maybeDraft match {
-      case Success(draft) => service.createMessage(draft) map {
+      case Success(draft) => esMessageService.createMessage(Message(draft)) map {
         message => Created(Json.obj("message" -> Json.toJson(message)))
       } recover {
         case e: Exception => e.asResult
@@ -27,8 +27,8 @@ class MessagesController(service: MessageService, securedAction: SecuredAction) 
     }
   }
 
-  def getMessagesForUsers(u1: UserId, u2: UserId) = securedAction.async {
-    service.getMessagesForUsers(u1, u2) map {
+  def getMessagesByUsers(u1: UserId, u2: UserId) = securedAction.async {
+    esMessageService.getMessagesByUsers(u1, u2) map {
       messages: List[Message] => Ok(Json.obj("messages" -> Json.toJson(messages)))
     } recover {
       case e: Exception => e.asResult
@@ -36,8 +36,11 @@ class MessagesController(service: MessageService, securedAction: SecuredAction) 
   }
 
   def markMessageRead(id: MessageId) = securedAction.async {
-    service.markMessageRead(id) map {
-      messageId: MessageId => Ok(Json.toJson(messageId))
+    esMessageService.markMessageRead(id) map { maybeMessageId =>
+      maybeMessageId match {
+        case Some(messageId) => Ok(Json.toJson(messageId))
+        case None => NotFound
+      }
     } recover {
       case e: Exception => e.asResult
     }

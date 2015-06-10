@@ -33,7 +33,6 @@ trait WireDependencies {
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
   lazy val imageService = wire[ImageService]
-  lazy val messageService = wire[MessageService]
 
   //// Elasticsearch
   lazy val esOfferService = wire[EsOfferService]

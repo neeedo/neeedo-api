@@ -7,6 +7,7 @@ import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import model.{Message, MessageId}
 import org.elasticsearch.action.index.IndexResponse
+import org.elasticsearch.index.engine.DocumentMissingException
 import org.elasticsearch.index.query.{OrFilterBuilder, AndFilterBuilder, TermFilterBuilder, FilteredQueryBuilder}
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
@@ -24,7 +25,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader)
       .map(parseIndexResponse(_, message))
   }
 
-  def getMessagesForUsers(u1: UserId, u2: UserId) = {
+  def getMessagesByUsers(u1: UserId, u2: UserId) = {
     elasticsearch.client
       .prepareSearch(config.messagesIndex.value)
       .setQuery(buildQuery(u1, u2))
@@ -36,12 +37,15 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader)
       }
   }
 
-  def markMessageRead(id: MessageId) = {
+  def markMessageRead(id: MessageId): Future[Option[MessageId]] = {
     val index = config.messagesIndex
     val typeName = config.messagesIndex.toTypeName
 
     elasticsearch.updateDocument(id.value, index, typeName)
-      .map(_ => id)
+      .map(_ => Option(id))
+      .recover {
+        case e: DocumentMissingException => Option.empty
+      }
   }
 
   private[es] def parseIndexResponse(indexResponse: IndexResponse, message: Message): Message = {

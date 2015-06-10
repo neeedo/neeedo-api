@@ -53,7 +53,7 @@ POST           /images                      @controllers.ImagesController.create
 # GET /conversations/:userId
 
 # Messages
-GET             /messages/:u1/:u2           @controllers.MessagesController.getMessagesForUsers(u1: common.domain.UserId, u2: common.domain.UserId)
+GET             /messages/:u1/:u2           @controllers.MessagesController.getMessagesByUsers(u1: common.domain.UserId, u2: common.domain.UserId)
 POST            /messages                   @controllers.MessagesController.createMessage()
 PUT             /messages/:id               @controllers.MessagesController.markMessageRead(id: model.MessageId)
 
