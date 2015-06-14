@@ -21,17 +21,17 @@ class EsOfferService(elasticsearch: ElasticsearchClient,
                      timeHelper: TimeHelper) extends EsSort(timeHelper) {
 
   def getOffersByUserId(id: UserId, pager: Pager): Future[List[Offer]] = {
-     elasticsearch.client
-       .prepareSearch(config.offerIndex.value)
-       .setQuery(QueryBuilders.matchQuery("userId", id.value))
-       .setFrom(pager.offset)
-       .setSize(pager.limit)
-       .addSort("_timestamp", SortOrder.DESC)
-       .execute()
-       .asScala
-       .map {
-         response => elasticsearch.searchresponseAs[Offer](response)
-       }
+    elasticsearch.client
+      .prepareSearch(config.offerIndex.value)
+      .setQuery(QueryBuilders.matchQuery("userId", id.value))
+      .setFrom(pager.offset)
+      .setSize(pager.limit)
+      .addSort("_timestamp", SortOrder.DESC)
+      .execute()
+      .asScala
+      .map {
+        response => elasticsearch.searchresponseAs[Offer](response)
+      }
   }
 
   def getAllOffers(pager: Pager, location: Option[Location]): Future[List[Offer]] = {

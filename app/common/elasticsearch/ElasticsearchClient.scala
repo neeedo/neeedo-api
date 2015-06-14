@@ -26,7 +26,7 @@ sealed trait ElasticsearchClient {
   def createElasticsearchClient(): Client
 
   def searchresponseAs[T](resp: SearchResponse)(implicit reads: Reads[T]): List[T] = {
-    resp.getHits.getHits.map( hit => Json.parse(hit.sourceAsString()).as[T]).toList
+    resp.getHits.getHits.map(hit => Json.parse(hit.sourceAsString()).as[T]).toList
   }
 
   def indexDocument(id: String, esIndex: IndexName, esType: TypeName, doc: JsValue): Future[IndexResponse] =
