@@ -1,10 +1,10 @@
 package services.es
 
-import common.domain.{Pager, CompletionTag, UserId}
+import common.domain.{CompletionTag, Location, Pager, UserId}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
-import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
+import common.helper.{ConfigLoader, TimeHelper}
 import common.logger.OfferLogger
 import model.{Offer, OfferId}
 import org.elasticsearch.action.index.IndexResponse
@@ -15,7 +15,10 @@ import play.api.libs.json.{JsObject, Json}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
+class EsOfferService(elasticsearch: ElasticsearchClient,
+                     config: ConfigLoader,
+                     esCompletionService: EsCompletionService,
+                     timeHelper: TimeHelper) extends EsSort(timeHelper) {
 
   def getOffersByUserId(id: UserId, pager: Pager): Future[List[Offer]] = {
      elasticsearch.client
@@ -31,12 +34,12 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
        }
   }
 
-  def getAllOffers(pager: Pager): Future[List[Offer]] = {
+  def getAllOffers(pager: Pager, location: Option[Location]): Future[List[Offer]] = {
     elasticsearch.client
       .prepareSearch(config.offerIndex.value)
+      .setQuery(buildFunctionScoredQuery(location))
       .setFrom(pager.offset)
       .setSize(pager.limit)
-      .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
       .map {
@@ -82,7 +85,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
 
   def deleteAllOffers() = {
     val pager = Pager(Integer.MAX_VALUE, 0)
-    getAllOffers(pager) map {
+    getAllOffers(pager, None) map {
       (offers: List[Offer]) => {
         offers map { (offer: Offer) => deleteOffer(offer.id) }
       }
@@ -97,6 +100,6 @@ class EsOfferService(elasticsearch: ElasticsearchClient, config: ConfigLoader, e
   }
 
   private[es] def buildEsOfferJson(offer: Offer) = {
-    Json.obj( "completionTags" -> offer.tags) ++ Json.toJson(offer).as[JsObject]
+    Json.obj("completionTags" -> offer.tags, "createdAt" -> timeHelper.now) ++ Json.toJson(offer).as[JsObject]
   }
 }

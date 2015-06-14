@@ -1,10 +1,10 @@
 package services.es
 
-import common.domain.{Pager, CompletionTag, UserId}
+import common.domain.{CompletionTag, Location, Pager, UserId}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
-import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
+import common.helper.{ConfigLoader, TimeHelper}
 import common.logger.DemandLogger
 import model.{Demand, DemandId}
 import org.elasticsearch.action.index.IndexResponse
@@ -15,7 +15,10 @@ import play.api.libs.json.{JsObject, Json}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, esCompletionService: EsCompletionService) {
+class EsDemandService(elasticsearch: ElasticsearchClient,
+                      config: ConfigLoader,
+                      esCompletionService: EsCompletionService,
+                      timeHelper: TimeHelper) extends EsSort(timeHelper) {
 
   def getDemandsByUserId(id: UserId, pager: Pager): Future[List[Demand]] = {
     elasticsearch.client
@@ -31,12 +34,12 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
     }
   }
 
-  def getAllDemands(pager: Pager): Future[List[Demand]] = {
+  def getAllDemands(pager: Pager, location: Option[Location]): Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
+      .setQuery(buildFunctionScoredQuery(location))
       .setFrom(pager.offset)
       .setSize(pager.limit)
-      .addSort("_timestamp", SortOrder.DESC)
       .execute()
       .asScala
       .map {
@@ -82,7 +85,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
 
   def deleteAllDemands() = {
     val pager = Pager(Integer.MAX_VALUE, 0)
-    getAllDemands(pager) map {
+    getAllDemands(pager, None) map {
       (demands: List[Demand]) => {
         demands map { (demand: Demand) => deleteDemand(demand.id) }
       }
@@ -97,6 +100,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient, config: ConfigLoader, 
   }
 
   private[es] def buildEsDemandJson(demand: Demand) = {
-    Json.obj( "completionTags" -> demand.mustTags) ++ Json.toJson(demand).as[JsObject]
+    Json.obj("completionTags" -> (demand.mustTags ++ demand.shouldTags),
+      "createdAt" -> timeHelper.now) ++ Json.toJson(demand).as[JsObject]
   }
 }

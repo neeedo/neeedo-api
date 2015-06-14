@@ -29,8 +29,8 @@ class OfferService(sphereOfferService: SphereOfferService, esOfferService: EsOff
     esOfferService.getOffersByUserId(id, pager)
   }
 
-  def getAllOffers(pager: Pager): Future[List[Offer]] = {
-    esOfferService.getAllOffers(pager)
+  def getAllOffers(pager: Pager, loc: Option[Location]): Future[List[Offer]] = {
+    esOfferService.getAllOffers(pager, loc)
   }
 
   def updateOffer(id: OfferId, version: Version, draft: OfferDraft): Future[Offer] = {
