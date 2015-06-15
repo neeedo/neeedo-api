@@ -2,6 +2,7 @@ package services.es
 
 import common.domain.{Latitude, Longitude, Location}
 import common.helper.TimeHelper
+import org.elasticsearch.common.joda.time.DateTimeZone
 import org.joda.time.DateTime
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
@@ -13,7 +14,7 @@ class EsSortSpec extends Specification with Mockito {
   trait EsSortContext extends Scope {
     val timeStamp = 1434272348084L
     val timeHelperMock = mock[TimeHelper]
-    timeHelperMock.now returns new DateTime(timeStamp)
+    timeHelperMock.now returns new DateTime(DateTimeZone.forID("Europe/Berlin")).withMillis(timeStamp)
     val esSort = new EsSort(timeHelperMock) {}
   }
 

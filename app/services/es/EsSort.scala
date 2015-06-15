@@ -5,7 +5,6 @@ import common.helper.TimeHelper
 import org.elasticsearch.common.geo.GeoPoint
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders
-import org.joda.time.DateTime
 
 abstract class EsSort(timeHelper: TimeHelper) {
   def buildFunctionScoredQuery(location: Option[Location]) = {
