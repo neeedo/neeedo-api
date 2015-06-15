@@ -100,7 +100,7 @@ sealed trait ElasticsearchClient {
       .prepareCreate(index.value)
       .setSettings(
         ImmutableSettings.settingsBuilder()
-          .put("number_of_shards", 5)
+          .put("number_of_shards", 1)
           .put("number_of_replicas", 0)
           .build()
       )

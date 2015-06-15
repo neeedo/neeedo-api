@@ -32,7 +32,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
   }
 
   def buildMatchingQuery(d: Demand): QueryBuilder = {
-    val query = QueryBuilders.filteredQuery(
+    QueryBuilders.filteredQuery(
       buildMatchingScoreQuery(d),
       FilterBuilders.andFilter(
         FilterBuilders
@@ -46,29 +46,21 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
           .rangeFilter("price").from(d.priceMin.value).to(d.priceMax.value)
       )
     )
-
-    query
   }
 
   private[es] def buildMatchingScoreQuery(d: Demand) = {
-    val baseQuery = QueryBuilders.functionScoreQuery(
+    QueryBuilders.functionScoreQuery(
+      if (d.shouldTags.isEmpty) QueryBuilders.matchAllQuery()
+      else QueryBuilders.termsQuery("tags", d.shouldTags.asJava),
       ScoreFunctionBuilders
         .gaussDecayFunction("createdAt", timeHelper.now, "8h")
         .setDecay(0.75)
         .setOffset("4h")
     ).add(
         ScoreFunctionBuilders
-          .gaussDecayFunction("location", new GeoPoint(d.location.lat.value, d.location.lon.value), "1km")
-          .setDecay(0.9)
-          .setOffset("2km")
-      )
-
-    d.shouldTags.foldLeft(baseQuery) {
-      case (query, elem) =>
-        query.add(
-          FilterBuilders.termFilter("tags", elem),
-          ScoreFunctionBuilders.weightFactorFunction(1)
-        )
-    }.scoreMode("sum")
+          .gaussDecayFunction("location", new GeoPoint(d.location.lat.value, d.location.lon.value), s"${d.distance.value / 2.0}km")
+          .setDecay(0.5)
+          .setOffset("1km")
+    ).scoreMode("avg")
   }
 }
