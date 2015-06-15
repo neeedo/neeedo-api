@@ -19,34 +19,34 @@ class MatchingControllerSpec extends Specification with Mockito {
 
     "return 400 for POST request with missing body" in new MatchingControllerContext {
       val fakeRequest = emptyBodyFakeRequest.withHeaders(("Content-Type","application/json"))
-      val res: Future[Result] = ctrl.matchDemand(Pager(0,0))(fakeRequest)
+      val res: Future[Result] = ctrl.matchDemand(Some(Pager(0,0)))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Missing body json object\"}")
     }
 
     "return 400 for POST request with invalid Demand Json" in new MatchingControllerContext {
       val fakeRequest = emptyBodyFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(wrongDemandJson)
-      val res: Future[Result] = ctrl.matchDemand(Pager(0,0))(fakeRequest)
+      val res: Future[Result] = ctrl.matchDemand(Some(Pager(0,0)))(fakeRequest)
 
       Helpers.status(res) must equalTo(400)
-      Helpers.contentAsString(res) must equalTo("{\"error\":\"Cannot parse json\"}")
+      Helpers.contentAsString(res) must equalTo("{\"error\":\"Invalid json body\"}")
     }
 
 
     "return 200 if MatchingService returns a MatchingResult" in new MatchingControllerContext {
       matchingService.matchDemand(any[Pager], any[Demand]) returns
-        Future.successful(MatchingResult(0, Pager(20, 0), List.empty[Card]))
+        Future.successful(List.empty)
 
       val fakeRequest = emptyBodyFakeRequest
         .withHeaders(("Content-Type","application/json"))
         .withJsonBody(Json.toJson(demand))
-      val res: Future[Result] = ctrl.matchDemand(Pager(20, 0))(fakeRequest)
+      val res: Future[Result] = ctrl.matchDemand(Some(Pager(20, 0)))(fakeRequest)
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo("{\"matches\":{\"total\":0,\"offset\":0,\"limit\":20,\"matching\":[]}}")
+      Helpers.contentAsString(res) must equalTo("{\"offers\":[]}")
     }
   }
 

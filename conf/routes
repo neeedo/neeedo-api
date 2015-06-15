@@ -28,10 +28,8 @@ DELETE         /offers/:id/:version         @controllers.OffersController.delete
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching
-GET            /matching/demands            @controllers.MatchingController.matchDemands()
-POST           /matching/demand             @controllers.MatchingController.matchDemand(pager: common.domain.Pager)
+POST           /matching/demand             @controllers.MatchingController.matchDemand(pager: Option[common.domain.Pager])
 OPTIONS        /matching/demand             @controllers.StaticController.deliverCorsHeaders()
-OPTIONS        /matching/demand/0/0         @controllers.StaticController.deliverCorsHeaders()
 
 # Completion
 GET            /completion/tag/:tag         @controllers.CompletionController.completeTag(tag: String)

@@ -2,8 +2,7 @@ package services.es
 
 import common.domain.{Latitude, Longitude, Location}
 import common.helper.TimeHelper
-import org.elasticsearch.common.joda.time.DateTimeZone
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeZone, DateTime}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import org.specs2.mutable.Specification
