@@ -22,7 +22,8 @@ import scala.concurrent.Future
 
 class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader) {
 
-  def createMessage(message: Message): Future[Message] = {
+  def createMessage(draft: MessageDraft): Future[Message] = {
+    val message = Message(draft)
     val index = config.messagesIndex
     val typeName = config.messagesIndex.toTypeName
 

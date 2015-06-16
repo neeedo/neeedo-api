@@ -21,7 +21,7 @@ class MessagesController(esMessageService: EsMessageService, securedAction: Secu
     val maybeDraft = bindRequestJsonBody(request)(MessageDraft.messageDraftReads)
 
     maybeDraft match {
-      case Success(draft) => esMessageService.createMessage(Message(draft)) map {
+      case Success(draft) => esMessageService.createMessage(draft) map {
         message => Created(Json.obj("message" -> Json.toJson(message)))
       } recover {
         case e: Exception => e.asResult
