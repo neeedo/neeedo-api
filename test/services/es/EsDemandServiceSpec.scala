@@ -3,9 +3,10 @@ package services.es
 import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
-import common.helper.ConfigLoader
+import common.helper.{TimeHelper, ConfigLoader}
 import model.{Demand, DemandId}
 import org.elasticsearch.action.index.IndexResponse
+import org.joda.time.DateTime
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
@@ -24,7 +25,10 @@ class EsDemandServiceSpec extends Specification with Mockito {
     val typeName = indexName.toTypeName
     val esClientMock = mock[ElasticsearchClient]
     val esCompletionServiceMock = mock[EsCompletionService]
-    val service = new EsDemandService(esClientMock, configLoader, esCompletionServiceMock)
+    val timeStamp = 1434272348084L
+    val timeHelperMock = mock[TimeHelper]
+    timeHelperMock.now returns new DateTime(timeStamp)
+    val service = new EsDemandService(esClientMock, configLoader, esCompletionServiceMock, timeHelperMock)
 
     val negativeIndexResponse = new IndexResponse("", "", "", 1L, false)
     val positiveIndexResponse = new IndexResponse("", "", "", 1L, true)

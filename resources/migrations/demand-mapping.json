@@ -12,11 +12,7 @@
       "index": "analyzed"
     },
     "location": {
-      "properties": {
-        "location": {
-          "type": "geo_point"
-        }
-      }
+      "type": "geo_point"
     },
     "mustTags": {
       "type": "string",
@@ -46,6 +42,9 @@
     },
     "version": {
       "type": "long"
+    },
+    "createdAt": {
+      "type": "date"
     }
   }
 }

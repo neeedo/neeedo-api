@@ -23,7 +23,7 @@ sealed trait S3Client {
 }
 
 class RemoteS3Client(configLoader: ConfigLoader) extends S3Client {
-  val bucketName = configLoader.getString("aws.s3.imageBucket")
+  lazy val bucketName = configLoader.getString("aws.s3.imageBucket")
 
   override def createClient(): AmazonS3Client = {
     val accessKey = configLoader.getString("aws.accessKeyId")

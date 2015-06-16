@@ -1,35 +1,32 @@
 package controllers
 
 import common.domain.Pager
-import common.helper.SecuredAction
-import model.Demand
+import common.helper.ImplicitConversions.ExceptionToResultConverter
+import common.helper.{ControllerUtils, SecuredAction}
+import model.{Demand, Offer}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import services.MatchingService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-class MatchingController(matchingService: MatchingService, securedAction: SecuredAction) extends Controller {
+class MatchingController(matchingService: MatchingService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
-  /* TODO diese methode noch umbauen in ListDemands bzw ListOffers als Schnupperaction
-   * TODO für nicht registrierte (In den Login / die Registrierung treiben */
-  def matchDemands() = Action.async {
-    matchingService.matchDemands().map {
-      demands => Ok(Json.obj("demands" -> Json.toJson(demands)))
-    }
-  }
+  def matchDemand(p: Option[Pager]) = securedAction.async { implicit request =>
+    val demand = bindRequestJsonBody(request)(Demand.demandReads)
 
-  def matchDemand(pager: Pager) = securedAction.async {
-    implicit request => request.body.asJson match {
-      case Some(json) => json.asOpt[Demand] match {
-        case Some(demand) =>
-          matchingService.matchDemand(pager, demand).map {
-            result => Ok(Json.toJson(result))
-          }
-        case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
-      }
-      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+    demand match {
+      case Success(d) =>
+        val pager = p.getOrElse(Pager(20, 0))
+        matchingService.matchDemand(pager, d).map {
+          offers: List[Offer] =>
+            Ok(Json.obj("offers" -> Json.toJson(offers)))
+        } recover {
+          case e: Exception => e.asResult
+        }
+      case Failure(e) => Future(e.asResult)
     }
   }
 }

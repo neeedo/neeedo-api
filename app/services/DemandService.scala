@@ -28,8 +28,8 @@ class DemandService(sphereDemandService: SphereDemandService, esDemandService: E
     esDemandService.getDemandsByUserId(id, pager)
   }
 
-  def getAllDemands(pager: Pager): Future[List[Demand]] = {
-    esDemandService.getAllDemands(pager)
+  def getAllDemands(pager: Pager, location: Option[Location]): Future[List[Demand]] = {
+    esDemandService.getAllDemands(pager, location)
   }
 
   def updateDemand(id: DemandId, version: Version, draft: DemandDraft): Future[Demand] = {

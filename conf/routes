@@ -10,7 +10,7 @@ GET            /doc                         @controllers.StaticController.showDo
 # Demands
 GET            /demands/:id                 @controllers.DemandsController.getDemandById(id: model.DemandId)
 GET            /demands/users/:id           @controllers.DemandsController.getDemandsByUserId(id: common.domain.UserId, pager: Option[common.domain.Pager])
-GET            /demands                     @controllers.DemandsController.getAllDemands(pager: Option[common.domain.Pager])
+GET            /demands                     @controllers.DemandsController.getAllDemands(pager: Option[common.domain.Pager], loc: Option[common.domain.Location])
 POST           /demands                     @controllers.DemandsController.createDemand()
 PUT            /demands/:id/:version        @controllers.DemandsController.updateDemand(id: model.DemandId, version: common.domain.Version)
 DELETE         /demands/:id/:version        @controllers.DemandsController.deleteDemand(id: model.DemandId, version: common.domain.Version)
@@ -20,7 +20,7 @@ OPTIONS        /demands                     @controllers.StaticController.delive
 # Offers
 GET            /offers/:id                  @controllers.OffersController.getOfferById(id: model.OfferId)
 GET            /offers/users/:id            @controllers.OffersController.getOffersByUserId(id: common.domain.UserId, pager: Option[common.domain.Pager])
-GET            /offers                      @controllers.OffersController.getAllOffers(pager: Option[common.domain.Pager])
+GET            /offers                      @controllers.OffersController.getAllOffers(pager: Option[common.domain.Pager], loc: Option[common.domain.Location])
 POST           /offers                      @controllers.OffersController.createOffer()
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
@@ -28,10 +28,8 @@ DELETE         /offers/:id/:version         @controllers.OffersController.delete
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching
-GET            /matching/demands            @controllers.MatchingController.matchDemands()
-POST           /matching/demand             @controllers.MatchingController.matchDemand(pager: common.domain.Pager)
+POST           /matching/demand             @controllers.MatchingController.matchDemand(pager: Option[common.domain.Pager])
 OPTIONS        /matching/demand             @controllers.StaticController.deliverCorsHeaders()
-OPTIONS        /matching/demand/0/0         @controllers.StaticController.deliverCorsHeaders()
 
 # Completion
 GET            /completion/tag/:tag         @controllers.CompletionController.completeTag(tag: String)
