@@ -23,7 +23,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient,
   def getOffersByUserId(id: UserId, pager: Pager): Future[List[Offer]] = {
     elasticsearch.client
       .prepareSearch(config.offerIndex.value)
-      .setQuery(QueryBuilders.matchQuery("userId", id.value))
+      .setQuery(QueryBuilders.termQuery("user.id", id.value))
       .setFrom(pager.offset)
       .setSize(pager.limit)
       .addSort("_timestamp", SortOrder.DESC)

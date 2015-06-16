@@ -23,7 +23,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
   def getDemandsByUserId(id: UserId, pager: Pager): Future[List[Demand]] = {
     elasticsearch.client
       .prepareSearch(config.demandIndex.value)
-      .setQuery(QueryBuilders.matchQuery("userId", id.value))
+      .setQuery(QueryBuilders.termQuery("user.id", id.value))
       .setFrom(pager.offset)
       .setSize(pager.limit)
       .addSort("_timestamp", SortOrder.DESC)

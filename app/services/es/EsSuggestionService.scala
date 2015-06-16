@@ -10,6 +10,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms.Bucket
 import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ChiSquare.ChiSquareBuilder
+import org.elasticsearch.search.aggregations.bucket.terms.{StringTerms, Terms}
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
