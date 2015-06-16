@@ -49,11 +49,10 @@ POST           /images                      @controllers.ImagesController.create
 # DELETE         /images/:id                  @controllers.ImagesController.deleteImage(id: common.domain.ImageId)
 
 # Conversations
-# GET /conversations/:userId
+GET /conversations/:userId                  @controllers.MessagesController.getConversationsByUser(userId: common.domain.UserId, read: Option[Boolean])
 
 # Messages
 GET             /messages/:u1/:u2           @controllers.MessagesController.getMessagesByUsers(u1: common.domain.UserId, u2: common.domain.UserId)
-GET             /conversations/:uid         @controllers.MessagesController.getConversationsByUser(uid: common.domain.UserId)
 POST            /messages                   @controllers.MessagesController.createMessage()
 PUT             /messages/:id               @controllers.MessagesController.markMessageRead(id: model.MessageId)
 

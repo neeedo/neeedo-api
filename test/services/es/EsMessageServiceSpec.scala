@@ -32,15 +32,15 @@ class EsMessageServiceSpec extends Specification with Mockito {
                 Json.obj(
                   "and" -> Json.obj(
                     "filters" -> Json.arr(
-                      Json.obj("term" -> Json.obj("senderId" -> u1.value)),
-                      Json.obj("term" -> Json.obj("recipientId" -> u2.value))
+                      Json.obj("term" -> Json.obj("sender.id" -> u1.value)),
+                      Json.obj("term" -> Json.obj("recipient.id" -> u2.value))
                     )
                 )),
                 Json.obj(
                   "and" -> Json.obj(
                     "filters" -> Json.arr(
-                      Json.obj("term" -> Json.obj("senderId" -> u2.value)),
-                      Json.obj("term" -> Json.obj("recipientId" -> u1.value))
+                      Json.obj("term" -> Json.obj("sender.id" -> u2.value)),
+                      Json.obj("term" -> Json.obj("recipient.id" -> u1.value))
                     )
                 ))
               )

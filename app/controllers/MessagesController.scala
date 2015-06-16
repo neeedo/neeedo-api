@@ -1,12 +1,9 @@
 package controllers
 
-import java.util
-
 import common.domain.{MessageDraft, UserId}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
-import model.{MessageId, Message}
-import org.elasticsearch.search.aggregations.bucket.terms.Terms
+import model.{Message, MessageId}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.es.EsMessageService
@@ -38,9 +35,9 @@ class MessagesController(esMessageService: EsMessageService, securedAction: Secu
     }
   }
 
-  def getConversationsByUser(id: UserId) = Action.async {
-    esMessageService.getConversationsByUser(id, read = false) map {
-      res => Ok("")
+  def getConversationsByUser(id: UserId, read: Option[Boolean]) = Action.async {
+    esMessageService.getConversationsByUser(id, read.getOrElse(false)) map {
+      res => Ok(Json.toJson(res))
     } recover {
       case e: Exception => e.asResult
     }
