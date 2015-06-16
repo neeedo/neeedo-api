@@ -21,8 +21,10 @@ trait OfferImplicits {
       Offer(
         OfferId(id),
         Version(version),
-        UserId(uid),
-        Username(uname),
+        UserIdAndName(
+          UserId(uid),
+          Username(uname)
+        ),
         tags.map(x => x.trim).filter(_ != ""),
         Location(
           Longitude(lon),
@@ -38,8 +40,8 @@ trait OfferImplicits {
       "id" -> o.id.value,
       "version" -> o.version.value,
       "user" -> Json.obj(
-        "id" -> o.uid.value,
-        "name" -> o.uname.value
+        "id" -> o.user.id.value,
+        "name" -> o.user.name.value
       ),
       "tags" -> o.tags,
       "location" -> Json.obj(

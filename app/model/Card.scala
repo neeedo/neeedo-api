@@ -7,7 +7,7 @@ import scala.util.Try
 
 sealed trait Card
 
-case class Demand(id: DemandId, version: Version, uid: UserId, uname: Username, mustTags: Set[String], shouldTags: Set[String],
+case class Demand(id: DemandId, version: Version, user: UserIdAndName, mustTags: Set[String], shouldTags: Set[String],
                   location: Location, distance: Distance, priceMin: Price, priceMax: Price) extends Card
 
 object Demand extends ModelUtils with DemandImplicits {
@@ -18,8 +18,10 @@ object Demand extends ModelUtils with DemandImplicits {
       Demand(
         DemandId(product.getId),
         Version(product.getVersion),
-        UserId(readStringAttribute(variant, "userId")),
-        Username(readStringAttribute(variant, "userName")),
+        UserIdAndName(
+          UserId(readStringAttribute(variant, "userId")),
+          Username(readStringAttribute(variant, "userName"))
+        ),
         readStringSetAttribute(variant, "mustTags"),
         readStringSetAttribute(variant, "shouldTags"),
         Location(
@@ -36,7 +38,7 @@ object Demand extends ModelUtils with DemandImplicits {
 }
 
 
-case class Offer(id: OfferId, version: Version, uid: UserId, uname: Username, tags: Set[String],
+case class Offer(id: OfferId, version: Version, user: UserIdAndName, tags: Set[String],
                  location: Location, price: Price, images: Set[String]) extends Card
 
 object Offer extends ModelUtils with OfferImplicits {
@@ -47,8 +49,10 @@ object Offer extends ModelUtils with OfferImplicits {
       Offer(
         OfferId(product.getId),
         Version(product.getVersion),
-        UserId(readStringAttribute(variant, "userId")),
-        Username(readStringAttribute(variant, "userName")),
+        UserIdAndName(
+          UserId(readStringAttribute(variant, "userId")),
+          Username(readStringAttribute(variant, "userName"))
+        ),
         readStringSetAttribute(variant, "tags"),
         Location(
           Longitude(readDoubleAttribute(variant, "longitude")),

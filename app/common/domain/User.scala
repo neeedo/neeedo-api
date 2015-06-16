@@ -15,6 +15,7 @@ object User extends UserImplicits {
 
 case class Username(value: String) extends AnyVal
 case class UserId(value: String) extends AnyVal
+case class UserIdAndName(id: UserId, name: Username)
 
 object UserId {
 
