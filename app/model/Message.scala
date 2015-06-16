@@ -1,28 +1,13 @@
 package model
 
-import java.util.UUID
-
-import common.domain.{MessageDraft, UserId}
+import common.domain.UserIdAndName
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
-case class Message(id: MessageId, senderId: UserId, recipientId: UserId,
+case class Message(id: MessageId, sender: UserIdAndName, recipient: UserIdAndName,
   body: String, timestamp: Long, read: Boolean)
 
-object Message extends MessageImplicits {
-
-  def apply(draft: MessageDraft): Message = {
-    Message(
-      MessageId(UUID.randomUUID.toString),
-      draft.senderId,
-      draft.recipientId,
-      draft.body,
-      System.currentTimeMillis,
-      false
-    )
-  }
-}
-
+object Message extends MessageImplicits
 
 case class MessageId(value: String)
 

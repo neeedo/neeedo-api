@@ -39,7 +39,7 @@ class MessagesController(esMessageService: EsMessageService, securedAction: Secu
   }
 
   def getConversationsByUser(id: UserId) = Action.async {
-    esMessageService.getConversationsByUser(id) map {
+    esMessageService.getConversationsByUser(id, read = false) map {
       res => Ok("")
     } recover {
       case e: Exception => e.asResult
