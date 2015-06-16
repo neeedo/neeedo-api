@@ -1,20 +1,20 @@
 package services.es
 
-import common.domain.{CompletionPhraseResult, CompletionPhrase}
+import common.domain.{CompletionPhrase, CompletionPhraseResult}
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.ElasticSearchQueryFailed
 import common.helper.ConfigLoader
+import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms.Bucket
 import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ChiSquare.ChiSquareBuilder
-import org.elasticsearch.search.aggregations.bucket.terms.{StringTerms, Terms}
+
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
-import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: ConfigLoader) {
   val aggregationName: String = "tags"
@@ -23,18 +23,16 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
   private val offerIndex = config.offerIndex
 
   def getSuggestions(phrase: CompletionPhrase): Future[CompletionPhraseResult] = {
-    val searchresponse = elasticsearchClient.client
+    elasticsearchClient.client
       .prepareSearch(demandIndex.value, offerIndex.value)
       .setTypes(demandIndex.toTypeName.value, offerIndex.toTypeName.value)
       .setSize(0)
       .setQuery(buildPhraseCompletionQuery(phrase))
       .addAggregation(buildAggregation)
       .execute()
-      .asScala
-
-    searchresponse map {
-      resp =>
-        CompletionPhraseResult(getBucketsFromSearchresponse(resp, phrase))
+      .asScala.map {
+        resp =>
+          CompletionPhraseResult(getBucketsFromSearchresponse(resp, phrase))
     } recover {
       case e: Exception =>
         throw new ElasticSearchQueryFailed("Failed to get receive tag suggests from Elasticsearch")
@@ -55,7 +53,7 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
     AggregationBuilders
       .significantTerms(aggregationName)
       .field(modelFieldName)
-      .minDocCount(2)
+      .minDocCount(1)
       .significanceHeuristic(new ChiSquareBuilder(false, false))
       .size(20)
   }
