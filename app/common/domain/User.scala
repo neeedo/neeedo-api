@@ -1,6 +1,8 @@
 package common.domain
 
 import io.sphere.sdk.customers.Customer
+import model.Demand
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
 
@@ -16,6 +18,14 @@ object User extends UserImplicits {
 case class Username(value: String) extends AnyVal
 case class UserId(value: String)
 case class UserIdAndName(id: UserId, name: Username)
+object UserIdAndName {
+  implicit val writes = new Writes[UserIdAndName] {
+    def writes(u: UserIdAndName) = Json.obj(
+      "id" -> u.id.value,
+      "name" -> u.name.value
+    )
+  }
+}
 
 object UserId {
 
