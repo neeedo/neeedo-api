@@ -17,6 +17,7 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
 import play.api.test.WithApplication
+import services.UserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
@@ -30,7 +31,11 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     val productTypeDrafts = new ProductTypeDrafts(configLoader)
     val productTypes = new MockProductTypes(productTypeDrafts)
     val sphereClientMock = mock[RemoteSphereClient]
-    val service = new SphereOfferService(sphereClientMock, productTypeDrafts, productTypes)
+    val userService = mock[UserService]
+    val service = new SphereOfferService(sphereClientMock, productTypeDrafts, productTypes, userService)
+
+    val username = Username("test")
+    val user = User(UserId("abc"), Version(1L), username, Email("test@web.de"))
 
     val draft = OfferDraft(
       UserId("abc"),
@@ -43,16 +48,19 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     val offer = Offer(
       OfferId("123"),
       Version(1),
-      draft.uid,
+      UserIdAndName(
+        draft.uid,
+        username
+      ),
       draft.tags,
       draft.location,
       draft.price,
       Set("xyz.jpg")
     )
 
-
     val productAttributeList = List(
-      Attribute.of("userId", offer.uid.value),
+      Attribute.of("userId", offer.user.id.value),
+      Attribute.of("userName", offer.user.name.value),
       Attribute.of("tags", offer.tags.asJava),
       Attribute.of("longitude", offer.location.lon.value),
       Attribute.of("latitude", offer.location.lat.value),
@@ -83,6 +91,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
 
   "SphereOfferService" should {
     "createOffer must throw SphereIndexFailed when SphereClient fails" in new SphereOfferServiceContext {
+      userService.getUserById(any[UserId]) returns Future(user)
       sphereClientMock.execute(any[ProductCreateCommand]) returns
         Future.failed(new Exception)
 
@@ -91,6 +100,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     }
 
     "createOffer must return offer when SphereClient succeeds" in new SphereOfferServiceContext {
+      userService.getUserById(any[UserId]) returns Future(user)
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future(offerProduct)
 
       Await.result(service.createOffer(draft), Duration.Inf) must beEqualTo(offer)
@@ -98,6 +108,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     }
 
     "createOffer must throw SphereIndexFailed when SphereClient returns invalid product" in new SphereOfferServiceContext {
+      userService.getUserById(any[UserId]) returns Future(user)
       sphereClientMock.execute(any[ProductCreateCommand]) returns
         Future(mockProduct)
 
@@ -106,17 +117,18 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     }
 
     "buildDraft must return valid product drafts" in new SphereOfferServiceContext {
-      val productDraft = service.buildProductDraft(draft)
+      val productDraft = service.buildProductDraft(username, draft)
 
       productDraft.getName.get(Locale.ENGLISH).get() must startWith("Biete: Socken Wolle")
       productDraft.getSlug.get(Locale.ENGLISH).get() must startWith("biete-socken-wolle")
       productDraft.getProductType must beEqualTo(productTypes.offer.toReference)
-      productDraft.getMasterVariant.getAttributes must beEqualTo(service.buildOfferAttributes(draft))
+      productDraft.getMasterVariant.getAttributes must beEqualTo(service.buildOfferAttributes(username, draft))
     }
 
     "buildOfferAttributes must return valid AttributeList" in new SphereOfferServiceContext {
-      val offerAttributes = service.buildOfferAttributes(draft).asScala
+      val offerAttributes = service.buildOfferAttributes(username, draft).asScala
       offerAttributes must contain(Attribute.of("userId", draft.uid.value))
+      offerAttributes must contain(Attribute.of("userName", username.value))
       offerAttributes must contain(Attribute.of("tags", draft.tags.asJava))
       offerAttributes must contain(Attribute.of("longitude", draft.location.lon.value))
       offerAttributes must contain(Attribute.of("latitude", draft.location.lat.value))

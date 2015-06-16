@@ -67,7 +67,10 @@ class MatchingControllerSpec extends Specification with Mockito {
     val demand = Demand(
       DemandId("123"),
       Version(1),
-      UserId("abc"),
+      UserIdAndName(
+        UserId("abc"),
+        Username("test")
+      ),
       Set("Socken", "Bekleidung"),
       Set("Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),
@@ -78,7 +81,7 @@ class MatchingControllerSpec extends Specification with Mockito {
 
     val wrongDemandJson: JsObject = Json.obj(
       "id" -> demand.id.value,
-      "userId" -> demand.uid.value,
+      "userId" -> demand.user.id.value,
       "mustTags" -> demand.mustTags,
       "location" -> Json.obj(
         "lon" -> demand.location.lon.value

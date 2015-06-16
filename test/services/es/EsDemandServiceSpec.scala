@@ -36,7 +36,10 @@ class EsDemandServiceSpec extends Specification with Mockito {
     val demand = Demand(
       DemandId("123"),
       Version(1),
-      UserId("abc"),
+      UserIdAndName(
+        UserId("abc"),
+        Username("test")
+      ),
       Set("Socken", "Bekleidung"),
       Set("Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),

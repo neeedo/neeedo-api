@@ -17,6 +17,7 @@ object TestData {
   val offerId = OfferId("testOfferId")
   val version = Version(1L)
   val userId = UserId("123")
+  val username = Username("test")
   val tags = Set("TV Regal", "Oppli", "Birkenoptik")
   val tagsWithWhitespaces = Set("  TV Regal", "Oppli   ", " Birkenoptik")
   val shouldTags = Set("Buche", "Kiefer", "Schwarz")
@@ -31,7 +32,10 @@ object TestData {
   val demand = Demand(
     demandId,
     version,
-    userId,
+    UserIdAndName(
+      userId,
+      username
+    ),
     tags,
     shouldTags,
     location,
@@ -42,7 +46,10 @@ object TestData {
   val demandJson: JsObject = Json.obj(
     "id" -> demandId.value,
     "version" -> version.value,
-    "userId" -> userId.value,
+    "user" -> Json.obj(
+      "id" -> userId.value,
+      "name" -> username.value
+    ),
     "mustTags" -> tags,
     "shouldTags" -> shouldTags,
     "location" -> Json.obj(
@@ -59,7 +66,10 @@ object TestData {
   val demandJsonWithCompletionTags: JsObject = Json.obj(
     "id" -> demandId.value,
     "version" -> version.value,
-    "userId" -> userId.value,
+    "user" -> Json.obj(
+      "id" -> userId.value,
+      "name" -> username.value
+    ),
     "mustTags" -> tags,
     "shouldTags" -> shouldTags,
     "completionTags" -> (tags ++ shouldTags),
@@ -77,7 +87,10 @@ object TestData {
   val demandJsonWithWhitespaces: JsObject = Json.obj(
     "id" -> demandId.value,
     "version" -> version.value,
-    "userId" -> userId.value,
+    "user" -> Json.obj(
+      "id" -> userId.value,
+      "name" -> username.value
+    ),
     "mustTags" -> tagsWithWhitespaces,
     "shouldTags" -> shouldTagsWithWhitespaces,
     "location" -> Json.obj(
@@ -132,6 +145,7 @@ object TestData {
 
   val demandProductAttributeList = List(
     Attribute.of("userId", userId.value),
+    Attribute.of("userName", username.value),
     Attribute.of("mustTags", tags.asJava),
     Attribute.of("shouldTags", shouldTags.asJava),
     Attribute.of("longitude", location.lon.value),
@@ -144,7 +158,10 @@ object TestData {
   val offer = Offer(
     offerId,
     version,
-    userId,
+    UserIdAndName(
+      userId,
+      username
+    ),
     tags,
     location,
     price,
@@ -153,7 +170,10 @@ object TestData {
   val offerJson: JsObject = Json.obj(
     "id" -> offerId.value,
     "version" -> version.value,
-    "userId" -> userId.value,
+    "user" -> Json.obj(
+      "id" -> userId.value,
+      "name" -> username.value
+    ),
     "tags" -> tags,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
@@ -166,7 +186,10 @@ object TestData {
   val offerJsonWithCompletionTags: JsObject = Json.obj(
     "id" -> offerId.value,
     "version" -> version.value,
-    "userId" -> userId.value,
+    "user" -> Json.obj(
+      "id" -> userId.value,
+      "name" -> username.value
+    ),
     "tags" -> tags,
     "completionTags" -> tags,
     "location" -> Json.obj(
@@ -180,7 +203,10 @@ object TestData {
   val offerJsonWithWhitespaces: JsObject = Json.obj(
     "id" -> offerId.value,
     "version" -> version.value,
-    "userId" -> userId.value,
+    "user" -> Json.obj(
+      "id" -> userId.value,
+      "name" -> username.value
+    ),
     "tags" -> tagsWithWhitespaces,
     "location" -> Json.obj(
       "lat" -> location.lat.value,
@@ -221,6 +247,7 @@ object TestData {
 
   val offerProductAttributeList = List(
     Attribute.of("userId", userId.value),
+    Attribute.of("userName", userId.value),
     Attribute.of("tags", tags.asJava),
     Attribute.of("longitude", location.lon.value),
     Attribute.of("latitude", location.lat.value),

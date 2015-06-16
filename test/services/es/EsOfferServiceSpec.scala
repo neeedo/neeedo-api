@@ -36,7 +36,10 @@ class EsOfferServiceSpec extends Specification with Mockito {
     val offer = Offer(
       OfferId("123"),
       Version(1),
-      UserId("abc"),
+      UserIdAndName(
+        UserId("abc"),
+        Username("test")
+      ),
       Set("Socken"),
       Location(Longitude(12.2), Latitude(15.5)),
       Price(50.00),

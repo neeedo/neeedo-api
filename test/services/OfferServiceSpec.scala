@@ -31,7 +31,10 @@ class OfferServiceSpec extends Specification with Mockito {
     val offer1 = Offer(
       OfferId("123"),
       Version(1),
-      draft.uid,
+      UserIdAndName(
+        draft.uid,
+        Username("test")
+      ),
       draft.tags,
       draft.location,
       draft.price,
@@ -41,7 +44,10 @@ class OfferServiceSpec extends Specification with Mockito {
     val offer2 = Offer(
       OfferId("456"),
       Version(1),
-      UserId("horst"),
+      UserIdAndName(
+        UserId("horst"),
+        Username("test")
+      ),
       Set("Fahrrad"),
       Location(Longitude(8.2), Latitude(13.5)),
       Price(149.00),

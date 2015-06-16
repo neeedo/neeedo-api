@@ -33,7 +33,10 @@ class DemandServiceSpec extends Specification with Mockito {
     val demand1 = Demand(
       DemandId("123"),
       Version(1),
-      draft.uid,
+      UserIdAndName(
+        draft.uid,
+        Username("test")
+      ),
       draft.mustTags,
       draft.shouldTags,
       draft.location,
@@ -45,7 +48,10 @@ class DemandServiceSpec extends Specification with Mockito {
     val demand2 = Demand(
       DemandId("456"),
       Version(1),
-      UserId("hans"),
+      UserIdAndName(
+        UserId("hans"),
+        Username("test")
+      ),
       Set("Fahrrad", "rot"),
       Set("fixie"),
       Location(Longitude(14.2), Latitude(9.5)),

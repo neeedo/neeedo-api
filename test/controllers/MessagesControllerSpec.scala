@@ -61,7 +61,7 @@ class MessagesControllerSpec extends Specification with Mockito {
 
     "createMessage must return InternalServerError when service returns " +
       "ElasticSearchFailedException" in new MessagesControllerContext {
-      esMessageService.createMessage(any[Message]).returns(Future.failed(new ElasticSearchIndexFailed("failed")))
+      esMessageService.createMessage(any[MessageDraft]).returns(Future.failed(new ElasticSearchIndexFailed("failed")))
 
       val res: Future[Result] = controller.createMessage()(createMessageFakeRequest)
 
@@ -70,7 +70,7 @@ class MessagesControllerSpec extends Specification with Mockito {
     }
 
     "createMessage must return 201 when service returns message" in new MessagesControllerContext {
-      esMessageService.createMessage(any[Message]).returns(Future.successful(message))
+      esMessageService.createMessage(any[MessageDraft]).returns(Future.successful(message))
 
       val res: Future[Result] = controller.createMessage()(createMessageFakeRequest)
 

@@ -200,7 +200,10 @@ class DemandsControllerSpec extends Specification with Mockito {
     val demand = Demand(
       DemandId("123"),
       Version(1),
-      UserId("abc"),
+      UserIdAndName(
+        UserId("abc"),
+        Username("test")
+      ),
       Set("Socken", "Bekleidung"),
       Set("Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),
@@ -210,7 +213,7 @@ class DemandsControllerSpec extends Specification with Mockito {
     )
 
     val demandDraftJson: JsObject = Json.obj(
-      "userId" -> demand.uid.value,
+      "userId" -> demand.user.id.value,
       "mustTags" -> demand.mustTags,
       "shouldTags" -> demand.shouldTags,
       "location" -> Json.obj(
@@ -225,7 +228,7 @@ class DemandsControllerSpec extends Specification with Mockito {
     )
 
     val wrongDemandDraftJson: JsObject = Json.obj(
-      "userId" -> demand.uid.value,
+      "userId" -> demand.user.id.value,
       "mustTags" -> demand.mustTags,
       "location" -> Json.obj(
         "lon" -> demand.location.lon.value

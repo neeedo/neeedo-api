@@ -17,6 +17,7 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
 import play.api.test.WithApplication
+import services.UserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
@@ -31,10 +32,14 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     val productTypeDrafts = new ProductTypeDrafts(configLoader)
     val productTypes = new MockProductTypes(productTypeDrafts)
     val sphereClientMock = mock[RemoteSphereClient]
-    val service = new SphereDemandService(sphereClientMock, productTypeDrafts, productTypes)
+    val userService = mock[UserService]
+    val service = new SphereDemandService(sphereClientMock, productTypeDrafts, productTypes, userService)
+
+    val username = Username("test")
+    val user = User(UserId("abc"), Version(1L), username, Email("test@web.de"))
 
     val draft = DemandDraft(
-      UserId("abc"),
+      user.id,
       Set("Socken", "Bekleidung"),
       Set("Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),
@@ -46,7 +51,10 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     val demand = Demand(
       DemandId("123"),
       Version(1),
-      draft.uid,
+      UserIdAndName(
+        draft.uid,
+        Username("test")
+      ),
       draft.mustTags,
       draft.shouldTags,
       draft.location,
@@ -56,7 +64,8 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     )
 
     val productAttributeList = List(
-      Attribute.of("userId", demand.uid.value),
+      Attribute.of("userId", demand.user.id.value),
+      Attribute.of("userName", demand.user.name.value),
       Attribute.of("mustTags", demand.mustTags.asJava),
       Attribute.of("shouldTags", demand.shouldTags.asJava),
       Attribute.of("longitude", demand.location.lon.value),
@@ -86,14 +95,15 @@ class SphereDemandServiceSpec extends Specification with Mockito {
 
   "SphereDemandService" should {
     "createDemand must throw SphereIndexFailed when SphereClient fails" in new SphereDemandServiceContext {
-      sphereClientMock.execute(any[ProductCreateCommand]) returns
-        Future.failed(new Exception)
+      userService.getUserById(any[UserId]) returns Future(user)
+      sphereClientMock.execute(any[ProductCreateCommand]) returns Future.failed(new Exception)
 
       Await.result(service.createDemand(draft), Duration.Inf) must throwA[SphereIndexFailed]
       there was one (sphereClientMock).execute(any[ProductCreateCommand])
     }
 
     "createDemand must return demand when SphereClient succeeds" in new SphereDemandServiceContext {
+      userService.getUserById(any[UserId]) returns Future(user)
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future(demandProduct)
 
       Await.result(service.createDemand(draft), Duration.Inf) must beEqualTo(demand)
@@ -101,25 +111,26 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     }
 
     "createDemand must throw SphereIndexFailed when SphereClient returns invalid product" in new SphereDemandServiceContext {
-      sphereClientMock.execute(any[ProductCreateCommand]) returns
-        Future(mockProduct)
+      userService.getUserById(any[UserId]) returns Future(user)
+      sphereClientMock.execute(any[ProductCreateCommand]) returns Future(mockProduct)
 
       Await.result(service.createDemand(draft), Duration.Inf) must throwA[SphereIndexFailed]
       there was one (sphereClientMock).execute(any[ProductCreateCommand])
     }
 
     "buildDraft must return valid product drafts" in new SphereDemandServiceContext {
-      val productDraft = service.buildProductDraft(draft)
+      val productDraft = service.buildProductDraft(username, draft)
 
       productDraft.getName.get(Locale.ENGLISH).get() must startWith("Suche: Socken Bekleidung")
       productDraft.getSlug.get(Locale.ENGLISH).get() must startWith("suche-socken-bekleidung")
       productDraft.getProductType must beEqualTo(productTypes.demand.toReference)
-      productDraft.getMasterVariant.getAttributes must beEqualTo(service.buildDemandAttributes(draft))
+      productDraft.getMasterVariant.getAttributes must beEqualTo(service.buildDemandAttributes(username, draft))
     }
 
     "buildDemandAttributes must return valid AttributeList" in new SphereDemandServiceContext {
-      val demandAttributes = service.buildDemandAttributes(draft).asScala
+      val demandAttributes = service.buildDemandAttributes(username, draft).asScala
       demandAttributes must contain(Attribute.of("userId", draft.uid.value))
+      demandAttributes must contain(Attribute.of("userName", username.value))
       demandAttributes must contain(Attribute.of("mustTags", draft.mustTags.asJava))
       demandAttributes must contain(Attribute.of("shouldTags", draft.shouldTags.asJava))
       demandAttributes must contain(Attribute.of("longitude", draft.location.lon.value))

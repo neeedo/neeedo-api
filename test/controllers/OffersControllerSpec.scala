@@ -208,7 +208,10 @@ class OffersControllerSpec extends Specification with Mockito {
   val offer = Offer(
     OfferId("123"),
     Version(1),
-    UserId("abc"),
+    UserIdAndName(
+      UserId("abc"),
+      Username("test")
+    ),
     Set("Socken Wolle"),
     Location(Longitude(12.2), Latitude(15.5)),
     Price(50.00),
@@ -216,7 +219,7 @@ class OffersControllerSpec extends Specification with Mockito {
   )
 
   val wrongOfferDraftJson: JsObject = Json.obj(
-    "userId" -> "abc",
+    "userId" -> offer.user.id.value,
     "tags" -> "testTags",
     "location" -> Json.obj(
       "lon" -> 20.0
@@ -225,7 +228,7 @@ class OffersControllerSpec extends Specification with Mockito {
   )
 
   val offerDraftJson: JsObject = Json.obj(
-    "userId" -> offer.uid.value,
+    "userId" -> offer.user.id.value,
     "tags" -> offer.tags,
     "location" -> Json.obj(
       "lat" -> offer.location.lat.value,
