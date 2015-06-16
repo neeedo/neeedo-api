@@ -53,9 +53,8 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
 
     userService.getUserById(draft.uid).flatMap {
       user =>
-        sphereClient
-          .execute(ProductCreateCommand.of(buildProductDraft(user.username, draft)))
-          .map {
+        val productCreateCommand = ProductCreateCommand.of(buildProductDraft(user.name, draft))
+        sphereClient.execute(productCreateCommand) map {
             product => Offer.fromProduct(product).get
         }
     } recover {

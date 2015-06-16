@@ -1,9 +1,9 @@
 package controllers
 
-import common.domain.{MessageDraft, UserId, UserCredentials}
+import common.domain._
 import common.exceptions.ElasticSearchIndexFailed
 import common.helper.SecuredAction
-import model.Message
+import model.{MessageId, Message}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
@@ -27,8 +27,11 @@ class MessagesControllerSpec extends Specification with Mockito {
     val u1 = UserId("u1")
     val u2 = UserId("u2")
 
+    val user1 = UserIdAndName(UserId("u1"), Username("name1"))
+    val user2 = UserIdAndName(UserId("u2"), Username("name2"))
+
     val draft = MessageDraft(u1, u2, "")
-    val message = Message(draft)
+    val message = Message(MessageId("testId"), user1, user2, "", 1L, read = false)
     val messageId = message.id
 
     val createMessageFakeRequest = new FakeRequest[AnyContent](

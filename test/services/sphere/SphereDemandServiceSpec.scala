@@ -35,8 +35,9 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     val userService = mock[UserService]
     val service = new SphereDemandService(sphereClientMock, productTypeDrafts, productTypes, userService)
 
+    val userId = UserId("abc")
     val username = Username("test")
-    val user = User(UserId("abc"), Version(1L), username, Email("test@web.de"))
+    val user = UserIdAndName(userId, username)
 
     val draft = DemandDraft(
       user.id,

@@ -45,11 +45,11 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     }
   }
 
-  def buildMessage(recipient: User, sender: User, draft: MessageDraft) = {
+  def buildMessage(recipient: UserIdAndName, sender: UserIdAndName, draft: MessageDraft) = {
     Message(
       MessageId(UUID.randomUUID.toString),
-      UserIdAndName(sender.id, sender.username),
-      UserIdAndName(recipient.id, recipient.username),
+      sender,
+      recipient,
       draft.body,
       timeHelper.now.getMillis,
       read = false)

@@ -21,7 +21,7 @@ class UsersController(userService: UserService, securedAction: SecuredAction) ex
 
   def getUserById(id: UserId) = securedAction.async {
     userService.getUserById(id).map {
-      user => Ok(Json.toJson(user))
+      userIdAndName => Ok(Json.toJson(userIdAndName))
     } recover {
       case e: Exception => e.asResult
     }
