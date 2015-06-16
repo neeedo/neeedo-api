@@ -1,17 +1,22 @@
 package services.es
 
-import common.domain.UserId
+import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.ElasticSearchIndexFailed
 import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import model.{Message, MessageId}
+import org.elasticsearch.action.ListenableActionFuture
 import org.elasticsearch.action.index.IndexResponse
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.index.engine.DocumentMissingException
-import org.elasticsearch.index.query.{OrFilterBuilder, AndFilterBuilder, TermFilterBuilder, FilteredQueryBuilder}
+import org.elasticsearch.index.query._
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
 
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -34,6 +39,65 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader)
       .asScala
       .map { response =>
         elasticsearch.searchresponseAs[Message](response)
+      }
+  }
+
+  case class Conversation(counterPart: User, lastMessage: Message, hasUnread: Boolean)
+
+//  def getConversationsByUser(id: UserId) = {
+//
+//    val response = elasticsearch.client.prepareSearch(config.messagesIndex.value)
+//      .setQuery(
+//        QueryBuilders.filteredQuery(null,
+//          FilterBuilders.andFilter(
+//            FilterBuilders.termFilter("recipientId", id.value),
+//            FilterBuilders.termFilter("read", false)
+//          )
+//        )
+//      )
+//      .addAggregation(
+//        AggregationBuilders.terms("by_sender").field("senderId")
+//      )
+//      .execute().actionGet //blocking
+//
+//    val terms: Terms = response.getAggregations.get("by_sender")
+//    val buckets = terms.getBuckets
+//
+//    buckets.asScala map {
+//      bla => Conversation(
+//        User(UserId(""), Version(1L), Username("bla"), Email("")),
+//        Message(MessageId(""), UserId(""), UserId(""), "", 1L, read = false),
+//        hasUnread = true
+//      )
+//    }
+//    Future(buckets)
+//  }
+
+  def getConversationsByUser(id: UserId) = {
+    elasticsearch.client.prepareSearch(config.messagesIndex.value)
+      .setQuery(
+        QueryBuilders.filteredQuery(null,
+          FilterBuilders.andFilter(
+            FilterBuilders.termFilter("recipientId", id.value),
+            FilterBuilders.termFilter("read", false)
+          )
+        )
+      )
+      .addAggregation(
+        AggregationBuilders.terms("by_sender").field("senderId")
+      )
+      .execute().asScala
+      .map { res: SearchResponse =>
+        val terms: Terms = res.getAggregations.get("by_sender")
+        val buckets = terms.getBuckets
+
+        buckets.asScala map {
+          bucket => Conversation(
+            User(UserId(""), Version(1L), Username("bla"), Email("")),
+            Message(MessageId(""), UserId(""), UserId(""), "", 1L, read = false),
+            hasUnread = true
+          )
+        }
       }
   }
 

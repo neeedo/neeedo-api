@@ -1,11 +1,14 @@
 package controllers
 
+import java.util
+
 import common.domain.{MessageDraft, UserId}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
-import model.{Message, MessageId}
+import model.{MessageId, Message}
+import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 import services.es.EsMessageService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,12 +38,18 @@ class MessagesController(esMessageService: EsMessageService, securedAction: Secu
     }
   }
 
+  def getConversationsByUser(id: UserId) = Action.async {
+    esMessageService.getConversationsByUser(id) map {
+      res => Ok("")
+    } recover {
+      case e: Exception => e.asResult
+    }
+  }
+
   def markMessageRead(id: MessageId) = securedAction.async {
-    esMessageService.markMessageRead(id) map { maybeMessageId =>
-      maybeMessageId match {
-        case Some(messageId) => Ok(Json.toJson(messageId))
-        case None => NotFound
-      }
+    esMessageService.markMessageRead(id) map {
+      case Some(messageId) => Ok(Json.toJson(messageId))
+      case None => NotFound
     } recover {
       case e: Exception => e.asResult
     }
