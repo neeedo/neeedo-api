@@ -3,7 +3,7 @@ package services.sphere
 import java.util.Locale
 
 import com.github.slugify.Slugify
-import common.domain.{Version, DemandDraft}
+import common.domain.{Username, Version, DemandDraft}
 import common.exceptions.{MalformedDemand, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
 import common.logger.DemandLogger
@@ -15,14 +15,16 @@ import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
 import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder}
 import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
 import io.sphere.sdk.utils.MoneyImpl
-import model.{CardId, DemandId, Demand}
+import model.{Offer, CardId, DemandId, Demand}
 import play.api.libs.json.Json
+import services.UserService
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-class SphereDemandService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts, productTypes: ProductTypes) {
+class SphereDemandService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts,
+                          productTypes: ProductTypes, userService: UserService) {
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
     getProductById(id) map {
@@ -35,7 +37,7 @@ class SphereDemandService(sphereClient: SphereClient, productTypeDrafts: Product
     sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
   }
 
-  def getAllDemands(): Future[List[Product]] = {
+  def getAllDemands: Future[List[Product]] = {
     val productQuery = ProductQuery.of().byProductType(productTypes.demand)
 
     sphereClient.execute(productQuery)
@@ -49,8 +51,13 @@ class SphereDemandService(sphereClient: SphereClient, productTypeDrafts: Product
       throw new SphereIndexFailed("Error while saving demand in sphere")
     }
 
-    sphereClient.execute(ProductCreateCommand.of(buildProductDraft(draft))).map {
-      product => Demand.fromProduct(product).get
+    userService.getUserById(draft.uid).flatMap {
+      user =>
+        sphereClient
+          .execute(ProductCreateCommand.of(buildProductDraft(user.username, draft)))
+          .map {
+          product => Demand.fromProduct(product).get
+        }
     } recover {
       case e: Exception => throwAndReportSphereIndexFailed(e)
     }
@@ -73,26 +80,27 @@ class SphereDemandService(sphereClient: SphereClient, productTypeDrafts: Product
   }
 
   def deleteAllDemands() = {
-    getAllDemands() map {
+    getAllDemands map {
       (demands: List[Product]) => {
         demands map { product => deleteProduct(Versioned.of(product.getId, product.getVersion)) }
       }
     }
   }
 
-  private[sphere] def buildProductDraft(draft: DemandDraft)  = {
+  private[sphere] def buildProductDraft(uname: Username, draft: DemandDraft)  = {
     val name = DemandDraft.generateName(draft)
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
     val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(buildDemandAttributes(draft))
+      .attributes(buildDemandAttributes(uname, draft))
       .build()
 
     ProductDraftBuilder.of(productTypes.demand, productName, slug, productVariant).build()
   }
 
-  private[sphere] def buildDemandAttributes(demandDraft: DemandDraft) = List(
+  private[sphere] def buildDemandAttributes(uname: Username, demandDraft: DemandDraft) = List(
     Attribute.of("userId", demandDraft.uid.value),
+    Attribute.of("userName", uname.value),
     Attribute.of("mustTags", demandDraft.mustTags.asJava),
     Attribute.of("shouldTags", demandDraft.shouldTags.asJava),
     Attribute.of("longitude", demandDraft.location.lon.value),

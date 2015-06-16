@@ -36,9 +36,10 @@ GET            /completion/tag/:tag         @controllers.CompletionController.co
 GET            /completion/suggest/:phrase  @controllers.CompletionController.suggestTags(phrase: String)
 
 # Users
+GET            /users/:id                   @controllers.UsersController.getUserById(id: common.domain.UserId)
 GET            /users/mail/:mail            @controllers.UsersController.getUserByMail(mail: common.domain.Email)
 POST           /users                       @controllers.UsersController.createUser()
-PUT            /users/:id/:version          @controllers.UsersController.updateUser(id: common.domain.UserId, version: common.domain.Version)
+# PUT            /users/:id/:version          @controllers.UsersController.updateUser(id: common.domain.UserId, version: common.domain.Version)
 DELETE         /users/:id/:version          @controllers.UsersController.deleteUser(id: common.domain.UserId, version: common.domain.Version)
 
 # Images

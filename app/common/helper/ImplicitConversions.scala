@@ -1,15 +1,12 @@
 package common.helper
 
-import java.util.concurrent.CompletionException
-
 import common.exceptions._
 import org.elasticsearch.action.{ActionListener, ListenableActionFuture}
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.mvc.Results._
 
-
-import scala.concurrent.{Promise, Future}
+import scala.concurrent.{Future, Promise}
 
 object ImplicitConversions {
   implicit class OptionConverter[T](x: java.util.Optional[T]) {
@@ -30,6 +27,7 @@ object ImplicitConversions {
         case e: InvalidJson => BadRequest(errorJson(x.getMessage))
         case e: Unauthorized => Unauthorized(errorJson(x.getMessage))
         case e: NetworkProblem => ServiceUnavailable(errorJson(x.getMessage))
+        case e: UserNotFound => NotFound(errorJson(x.getMessage))
         case _ => InternalServerError(errorJson(x.getMessage))
       }
     }

@@ -1,14 +1,13 @@
 package services
 
-import java.net.ConnectException
 import java.util.concurrent.CompletionException
 
 import common.domain._
-import common.exceptions.NetworkProblem
+import common.exceptions.{UserNotFound, NetworkProblem}
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
 import io.sphere.sdk.customers.commands._
-import io.sphere.sdk.customers.queries.CustomerQuery
+import io.sphere.sdk.customers.queries.{CustomerByIdFetch, CustomerQuery}
 import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName, CustomerSignInResult}
 import io.sphere.sdk.models.Versioned
 import io.sphere.sdk.queries.PagedQueryResult
@@ -29,6 +28,19 @@ class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
         case (customer: Customer) => User.fromCustomer(customer)
       }
     }
+  }
+
+  def getUserById(id: UserId): Future[User] = {
+    val query = CustomerByIdFetch.of(id.value)
+
+    sphereClient
+      .execute(query)
+      .map {
+        res => res.asScala match {
+          case Some(customer) => User.fromCustomer(customer)
+          case None => throw new UserNotFound(s"User with id ${id.value} does not exist")
+        }
+      }
   }
 
   def createUser(userDraft: UserDraft): Future[User] = {

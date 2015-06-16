@@ -9,7 +9,8 @@ trait DemandImplicits {
   implicit val demandReads: Reads[Demand] = (
     (JsPath \ "id").read[String] and
     (JsPath \ "version").read[Long] and
-    (JsPath \ "userId").read[String] and
+    (JsPath \ "user" \ "id").read[String] and
+    (JsPath \ "user" \ "name").read[String] and
     (JsPath \ "mustTags").read[Set[String]] and
     (JsPath \ "shouldTags").read[Set[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
@@ -18,11 +19,12 @@ trait DemandImplicits {
     (JsPath \ "price" \ "min").read[Double] and
     (JsPath \ "price" \ "max").read[Double]
     ) {
-    (id, version, uid, mustTags, shouldTags, lat, lon, distance, priceMin, priceMax) =>
+    (id, version, uid, username, mustTags, shouldTags, lat, lon, distance, priceMin, priceMax) =>
       Demand(
         DemandId(id),
         Version(version),
         UserId(uid),
+        Username(username),
         mustTags.map(x => x.trim).filter(_ != ""),
         shouldTags.map(x => x.trim).filter(_ != ""),
         Location( Longitude(lon), Latitude(lat) ),
@@ -36,7 +38,10 @@ trait DemandImplicits {
     def writes(d: Demand) = Json.obj(
       "id" -> d.id.value,
       "version" -> d.version.value,
-      "userId" -> d.uid.value,
+      "user" -> Json.obj(
+        "id" -> d.uid.value,
+        "name" -> d.uname.value
+      ),
       "mustTags" -> d.mustTags,
       "shouldTags" -> d.shouldTags,
       "location" -> Json.obj(

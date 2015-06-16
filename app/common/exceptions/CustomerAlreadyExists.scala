@@ -1,6 +1,7 @@
 package common.exceptions
 
 class CustomerAlreadyExists(message: String) extends Exception(message)
+class UserNotFound(message: String) extends Exception(message)
 class ProductNotFound(message: String) extends Exception(message)
 class ElasticSearchIndexFailed(message: String) extends Exception(message)
 class ElasticSearchDeleteFailed(message: String) extends Exception(message)

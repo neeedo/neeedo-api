@@ -3,7 +3,7 @@ package services.sphere
 import java.util.Locale
 
 import com.github.slugify.Slugify
-import common.domain.{OfferDraft, Version}
+import common.domain.{Username, OfferDraft, Version}
 import common.exceptions.{MalformedOffer, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
 import common.logger.OfferLogger
@@ -16,13 +16,15 @@ import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{CardId, Offer, OfferId}
 import play.api.libs.json.Json
+import services.UserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts, productTypes: ProductTypes) {
+class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts,
+                         productTypes: ProductTypes, userService: UserService) {
 
   def getOfferById(id: OfferId): Future[Option[Offer]] = {
     getProductById(id) map {
@@ -49,8 +51,13 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
       throw new SphereIndexFailed("Error while saving offer in sphere")
     }
 
-    sphereClient.execute(ProductCreateCommand.of(buildProductDraft(draft))).map {
-      product => Offer.fromProduct(product).get
+    userService.getUserById(draft.uid).flatMap {
+      user =>
+        sphereClient
+          .execute(ProductCreateCommand.of(buildProductDraft(user.username, draft)))
+          .map {
+            product => Offer.fromProduct(product).get
+        }
     } recover {
       case e: Exception => throwAndReportSphereIndexFailed(e)
     }
@@ -80,19 +87,20 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     }
   }
 
-  private[sphere] def buildProductDraft(draft: OfferDraft)  = {
+  private[sphere] def buildProductDraft(uname: Username, draft: OfferDraft)  = {
     val name = OfferDraft.generateName(draft)
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
     val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
     val productVariant = ProductVariantDraftBuilder.of()
-      .attributes(buildOfferAttributes(draft))
+      .attributes(buildOfferAttributes(uname, draft))
       .build()
 
     ProductDraftBuilder.of(productTypes.offer, productName, slug, productVariant).build()
   }
 
-  private[sphere] def buildOfferAttributes(offerDraft: OfferDraft) = List(
+  private[sphere] def buildOfferAttributes(uname: Username, offerDraft: OfferDraft) = List(
     Attribute.of("userId", offerDraft.uid.value),
+    Attribute.of("userName", uname.value),
     Attribute.of("tags", offerDraft.tags.asJava),
     Attribute.of("longitude", offerDraft.location.lon.value),
     Attribute.of("latitude", offerDraft.location.lat.value),

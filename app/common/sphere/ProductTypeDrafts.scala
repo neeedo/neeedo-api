@@ -21,13 +21,19 @@ class ProductTypeDrafts(configloader: ConfigLoader) {
       offerAttributes)
 
   private def demandAttributes: java.util.List[AttributeDefinition] =
-    List(userId, mustTags, shouldTags, longitude, latitude, distance, priceMin, priceMax).asJava
+    List(userId, userName, mustTags, shouldTags, longitude, latitude, distance, priceMin, priceMax).asJava
 
   private def offerAttributes: java.util.List[AttributeDefinition] =
-    List(userId, tags, longitude, latitude, price, images).asJava
+    List(userId, userName, tags, longitude, latitude, price, images).asJava
 
   private def userId: AttributeDefinition = AttributeDefinitionBuilder
     .of("userId", LocalizedStrings.of(Locale.ENGLISH, "userId"), TextType.of())
+    .isRequired(true)
+    .inputHint(TextInputHint.SINGLE_LINE)
+    .build()
+
+  private def userName: AttributeDefinition = AttributeDefinitionBuilder
+    .of("userName", LocalizedStrings.of(Locale.ENGLISH, "userName"), TextType.of())
     .isRequired(true)
     .inputHint(TextInputHint.SINGLE_LINE)
     .build()

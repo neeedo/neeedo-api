@@ -19,6 +19,14 @@ class UsersController(userService: UserService, securedAction: SecuredAction) ex
     }
   }
 
+  def getUserById(id: UserId) = securedAction.async {
+    userService.getUserById(id).map {
+      user => Ok(Json.toJson(user))
+    } recover {
+      case e: Exception => e.asResult
+    }
+  }
+
   def createUser = Action.async { implicit request =>
     val userDraft = bindRequestJsonBody(request)(UserDraft.userDraftReads)
 
@@ -33,20 +41,20 @@ class UsersController(userService: UserService, securedAction: SecuredAction) ex
     }
   }
 
-  def updateUser(id: UserId, version: Version) = securedAction.async { implicit request =>
-    request.body.asJson match {
-      case Some(json) => json.asOpt[UserDraft] match {
-        case Some(draft) =>
-          userService.updateUser(id, version, draft).map {
-            user => Ok(Json.obj("user" -> Json.toJson(user)))
-          } recover {
-            case e: Exception => e.asResult
-          }
-        case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
-      }
-      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
-    }
-  }
+//  def updateUser(id: UserId, version: Version) = securedAction.async { implicit request =>
+//    request.body.asJson match {
+//      case Some(json) => json.asOpt[UserDraft] match {
+//        case Some(draft) =>
+//          userService.updateUser(id, version, draft).map {
+//            user => Ok(Json.obj("user" -> Json.toJson(user)))
+//          } recover {
+//            case e: Exception => e.asResult
+//          }
+//        case None => Future.successful(BadRequest(Json.obj("error" -> "Cannot parse json")))
+//      }
+//      case None => Future.successful(BadRequest(Json.obj("error" -> "Missing body")))
+//    }
+//  }
 
   def deleteUser(id: UserId, version: Version) = securedAction.async {
     userService.deleteUser(id, version).map {
