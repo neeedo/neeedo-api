@@ -1,15 +1,15 @@
 package controllers
 
-import common.domain.{UserId, UserCredentials}
+import common.domain.{UserCredentials, UserId}
 import common.helper.SecuredAction
-import model.{Card, OfferId, CardId, DemandId}
+import model.OfferId
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
-import play.api.mvc.{Result, AnyContentAsEmpty, AnyContent}
-import play.api.test.{FakeHeaders, Helpers, FakeRequest, WithApplication}
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, Result}
 import play.api.test.Helpers.defaultAwaitTimeout
-import services.{UserService, FavoritesService}
+import play.api.test.{FakeHeaders, FakeRequest, Helpers, WithApplication}
+import services.UserService
 import test.TestData
 
 import scala.concurrent.Future
@@ -17,13 +17,13 @@ import scala.concurrent.Future
 class FavoritesControllerSpec extends Specification with Mockito {
 
   trait FavoritesControllerContext extends WithApplication {
-    val favoritesService = mock[FavoritesService]
+    val favoritesService = mock[FavoriteService]
     val userService = mock[UserService]
     val securedAction = new SecuredAction(userService)
     val controller = new FavoritesController(favoritesService, securedAction)
 
-    val id1 = DemandId("testDemand")
-    val id2 = OfferId("testOffer")
+    val id1 = OfferId("o1")
+    val id2 = OfferId("o2")
     val uid = UserId("testUser")
 
 
@@ -64,9 +64,9 @@ class FavoritesControllerSpec extends Specification with Mockito {
       Helpers.contentAsString(res) must equalTo(Json.obj("favorites" -> Json.toJson(favorites map (_.value))).toString())
     }
 
-    "getFavoritesByUser should return 200 and an empty list of CardIds as " +
+    "getFavoritesByUser should return 200 and an empty list of OfferIds as " +
       "json body if userId is not found" in new FavoritesControllerContext {
-      favoritesService.getFavoritesByUser(any[UserId]) returns Future(List.empty[CardId])
+      favoritesService.getFavoritesByUser(any[UserId]) returns Future(List.empty[OfferId])
 
       val res: Future[Result] = controller.getFavoritesByUser(uid)(getFavoritesFakeRequest)
 
@@ -74,39 +74,39 @@ class FavoritesControllerSpec extends Specification with Mockito {
       Helpers.contentAsString(res) must equalTo(Json.obj("favorites" -> Json.toJson(List.empty[String])).toString())
     }
 
-    "addFavorite should return 201 and given CardId, if CardId isn't " +
+    "addFavorite should return 201 and given OfferId, if OfferId isn't " +
       "already in favorites" in new FavoritesControllerContext {
-      favoritesService.addFavorite(any[CardId]) returns Future(Option(id1))
+      favoritesService.addFavorite(any[OfferId]) returns Future(Option(id1))
 
       val res: Future[Result] = controller.addFavorite(id1)(addFavoriteFakeRequest)
 
       Helpers.status(res) must equalTo(201)
-      Helpers.contentAsString(res) must equalTo(Json.obj("id" -> id1.value).toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("favorite" -> id1.value).toString())
     }
 
-    "addFavorites should return 200 and given CardId, if CardId is " +
+    "addFavorites should return 200 and given OfferId, if OfferId is " +
       "already in favorites" in new FavoritesControllerContext {
-      favoritesService.addFavorite(any[CardId]) returns Future(Option.empty)
+      favoritesService.addFavorite(any[OfferId]) returns Future(Option.empty)
 
       val res: Future[Result] = controller.addFavorite(id1)(addFavoriteFakeRequest)
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo(Json.obj("id" -> id1.value).toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("favorite" -> id1.value).toString())
     }
 
-    "removeFavorites should return 200 and given CardId if CardId is " +
+    "removeFavorites should return 200 and given OfferId if OfferId is " +
       "in favorites" in new FavoritesControllerContext {
-      favoritesService.removeFavorite(any[CardId]) returns Future(Option(id1))
+      favoritesService.removeFavorite(any[OfferId]) returns Future(Option(id1))
 
       val res: Future[Result] = controller.removeFavorite(id1)(removeFavoriteFakeRequest)
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo(Json.obj("id" -> id1.value).toString())
+      Helpers.contentAsString(res) must equalTo(Json.obj("favorite" -> id1.value).toString())
     }
 
-    "removeFavorites should return 404 if given CardId is not in " +
+    "removeFavorites should return 404 if given OfferId is not in " +
       "favorites" in new FavoritesControllerContext {
-      favoritesService.removeFavorite(any[CardId]) returns Future(Option.empty)
+      favoritesService.removeFavorite(any[OfferId]) returns Future(Option.empty)
 
       val res: Future[Result] = controller.removeFavorite(id1)(removeFavoriteFakeRequest)
 

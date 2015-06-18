@@ -1,16 +1,16 @@
 package controllers
 
 import common.domain.UserId
-import common.helper.{ControllerUtils, SecuredAction}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
-import model.CardId
+import common.helper.{ControllerUtils, SecuredAction}
+import model.OfferId
 import play.api.libs.json.Json
 import play.api.mvc.Controller
-import services.FavoritesService
+import services.es.EsFavoriteService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FavoritesController(favoritesService: FavoritesService, securedAction: SecuredAction)
+class FavoritesController(favoritesService: EsFavoriteService, securedAction: SecuredAction)
   extends Controller with ControllerUtils {
 
   def getFavoritesByUser(id: UserId) = securedAction.async {
@@ -21,18 +21,18 @@ class FavoritesController(favoritesService: FavoritesService, securedAction: Sec
     }
   }
 
-  def addFavorite(id: CardId) = securedAction.async { implicit request =>
-    favoritesService.addFavorite(id) map {
-      case Some(_) => Created(Json.obj("id" -> id.value))
-      case _ => Ok(Json.obj("id" -> id.value))
+  def addFavorite(userId: UserId, offerId: OfferId) = securedAction.async { implicit request =>
+    favoritesService.addFavorite(userId, offerId) map {
+      case Some(_) => Created(Json.toJson(offerId))
+      case _ => Ok(Json.toJson(offerId))
     } recover {
       case e: Exception => e.asResult
     }
   }
 
-  def removeFavorite(id: CardId) = securedAction.async {
-    favoritesService.removeFavorite(id) map {
-      case Some(_) => Ok(Json.obj("id" -> id.value))
+  def removeFavorite(userId: UserId, offerId: OfferId) = securedAction.async {
+    favoritesService.removeFavorite(userId, offerId) map {
+      case Some(_) => Ok(Json.toJson(offerId))
       case _ => NotFound
     } recover {
       case e: Exception => e.asResult

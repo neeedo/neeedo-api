@@ -42,6 +42,7 @@ trait WireDependencies {
   lazy val esCompletionService = wire[EsCompletionService]
   lazy val esSuggestionService = wire[EsSuggestionService]
   lazy val esMessageService = wire[EsMessageService]
+  lazy val esFavoriteService = wire[EsFavoriteService]
 
   //// Sphere
   lazy val sphereOfferService = wire[SphereOfferService]
@@ -56,6 +57,7 @@ trait WireDependencies {
   lazy val userController = wire[UsersController]
   lazy val imagesController = wire[ImagesController]
   lazy val messageController = wire[MessagesController]
+  lazy val favoriteController = wire[FavoritesController]
 
   // Migrations
   lazy val productTypeMigration = wire[ProductTypeMigrations]
