@@ -14,4 +14,6 @@ class Unauthorized(message: String) extends Exception(message)
 class MalformedOffer(message: String) extends Exception(message)
 class MalformedDemand(message: String) extends Exception(message)
 class NetworkProblem(message: String) extends Exception(message)
+class UploadFileToLarge(message: String) extends Exception(message)
+class WrongUploadType(message: String) extends Exception(message)
 

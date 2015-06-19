@@ -19,6 +19,7 @@ class ConfigLoader(config: Configuration) {
   def getString(key: String): String = config.getString(key).getOrElse {
     throwIllegalConfigException(key)
   }
+  def getInt(key: String) = getString(key).toInt
 
   def getBoolean(key: String): Boolean = config.getBoolean(key).getOrElse {
     throwIllegalConfigException(key)

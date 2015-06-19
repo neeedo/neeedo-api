@@ -28,6 +28,8 @@ object ImplicitConversions {
         case e: Unauthorized => Unauthorized(errorJson(x.getMessage))
         case e: NetworkProblem => ServiceUnavailable(errorJson(x.getMessage))
         case e: UserNotFound => NotFound(errorJson(x.getMessage))
+        case e: UploadFileToLarge => BadRequest(errorJson(x.getMessage))
+        case e: WrongUploadType => BadRequest(errorJson(x.getMessage))
         case _ => InternalServerError(errorJson(x.getMessage))
       }
     }
