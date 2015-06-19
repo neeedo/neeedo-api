@@ -29,7 +29,7 @@ class OffersController(service: OfferService, securedAction: SecuredAction) exte
     }
   }
 
-  def getOfferById(id: OfferId) = securedAction.async {
+  def getOfferById(id: OfferId) = Action.async {
     service.getOfferById(id) map {
       case Some(offer) => Ok(Json.obj("offer" -> Json.toJson(offer)))
       case None => NotFound(Json.obj("error" -> "Offer not found"))
