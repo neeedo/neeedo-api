@@ -301,7 +301,7 @@ The request body must contain a valid DemandDraft json object
             "user": {
                 "id": "1",
                 "name": "1"
-            }.
+            },
             "mustTags":["socken", "bekleidung", "wolle"],
             "shouldTags":["rot", "weich", "warm"],
             "location": {
