@@ -108,6 +108,12 @@ GET `/matching/demand/{from}/{pageSize}`
 The request body must contain a valid Demand json object
 
     {
+        "id":"984730ec-2778-4c5d-ab71-19128c738729",
+        "version":1,
+        "user": {
+            "id":"f8b3dddf-1943-4371-aaa4-2be98fe4ee54",
+            "name":"neu"
+        },
         "mustTags":["rahmen"],
         "shouldTags":[],
         "location": {
@@ -117,12 +123,7 @@ The request body must contain a valid Demand json object
         "distance":30,
         "price": {
             "min":0,
-            "max":50},
-        "id":"984730ec-2778-4c5d-ab71-19128c738729",
-        "version":1,
-        "user": {
-            "id":"f8b3dddf-1943-4371-aaa4-2be98fe4ee54",
-            "name":"neu"
+            "max":50
         }
     }
 
