@@ -49,6 +49,14 @@ API-Documentation
 - [Status (unsecured)](#status)
 - [Matching](#matching)
     - [Get all offers for one demand (unsecured)](#get-all-offers-for-one-demand)
+- [Tag Suggester](#tag-suggester)
+    - [Get Tag suggestions (unsecured)](#get-tag-suggestions)
+    - [Get Tag completions (unsecured)](#get-tag-completions)
+- [Messages](#messages)
+    - [Write Message](#write-message)
+    - [Read Message](#read-message)
+    - [Mark Message as read](#mark-message-as-read)
+    - [Get all conversations](#get-all-conversations)
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
 	- [Query Demands for User](#query-demands-for-user)
@@ -66,7 +74,6 @@ API-Documentation
 - [Users](#users)
 	- [Query singer User](#query-single-user-by-email)
  	- [Create User (unsecured)](#create-user)
- 	- [Update User](#update-user)
 	- [Delete User](#delete-user)
 - [Images](#images)
     - [Upload Image](#upload-image)
@@ -133,6 +140,189 @@ The request body must contain a valid Demand json object
 ### Example
     curl -XPOST -H "Content-Type: application/json" -d '{"mustTags":["rahmen"],"shouldTags":[],"location": {"lat":52.4907453,"lon":13.5210239},"distance":30,"price": {"min":0,"max":50},"id":"984730ec-2778-4c5d-ab71-19128c738729","version":1,"user": {"id":"f8b3dddf-1943-4371-aaa4-2be98fe4ee54","name":"neu"}}' https://localhost:9443/matching/demand/0/0 -v
 
+# Tag Suggester
+
+## Get Tag suggestions (unsecured)
+
+### Resource
+GET `/completion/suggest/{phrase}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| phrase | Mandatory | url encoded phrase string ("tag1,tag2,tag3") |
+
+### Response
+200 Ok
+
+    {
+        "suggestedTags":[
+            "Rahmen",
+            "Radkappe"
+        ]
+    }
+
+## Get Tag completions (unsecured)
+
+### Resource
+GET `/completion/tag/{tag}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| tag | Mandatory | url encoded tag string |
+
+### Response
+200 Ok
+
+    {
+        "completedTags":[
+            "Rahmen",
+            "Radkappe"
+        ]
+    }
+
+# Messages
+
+## Write Message
+
+### Resource
+POST `/messages`
+
+### Body
+The request body must contain a valid message draft json object
+
+    {
+        "senderId":"56530372-aa7f-41d7-b1b0-c09931fdbc08",
+        "recipientId": "98d40e3e-1c50-43f3-9ba5-58497b417d01",
+        "body": "hey there"
+    }
+
+### Response
+200 Ok
+
+    {
+        "message": {
+            "id": "509cfcc8-3a1f-450b-a088-fad8cd3d6032",
+            "sender": {
+                "id": "56530372-aa7f-41d7-b1b0-c09931fdbc08",
+                "name": "Test"
+            },
+            "recipient": {
+                "id": "98d40e3e-1c50-43f3-9ba5-58497b417d01",
+                "name": "Blub"
+            },
+            "body": "hey there",
+            "timestamp": 1434802592926,
+            "read": false
+        }
+    }
+
+## Read Messages
+
+### Resource
+GET `/messages/{userId1}/{userId2}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| userId1 | Mandatory | alphanumeric |
+| userId2 | Mandatory | alphanumeric |
+
+### Response
+200 Ok
+
+    {
+        "messages": [
+            {
+                "id": "2bf41679-e3c4-45fb-89df-a1ff6bad4b2d",
+                "sender": {
+                    "id": "98d40e3e-1c50-43f3-9ba5-58497b417d01",
+                    "name": "Blub"
+                },
+                "recipient": {
+                    "id": "3000dfdd-9acf-42c8-9768-f4f6b3fd221d",
+                    "name": "Test"
+                },
+                "body": "hey there yourself",
+                "timestamp": 1434463375027,
+                "read": false
+            },
+            {
+                "id": "24c5e9ff-eed3-4b15-b6d6-4cee5d8f1616",
+                "sender": {
+                    "id": "98d40e3e-1c50-43f3-9ba5-58497b417d01",
+                    "name": "Blub"
+                },
+                "recipient": {
+                    "id": "3000dfdd-9acf-42c8-9768-f4f6b3fd221d",
+                    "name": "Test"
+                },
+                "body": "hey there",
+                "timestamp": 1434463368196,
+                "read": false
+            },
+            {
+                "id": "73340fa6-faa9-4c49-8bf7-f9e85ad941a4",
+                "sender": {
+                    "id": "3000dfdd-9acf-42c8-9768-f4f6b3fd221d",
+                    "name": "Test"
+                },
+                "recipient": {
+                    "id": "98d40e3e-1c50-43f3-9ba5-58497b417d01",
+                    "name": "Blub"
+                },
+                "body": "hey there",
+                "timestamp": 1434463349075,
+                "read": false
+            }
+        ]
+    }
+
+## Mark Message as read
+
+### Resource
+PUT `/messages/{messageId}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| messageId | Mandatory | alphanumeric |
+
+### Response
+
+    {
+        "messageId": "73340fa6-faa9-4c49-8bf7-f9e85ad941a4"
+    }
+
+## Get all conversations
+Get all userIds that have a dialogue with a specific user with unread/read messages
+
+### Resource
+GET `/conversations/{userId}?read={read}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| userId | Mandatory | alphanumeric |
+| read | Mandatory | boolean |
+
+### Response
+
+    {
+        "users": [
+            {
+                "id": "98d40e3e-1c50-43f3-9ba5-58497b417d01",
+                "name": "Blub"
+            }
+        ]
+    }
+
 # Demands
 ## Query single Demand
 ### Resource
@@ -144,7 +334,7 @@ GET `/demands/{id}`
 | ---- | --------- | ---------- |
 | id | Mandatory | alphanumeric |
 
-###Response
+### Response
 200 Ok
     
     {
@@ -602,53 +792,6 @@ The request body must contain a valid UserDraft json object
 ### Example
 
     curl -XPOST -H "Content-Type: application/json" -d '{"username":"Test", "email":"test@gmail.com", "password":"test"}' https://localhost:9443/users -v
-
-
-## Update User
-### Resource
-PUT `/users/{id}/{version}`
-
-### URL Parameters
-
-| Name | Mandatory | Value Type |
-| ---- | --------- | ---------- |
-| id | Mandatory | alphanumeric |
-| version | Mandatory | numeric |
-
-
-### Body
-The request body must contain a valid UserDraft json object
-
-    {
-        "name":"Test",
-        "email":"updated@web.com",
-        "password", "password"
-    }
-
-
-### Response
-200 Ok
-
-    {
-        "user": {
-            "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 2,
-            "name":"Test",
-            "email":"updated@web.com"
-        }
-    }
-
-400 Bad Request
-
-    {
-        "error" : "A user with this email address already exists"
-    }
-
-404 Not Found - Entity was not found
-
-### Example
-
-    curl -XPUT -H "Content-Type: application/json" -d '{"username":"Test","email":"updated@web.com","password":"12345"}' https://localhost:9443/users/1/1 -v
 
 ## Delete User
 ### Resource

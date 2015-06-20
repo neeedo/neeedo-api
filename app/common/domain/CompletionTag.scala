@@ -12,7 +12,7 @@ object CompletionTagResult {
 
 case class CompletionPhrase(value: List[String])
 object CompletionPhrase {
-  def apply(phrase: String) = new CompletionPhrase(phrase.split(" ").toList)
+  def apply(phrase: String) = new CompletionPhrase(phrase.split(",").toList)
 }
 
 case class CompletionPhraseResult(value: List[String])
