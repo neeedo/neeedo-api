@@ -105,22 +105,24 @@ GET `/matching/demand/{from}/{pageSize}`
 | pageSize | Mandatory | Integer    | Page size for paging (not yet implemented just pass a number) |
 
 ### Body
-The request body must contain a valid DemandDraft json object
+The request body must contain a valid Demand json object
 
     {
-        "id" : "c1ef9724-935e-4455-854e-96b99eec555d",
-        "version" : 1,
-        "userId" : "1",
-        "mustTags" : ["iphone"],
-        "shouldTags" : ["neuwertig","schwarz"],
-        "location" : {
-            "lat" : 35.92516,
-            "lon" : 12.37528
+        "mustTags":["rahmen"],
+        "shouldTags":[],
+        "location": {
+            "lat":52.4907453,
+            "lon":13.5210239
         },
-        "distance" : 30,
-        "price" : {
-            "min" : 100.0,
-            "max" : 340.0
+        "distance":30,
+        "price": {
+            "min":0,
+            "max":50},
+        "id":"984730ec-2778-4c5d-ab71-19128c738729",
+        "version":1,
+        "user": {
+            "id":"f8b3dddf-1943-4371-aaa4-2be98fe4ee54",
+            "name":"neu"
         }
     }
 
@@ -128,7 +130,7 @@ The request body must contain a valid DemandDraft json object
 200 Ok
 
 ### Example
-    curl -XPOST -H "Content-Type: application/json" -d '{"id":"c1ef9724-935e-4455-854e-96b99eec555d","version":1,"userId":"1","mustTags":["iphone"],"shouldTags":["neuwertig","schwarz"],"location":{"lat":35.92516,"lon":12.37528},"distance":30,"price":{"min":100.0,"max":340.0}}' https://localhost:9443/matching/demand/0/0 -v
+    curl -XPOST -H "Content-Type: application/json" -d '{"mustTags":["rahmen"],"shouldTags":[],"location": {"lat":52.4907453,"lon":13.5210239},"distance":30,"price": {"min":0,"max":50},"id":"984730ec-2778-4c5d-ab71-19128c738729","version":1,"user": {"id":"f8b3dddf-1943-4371-aaa4-2be98fe4ee54","name":"neu"}}' https://localhost:9443/matching/demand/0/0 -v
 
 # Demands
 ## Query single Demand
@@ -147,8 +149,11 @@ GET `/demands/{id}`
     {
         "demand":{
             "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 1
-            "userId":"1",
+            "version": 1,
+            "user" : {
+                "id":"1",
+                "name":"Stefan"
+            },
             "mustTags":["socken", "bekleidung", "wolle"],
             "shouldTags":["rot", "weich", "warm"],
             "location":{
@@ -227,8 +232,11 @@ The request body must contain a valid DemandDraft json object
     {
         "demand": {
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 1
-            "userId": "1",
+            "version": 1,
+            "user" : {
+                "id": "1",
+                "name": "Stefan"
+            },
             "mustTags":["socken", "bekleidung", "wolle"],
             "shouldTags":["rot", "weich", "warm"],
             "location": {
@@ -288,8 +296,11 @@ The request body must contain a valid DemandDraft json object
     {
         "demand": {
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 2
-            "userId": "1",
+            "version": 2,
+            "user": {
+                "id": "1",
+                "name": "1"
+            }.
             "mustTags":["socken", "bekleidung", "wolle"],
             "shouldTags":["rot", "weich", "warm"],
             "location": {
@@ -354,8 +365,11 @@ GET `/offers/{id}`
     {
         "offer":{
             "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 1
-            "userId":"1",
+            "version": 1,
+            "user": {
+                "id":"1",
+                "name":"Stefan"
+            },
             "tags":["socken", "bekleidung", "wolle"],
             "location":{
                 "lat":13.534212,
@@ -428,8 +442,11 @@ the pictures and use the correct name that is returned by the api.
     {
         "offer": {
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 1
-            "userId": "1",
+            "version": 1,
+            "user": {
+                "id": "1",
+                "name": "Stefan",
+            },
             "tags":["socken", "bekleidung", "wolle"],
             "location": {
                 "lat":13.534212,
@@ -479,8 +496,11 @@ The request body must contain a valid OfferDraft json object
     {
         "offer": {
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 2
-            "userId": "1",
+            "version": 2,
+            "user": {
+                "id": "1",
+                "name": "1",
+            },
             "tags":["socken", "bekleidung", "wolle"],
             "location": {
                 "lat":13.534212,
@@ -539,8 +559,8 @@ GET `/users/mail/{mail}`
     {
         "user":{
             "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 1
-            "username":"test",
+            "version": 1,
+            "name":"test",
             "email":"test@web.de"
         }
     }
@@ -555,7 +575,7 @@ POST `/users`
 The request body must contain a valid UserDraft json object
 
     {
-        "username":"Test",
+        "name":"Test",
         "email":"test@web.com",
         "password":"12345"
     }
@@ -567,7 +587,7 @@ The request body must contain a valid UserDraft json object
         "user": {
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
             "version": 1,
-            "username":"Test",
+            "name":"Test",
             "email":"test@web.com"
         }
     }
@@ -599,7 +619,7 @@ PUT `/users/{id}/{version}`
 The request body must contain a valid UserDraft json object
 
     {
-        "username":"Test",
+        "name":"Test",
         "email":"updated@web.com",
         "password", "password"
     }
@@ -611,8 +631,8 @@ The request body must contain a valid UserDraft json object
     {
         "user": {
             "id": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
-            "version": 2
-            "username":"Test",
+            "version": 2,
+            "name":"Test",
             "email":"updated@web.com"
         }
     }
