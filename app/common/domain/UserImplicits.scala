@@ -8,7 +8,7 @@ trait UserImplicits {
   implicit val userReads: Reads[User] = (
     (JsPath \ "user" \ "id").read[String] and
     (JsPath \ "user" \ "version").read[Long] and
-    (JsPath \ "user" \ "username").read[String] and
+    (JsPath \ "user" \ "name").read[String] and
     (JsPath \ "user" \ "email").read[String]
     ) {
     (id, version, username, email) =>
@@ -25,7 +25,7 @@ trait UserImplicits {
       "user" -> Json.obj(
         "id" -> u.id.value,
         "version" -> u.version.value,
-        "username" -> u.username.value,
+        "name" -> u.username.value,
         "email" -> u.email.value
       )
     )
