@@ -1,6 +1,6 @@
 package services.es
 
-import common.domain.{CompletionTag, Location, Pager, UserId}
+import common.domain._
 import common.elasticsearch.ElasticsearchClient
 import common.exceptions.{ElasticSearchDeleteFailed, ElasticSearchIndexFailed, ProductNotFound}
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
@@ -8,9 +8,12 @@ import common.helper.{ConfigLoader, TimeHelper}
 import common.logger.DemandLogger
 import model.{Demand, DemandId}
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.common.unit.DistanceUnit
+import org.elasticsearch.common.xcontent.XContentFactory
+import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
+import scala.collection.JavaConverters._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -57,7 +60,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
     val index = config.demandIndex
     val typeName = config.demandIndex.toTypeName
     elasticsearch.indexDocument(demand.id.value, index, typeName, buildEsDemandJson(demand))
-      .map(parseIndexResponse(_, demand))
+      .flatMap(processIndexResponse(_, demand))
       .recover {
       case e: Exception => throwAndReportEsIndexFailed(e)
     }
@@ -70,13 +73,15 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
       throw new ElasticSearchDeleteFailed("Error while deleting demand from Elasticsearch")
     }
 
-    val deleteResult = elasticsearch
+    elasticsearch
       .deleteDocument(id.value, config.demandIndex, config.demandIndex.toTypeName)
-
-    deleteResult map {
-      isFound =>
-        if (isFound) id
-        else throw new ProductNotFound(s"No demand with id: ${id.value} found")
+      .flatMap {
+        res =>
+          if (res) {
+            elasticsearch
+              .deleteDocument(id.value, config.offerIndex, TypeName(".percolator"))
+              .map(_ => id)
+          } else throw new ProductNotFound(s"No demand with id: ${id.value} found")
     } recover {
       case e: ProductNotFound => throw e
       case e: Exception => throwAndLogEsDeleteFailed(e)
@@ -92,11 +97,42 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
     }
   }
 
-  private[es] def parseIndexResponse(indexResponse: IndexResponse, demand: Demand) = {
+  private[es] def processIndexResponse(indexResponse: IndexResponse, demand: Demand) = {
     if (indexResponse.isCreated) {
-      esCompletionService.upsertCompletions(demand.mustTags.map(CompletionTag).toList)
-      demand
+      for {
+        completion <- esCompletionService.upsertCompletions(demand.mustTags.map(CompletionTag).toList)
+        percolator <- createPercolatorDemand(demand)
+      } yield demand
     } else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
+  }
+
+  private[es] def createPercolatorDemand(demand: Demand): Future[Boolean] = {
+    val indexName = config.offerIndex
+    val query = buildPercolateQuery(demand)
+
+    val doc = Json.obj("query" -> Json.parse(query.toString))
+
+    elasticsearch
+      .indexDocument(demand.id.value, indexName, TypeName(".percolator"), doc)
+      .map(_.isCreated)
+  }
+
+  private[es] def buildPercolateQuery(demand: Demand) = {
+    QueryBuilders.filteredQuery(
+      if (demand.shouldTags.isEmpty) QueryBuilders.matchAllQuery()
+      else QueryBuilders.termsQuery("tags", demand.shouldTags.map(_.toLowerCase).asJava),
+      FilterBuilders.andFilter(
+        FilterBuilders
+          .geoDistanceFilter("location")
+          .distance(demand.distance.value, DistanceUnit.KILOMETERS)
+          .point(demand.location.lat.value, demand.location.lon.value),
+        FilterBuilders
+          .termsFilter("tags", demand.mustTags.map(_.toLowerCase).asJava)
+          .execution("and"),
+        FilterBuilders
+          .rangeFilter("price").from(demand.priceMin.value).to(demand.priceMax.value)
+      )
+    )
   }
 
   private[es] def buildEsDemandJson(demand: Demand) = {

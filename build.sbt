@@ -31,6 +31,7 @@ libraryDependencies ++= Seq(
   "io.sphere.sdk.jvm" % "sphere-models" % "1.0.0-M14",
   "io.sphere.sdk.jvm" % "sphere-scala-client_2.11" % "1.0.0-M14",
   "com.amazonaws" % "aws-java-sdk" % "1.9.6",
+  "org.codehaus.groovy" % "groovy-all" % "2.4.0",
   cache,
   ws
 )

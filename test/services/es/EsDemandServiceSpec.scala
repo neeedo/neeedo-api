@@ -19,12 +19,13 @@ import scala.concurrent.{Await, Future}
 class EsDemandServiceSpec extends Specification with Mockito {
 
   trait EsDemandServiceContext extends WithApplication {
-    val config = Map("demand.typeName" -> "demand")
+    val config = Map("demand.typeName" -> "demand", "offer.typeName" -> "offer")
     val configLoader = new ConfigLoader(Configuration.from(config))
     val indexName = configLoader.demandIndex
     val typeName = indexName.toTypeName
     val esClientMock = mock[ElasticsearchClient]
     val esCompletionServiceMock = mock[EsCompletionService]
+    esCompletionServiceMock.upsertCompletions(any[List[CompletionTag]]) returns Future(List.empty)
     val timeStamp = 1434272348084L
     val timeHelperMock = mock[TimeHelper]
     timeHelperMock.now returns new DateTime(timeStamp)
@@ -75,15 +76,20 @@ class EsDemandServiceSpec extends Specification with Mockito {
       Await.result(service.createDemand(demand), Duration.Inf) must beEqualTo(demand)
       there was one (esClientMock)
         .indexDocument(demand.id.value, indexName, typeName, service.buildEsDemandJson(demand))
+      there was one (esCompletionServiceMock)
+        .upsertCompletions(demand.mustTags.map(CompletionTag).toList)
     }
 
-    "parseIndexResponse must throw exception for negative indexResponse" in new EsDemandServiceContext {
-      service.parseIndexResponse(negativeIndexResponse, demand) must
+    "processIndexResponse must throw exception for negative indexResponse" in new EsDemandServiceContext {
+      Await.result(service.processIndexResponse(negativeIndexResponse, demand), Duration.Inf) must
         throwA(new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative"))
     }
 
-    "parseIndexResponse must return demand for positive indexResponse" in new EsDemandServiceContext {
-      service.parseIndexResponse(positiveIndexResponse, demand) must beEqualTo(demand)
+    "processIndexResponse must return demand for positive indexResponse" in new EsDemandServiceContext {
+      esClientMock.indexDocument(anyString, any[IndexName], any[TypeName], any[JsValue]) returns
+        Future(positiveIndexResponse)
+
+      Await.result(service.processIndexResponse(positiveIndexResponse, demand), Duration.Inf) must beEqualTo(demand)
     }
 
     "deleteDemand must throw EsDeleteFailed when elasticsearch throws an exception" in new EsDemandServiceContext {

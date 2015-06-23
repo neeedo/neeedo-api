@@ -7,7 +7,8 @@ import common.elasticsearch.ElasticsearchClient
 import common.exceptions.ElasticSearchIndexFailed
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import common.helper.{ConfigLoader, TimeHelper}
-import model.{Message, MessageId}
+import model.{OfferId, Message, MessageId}
+import org.elasticsearch.action.get.GetRequest
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.index.engine.DocumentMissingException
@@ -24,12 +25,69 @@ import scala.concurrent.Future
 
 class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader, userService: UserService, timeHelper: TimeHelper) {
 
+  def alertDemandsFor(offerId: OfferId): Future[List[Message]] = {
+    val usersFuture = getPercolatedDemandIds(offerId)
+    usersFuture.flatMap {
+      users =>
+        users.toString()
+        Future.sequence {
+          users.map {
+            user =>
+              println(user)
+              val draft = MessageDraft(
+                UserId("Neeedo"),
+                user,
+                offerId.value)
+              createMessage(draft)
+          }
+        }
+    } recover {
+      case e: Exception =>
+        e.printStackTrace()
+        List.empty
+    }
+  }
+
+  private[es] def getPercolatedDemandIds(offerId: OfferId): Future[List[UserId]] = {
+      elasticsearch.client.preparePercolate()
+        .setIndices(config.offerIndex.value)
+        .setGetRequest(
+          new GetRequest(
+            config.offerIndex.value,
+            config.offerIndex.toTypeName.value,
+            offerId.value))
+        .setDocumentType(config.offerIndex.toTypeName.value)
+        .execute()
+        .asScala
+        .flatMap {
+          res =>
+            Future.sequence {
+              res.getMatches.toList.map {
+                matchedDemand =>
+                  elasticsearch.client
+                    .prepareGet(
+                      config.demandIndex.value,
+                      config.demandIndex.toTypeName.value,
+                      matchedDemand.getId.string()
+                    )
+                    .execute()
+                    .asScala
+                    .map {
+                      resp =>
+                        UserId((Json.parse(resp.getSourceAsString) \ "user" \ "id").as[String])
+                    }
+              }
+            }
+      }
+  }
+
   def createMessage(draft: MessageDraft): Future[Message] = {
     val index = config.messagesIndex
     val typeName = config.messagesIndex.toTypeName
     val message: Future[Message] = for {
       recipient <- userService.getUserById(draft.recipientId)
-      sender <- userService.getUserById(draft.senderId)
+      sender <- if (draft.senderId.value == "Neeedo") Future(UserIdAndName(draft.senderId, Username("Neeedo")))
+        else userService.getUserById(draft.senderId)
     } yield buildMessage(recipient, sender, draft)
 
     message.flatMap {
@@ -64,8 +122,6 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
       }
   }
 
-  case class Conversation(counterPart: User, lastMessage: Message, hasUnread: Boolean)
-
   def buildConversationsQuery(id: UserId, read: Boolean) = {
     val filter = FilterBuilders.andFilter(
       FilterBuilders.termFilter("read", read),
@@ -94,7 +150,9 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
 
           Future.sequence {
             ids.map {
-              id => userService.getUserById(UserId(id)).map(u => UserIdAndName(u.id, u.name))
+              id =>
+                if (id == "Neeedo") Future(UserIdAndName(UserId(id), Username("Neeedo")))
+                else userService.getUserById(UserId(id)).map(u => UserIdAndName(u.id, u.name))
             }
           }
       }
