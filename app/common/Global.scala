@@ -41,6 +41,7 @@ object Global extends WithFilters(CrossOriginFilter) with GlobalSettings with Ma
     Await.result(wired.lookupSingleOrThrow(classOf[MessagesEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     Await.result(wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     Await.result(wired.lookupSingleOrThrow(classOf[AmazonS3Migrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    Await.result(wired.lookupSingleOrThrow(classOf[FavoritesEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
     MigrationsLogger.info("### Migrations done ###\n")
   }
 }

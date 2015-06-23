@@ -34,6 +34,7 @@ trait WireDependencies {
   lazy val completionService = wire[CompletionService]
   lazy val userService = wire[UserService]
   lazy val imageService = wire[ImageService]
+  lazy val favoriteService = wire[FavoriteService]
 
   //// Elasticsearch
   lazy val esOfferService = wire[EsOfferService]
@@ -66,4 +67,5 @@ trait WireDependencies {
   lazy val messagesEsMigration = wire[MessagesEsMigrations]
   lazy val productTestDataMigration = wire[ProductTestDataMigrations]
   lazy val amazons3Migration = wire[AmazonS3Migrations]
+  lazy val favoritesEsMigration = wire[FavoritesEsMigrations]
 }
