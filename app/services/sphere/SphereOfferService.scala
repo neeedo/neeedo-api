@@ -87,7 +87,7 @@ class SphereOfferService(sphereClient:      SphereClient,
 
   def deleteAllOffers() = {
     getAllOffers map {
-      offers => offers map {
+      offerProducts => offerProducts map {
         product => deleteProduct(Versioned.of(product.getId, product.getVersion))
       }
     }
