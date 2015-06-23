@@ -1,0 +1,14 @@
+{
+  "favorites" : {
+    "properties" : {
+      "userId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "offerId": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}
