@@ -29,7 +29,7 @@ class DemandsController(service: DemandService, securedAction: SecuredAction) ex
     }
   }
 
-  def getDemandById(id: DemandId) = securedAction.async {
+  def getDemandById(id: DemandId) = Action.async {
     service.getDemandById(id) map {
       case Some(demand) => Ok(Json.obj("demand" -> Json.toJson(demand)))
       case None => NotFound(Json.obj("error" -> "Demand not found"))

@@ -37,7 +37,7 @@ class MessagesController(esMessageService: EsMessageService, securedAction: Secu
 
   def getConversationsByUser(id: UserId, read: Option[Boolean]) = Action.async {
     esMessageService.getConversationsByUser(id, read.getOrElse(false)) map {
-      res => Ok(Json.toJson(res))
+      res => Ok(Json.obj("users" -> Json.toJson(res)))
     } recover {
       case e: Exception => e.asResult
     }

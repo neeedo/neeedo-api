@@ -85,8 +85,6 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
       .addAggregation(AggregationBuilders.terms("sender").field("sender.id").exclude(id.value))
       .addAggregation(AggregationBuilders.terms("recipient").field("recipient.id").exclude(id.value))
 
-    println(query)
-
     query
       .execute()
       .asScala

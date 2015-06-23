@@ -43,4 +43,12 @@ class ImagesController(imageService: ImageService, securedAction: SecuredAction)
       .map { _ => Ok }
       .recover { case e: Exception =>e.asResult }
   }
+
+  def createImageFromUrl(url: String) = securedAction.async {
+    imageService.createImage(url).map {
+      imageId => Created(Json.toJson(imageId))
+    } recover {
+      case e: Exception => e.asResult
+    }
+  }
 }

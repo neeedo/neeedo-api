@@ -9,7 +9,7 @@ case class UserDraft(username: Username, email: Email, password: String)
 object UserDraft {
 
   implicit val userDraftReads: Reads[UserDraft] = (
-    (JsPath \ "username").read[String] and
+    (JsPath \ "name").read[String] and
     (JsPath \ "email").read[String] and
     (JsPath \ "password").read[String]
     ) {
@@ -23,7 +23,7 @@ object UserDraft {
 
   implicit val offerDraftWrites = new Writes[UserDraft] {
     def writes(u: UserDraft) = Json.obj(
-      "username" -> u.username.value,
+      "name" -> u.username.value,
       "email" -> u.email.value,
       "password" -> u.password
     )
