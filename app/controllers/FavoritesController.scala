@@ -1,39 +1,37 @@
 package controllers
 
-import common.domain.UserId
+import common.domain.{Favorite, UserId}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
-import model.OfferId
+import model.{Offer, OfferId}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
-import services.es.EsFavoriteService
+import services.FavoriteService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FavoritesController(favoritesService: EsFavoriteService, securedAction: SecuredAction)
+class FavoritesController(favoritesService: FavoriteService, securedAction: SecuredAction)
   extends Controller with ControllerUtils {
 
   def getFavoritesByUser(id: UserId) = securedAction.async {
     favoritesService.getFavoritesByUser(id) map {
-      favorites => Ok(Json.obj("favorites" -> Json.toJson(favorites map (_.value))))
+      favorites => Ok(Json.obj("favorites" -> Json.toJson(favorites)))
     } recover {
       case e: Exception => e.asResult
     }
   }
 
-  def addFavorite(userId: UserId, offerId: OfferId) = securedAction.async { implicit request =>
-    favoritesService.addFavorite(userId, offerId) map {
-      case Some(_) => Created(Json.toJson(offerId))
-      case _ => Ok(Json.toJson(offerId))
+  def addFavorite() = securedAction.async(parse.json[Favorite]) { implicit request =>
+    favoritesService.addFavorite(request.body) map {
+      favorite => Created(Json.obj("favorite" -> Json.toJson(favorite)))
     } recover {
       case e: Exception => e.asResult
     }
   }
 
-  def removeFavorite(userId: UserId, offerId: OfferId) = securedAction.async {
-    favoritesService.removeFavorite(userId, offerId) map {
-      case Some(_) => Ok(Json.toJson(offerId))
-      case _ => NotFound
+  def removeFavorite() = securedAction.async(parse.json[Favorite]) { implicit request =>
+    favoritesService.removeFavorite(request.body) map {
+      favorite => Ok(Json.obj("favorite" -> Json.toJson(favorite)))
     } recover {
       case e: Exception => e.asResult
     }

@@ -1,13 +1,16 @@
 package services.es
 
-import common.domain.UserId
+import java.util.UUID
+
+import common.domain.{Favorite, UserId}
 import common.elasticsearch.ElasticsearchClient
+import common.exceptions.ElasticSearchIndexFailed
 import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
-import model.OfferId
-import org.elasticsearch.index.query.{AndFilterBuilder, QueryBuilders, TermFilterBuilder}
-import play.api.libs.json.{JsValue, Json}
+import org.elasticsearch.index.query.QueryBuilders
+import play.api.libs.json.Json
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader) {
@@ -15,44 +18,35 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
   val index = config.favoritesIndex
   val typeName = config.favoritesIndex.toTypeName
 
-  def addFavorite(userId: UserId, offerId: OfferId): Future[Option[OfferId]] = {
-    val favorite = buildEsJson(offerId, userId)
+  def addFavorite(favorite: Favorite): Future[Favorite] = {
+    val uuid = UUID.randomUUID().toString
 
-    elasticsearch.indexDocument(offerId.value, index, typeName, favorite) map {
-      res => if(res.isCreated) Option(offerId) else None
-    } recover {
-      case e: Exception => throw e
+    elasticsearch.indexDocument(uuid, index, typeName, Json.toJson(favorite)) map {
+      result =>
+        if(result.isCreated) favorite
+        else throw new ElasticSearchIndexFailed("Error while saving favorite in elasticsearch")
     }
   }
 
-  def getFavoritesByUser(userId: UserId): Future[List[OfferId]] = {
+  def getFavoritesByUser(userId: UserId): Future[List[Favorite]] = {
     elasticsearch.client
       .prepareSearch(index.value)
       .setQuery(QueryBuilders.termQuery("userId", userId.value))
       .execute()
       .asScala
-      .map (elasticsearch.searchresponseAs[OfferId])
+      .map (elasticsearch.searchresponseAs[Favorite])
   }
 
-  def removeFavorite(userId: UserId, offerId: OfferId): Future[OfferId] = {
+  def removeFavorite(favorite: Favorite): Future[Favorite] = {
     elasticsearch.client
       .prepareDeleteByQuery(index.value)
-      .setQuery(deleteByUserAndIdQuery(userId, offerId))
+      .setQuery(deleteFavoriteQuery(favorite))
       .execute()
       .asScala
-      .map (_ => offerId)
+      .map (_ => favorite)
   }
 
-  private[es] def buildEsJson(offerId: OfferId, userId: UserId): JsValue = Json.obj(
-    "offerId" -> offerId.value,
-    "userId" -> userId.value
-  )
-
-  private[es] def deleteByUserAndIdQuery(userId: UserId, offerId: OfferId) =
-    QueryBuilders.filteredQuery(null,
-      new AndFilterBuilder(
-        new TermFilterBuilder("userId", userId),
-        new TermFilterBuilder("offerId", offerId)
-      )
-    )
+  private[es] def deleteFavoriteQuery(favorite: Favorite) = QueryBuilders.boolQuery()
+    .must(QueryBuilders.termQuery("userId", favorite.userId.value))
+    .must(QueryBuilders.termQuery("offerId", favorite.offerId.value))
 }

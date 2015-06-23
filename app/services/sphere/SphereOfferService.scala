@@ -2,8 +2,7 @@ package services.sphere
 
 import java.util.Locale
 
-import com.github.slugify.Slugify
-import common.domain.{Username, OfferDraft, Version}
+import common.domain.{OfferDraft, Username, Version}
 import common.exceptions.{MalformedOffer, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
 import common.logger.OfferLogger
@@ -12,7 +11,7 @@ import io.sphere.sdk.attributes.Attribute
 import io.sphere.sdk.models.{LocalizedStrings, Versioned}
 import io.sphere.sdk.products._
 import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand}
-import io.sphere.sdk.products.queries.{ProductQuery, ProductByIdFetch}
+import io.sphere.sdk.products.queries.{ProductByIdFetch, ProductQuery}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{CardId, Offer, OfferId}
 import play.api.libs.json.Json
@@ -23,8 +22,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductTypeDrafts,
-                         productTypes: ProductTypes, userService: UserService) {
+class SphereOfferService(sphereClient:      SphereClient,
+                         productTypeDrafts: ProductTypeDrafts,
+                         productTypes:      ProductTypes,
+                         userService:       UserService) {
 
   def getOfferById(id: OfferId): Future[Option[Offer]] = {
     getProductById(id) map {
@@ -33,15 +34,22 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     }
   }
 
-  private def getProductById(id: CardId): Future[Option[Product]] = {
-    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
+  def getOffersByIds(ids: List[OfferId]): Future[List[Offer]] = {
+    val predicate = ProductQuery.model().id().isIn(ids.map(_.value).asJava)
+    val query = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
+
+    sphereClient.execute(query) map {
+      result =>
+        result.getResults.asScala.toList.flatMap(o => Offer.fromProduct(o).toOption)
+    }
   }
 
   def getAllOffers: Future[List[Product]] = {
     val productQuery = ProductQuery.of().byProductType(productTypes.offer)
 
-    sphereClient.execute(productQuery)
-      .map { res => res.getResults.asScala.toList }
+    sphereClient.execute(productQuery) map {
+      res => res.getResults.asScala.toList
+    }
   }
 
   def createOffer(draft: OfferDraft): Future[Offer] = {
@@ -72,16 +80,15 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
   }
 
   def deleteProduct(product: Versioned[Product]) = {
-    sphereClient.execute(ProductDeleteCommand.of(product))
-      .recover {
+    sphereClient.execute(ProductDeleteCommand.of(product)) recover {
       case e: Exception => throw new SphereDeleteFailed("Offer could not be deleted")
     }
   }
 
   def deleteAllOffers() = {
     getAllOffers map {
-      (offers: List[Product]) => {
-        offers map { product => deleteProduct(Versioned.of(product.getId, product.getVersion)) }
+      offers => offers map {
+        product => deleteProduct(Versioned.of(product.getId, product.getVersion))
       }
     }
   }
@@ -89,7 +96,7 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
   private[sphere] def buildProductDraft(uname: Username, draft: OfferDraft)  = {
     val name = OfferDraft.generateName(draft)
     val productName = LocalizedStrings.of(Locale.ENGLISH, name)
-    val slug = LocalizedStrings.of(Locale.ENGLISH, new Slugify().slugify(name))
+    val slug = LocalizedStrings.of(Locale.ENGLISH, name).slugified()
     val productVariant = ProductVariantDraftBuilder.of()
       .attributes(buildOfferAttributes(uname, draft))
       .build()
@@ -106,4 +113,7 @@ class SphereOfferService(sphereClient: SphereClient, productTypeDrafts: ProductT
     Attribute.of("price", MoneyImpl.of(BigDecimal(offerDraft.price.value).bigDecimal, "EUR")),
     Attribute.of("images", offerDraft.images.asJava)
   ).asJava
+
+  private[sphere] def getProductById(id: CardId): Future[Option[Product]] =
+    sphereClient.execute(ProductByIdFetch.of(id.value)) map(_.asScala)
 }
