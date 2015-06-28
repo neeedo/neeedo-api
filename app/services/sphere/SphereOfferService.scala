@@ -45,7 +45,7 @@ class SphereOfferService(sphereClient:      SphereClient,
   }
 
   def getAllOffers: Future[List[Product]] = {
-    val productQuery = ProductQuery.of().byProductType(productTypes.offer)
+    val productQuery = ProductQuery.of().byProductType(productTypes.offer).withLimit(500)
 
     sphereClient.execute(productQuery) map {
       res => res.getResults.asScala.toList

@@ -77,7 +77,7 @@ class EsDemandServiceSpec extends Specification with Mockito {
       there was one (esClientMock)
         .indexDocument(demand.id.value, indexName, typeName, service.buildEsDemandJson(demand))
       there was one (esCompletionServiceMock)
-        .upsertCompletions(demand.mustTags.map(CompletionTag).toList)
+        .upsertCompletions(demand.mustTags.map(CompletionTag(_)).toList)
     }
 
     "processIndexResponse must throw exception for negative indexResponse" in new EsDemandServiceContext {

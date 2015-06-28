@@ -100,7 +100,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
   private[es] def processIndexResponse(indexResponse: IndexResponse, demand: Demand) = {
     if (indexResponse.isCreated) {
       for {
-        completion <- esCompletionService.upsertCompletions(demand.mustTags.map(CompletionTag).toList)
+        completion <- esCompletionService.upsertCompletions(demand.mustTags.map(CompletionTag(_)).toList)
         percolator <- createPercolatorDemand(demand)
       } yield demand
     } else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
