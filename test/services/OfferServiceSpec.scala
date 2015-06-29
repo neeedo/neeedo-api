@@ -6,7 +6,7 @@ import model.{Offer, OfferId}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
-import services.es.EsOfferService
+import services.es.{EsMessageService, EsOfferService}
 import services.sphere.SphereOfferService
 
 import scala.concurrent.duration._
@@ -18,7 +18,8 @@ class OfferServiceSpec extends Specification with Mockito {
   trait OfferServiceContext extends Scope {
     val esOfferServiceMock = mock[EsOfferService]
     val sphereOfferServiceMock = mock[SphereOfferService]
-    val service = new OfferService(sphereOfferServiceMock, esOfferServiceMock)
+    val esMessageServiceMock = mock[EsMessageService]
+    val service = new OfferService(sphereOfferServiceMock, esOfferServiceMock, esMessageServiceMock)
 
     val draft = OfferDraft(
       UserId("abc"),
@@ -78,12 +79,14 @@ class OfferServiceSpec extends Specification with Mockito {
     }
 
     "createOffer must return offer if elasticsearch and sphere succeed" in new OfferServiceContext {
-      sphereOfferServiceMock.createOffer(draft) returns Future(offer1)
-      esOfferServiceMock.createOffer(offer1) returns Future(offer1)
+      sphereOfferServiceMock.createOffer(any[OfferDraft]) returns Future(offer1)
+      esOfferServiceMock.createOffer(any[Offer]) returns Future(offer1)
+      esMessageServiceMock.alertDemandsFor(any[OfferId]) returns Future(List.empty)
 
       Await.result(service.createOffer(draft), Duration.Inf) must beEqualTo(offer1)
       there was one (sphereOfferServiceMock).createOffer(draft)
       there was one (esOfferServiceMock).createOffer(offer1)
+      there was one (esMessageServiceMock).alertDemandsFor(offer1.id)
     }
 
     "deleteOffer must throw correct exception when SphereOfferService fails" in new OfferServiceContext {
@@ -142,11 +145,12 @@ class OfferServiceSpec extends Specification with Mockito {
       there was no (esOfferServiceMock).deleteOffer(offer1.id)
     }
 
-    "updateDemand must return new demand if es and sphere succeed" in new OfferServiceContext {
+    "updateOffer must return new offer if es and sphere succeed" in new OfferServiceContext {
       esOfferServiceMock.deleteOffer(any[OfferId]) returns Future(offer1.id)
       sphereOfferServiceMock.deleteOffer(any[OfferId], any[Version]) returns Future(offer1)
       sphereOfferServiceMock.createOffer(any[OfferDraft]) returns Future(offer2)
       esOfferServiceMock.createOffer(any[Offer]) returns Future(offer2)
+      esMessageServiceMock.alertDemandsFor(any[OfferId]) returns Future(List.empty)
 
       Await.result(service.updateOffer(offer1.id, offer1.version, draft), Duration.Inf) must
         beEqualTo(offer2)
@@ -154,6 +158,7 @@ class OfferServiceSpec extends Specification with Mockito {
       there was one (sphereOfferServiceMock).deleteOffer(offer1.id, offer1.version)
       there was one (sphereOfferServiceMock).createOffer(draft)
       there was one (esOfferServiceMock).createOffer(offer2)
+      there was one (esMessageServiceMock).alertDemandsFor(offer2.id)
     }
   }
 }

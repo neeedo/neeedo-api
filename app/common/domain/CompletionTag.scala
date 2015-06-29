@@ -2,7 +2,10 @@ package common.domain
 
 import play.api.libs.json.{Json, Writes}
 
-case class CompletionTag(value: String)
+case class CompletionTag(rawValue: String) {
+  val value = rawValue.trim.toLowerCase
+}
+
 case class CompletionTagResult(value: List[String])
 object CompletionTagResult {
   implicit val completionTagResult = new Writes[CompletionTagResult] {
@@ -12,7 +15,7 @@ object CompletionTagResult {
 
 case class CompletionPhrase(value: List[String])
 object CompletionPhrase {
-  def apply(phrase: String) = new CompletionPhrase(phrase.split(",").toList)
+  def apply(phrase: String) = new CompletionPhrase(phrase.split(",").toList.map(_.trim.toLowerCase))
 }
 
 case class CompletionPhraseResult(value: List[String])

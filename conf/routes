@@ -22,10 +22,10 @@ GET            /offers/:id                  @controllers.OffersController.getOff
 GET            /offers/users/:id            @controllers.OffersController.getOffersByUserId(id: common.domain.UserId, pager: Option[common.domain.Pager])
 GET            /offers                      @controllers.OffersController.getAllOffers(pager: Option[common.domain.Pager], loc: Option[common.domain.Location])
 POST           /offers                      @controllers.OffersController.createOffer()
-# POST           /testOffers                  @controllers.OffersController.createTestOffer()
+POST           /testOffers                  @controllers.OffersController.createTestOffer()
 PUT            /offers/:id/:version         @controllers.OffersController.updateOffer(id: model.OfferId, version: common.domain.Version)
 DELETE         /offers/:id/:version         @controllers.OffersController.deleteOffer(id: model.OfferId, version: common.domain.Version)
-# DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
+DELETE         /offers/all                  @controllers.OffersController.deleteAllOffers()
 OPTIONS        /offers                      @controllers.StaticController.deliverCorsHeaders()
 
 # Matching

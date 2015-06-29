@@ -57,6 +57,10 @@ API-Documentation
     - [Read Message](#read-message)
     - [Mark Message as read](#mark-message-as-read)
     - [Get all conversations](#get-all-conversations)
+- [Favorites](#favorites)
+    - [Add Favorite](#add-favorite)
+    - [Get Favorites By User](#get-favorites-by-user)
+    - [Remove Favorite](#remove-favorite)
 - [Demands](#demands)
 	- [Query single Demand](#query-single-demand)
 	- [Query Demands for User](#query-demands-for-user)
@@ -321,6 +325,78 @@ GET `/conversations/{userId}?read={read}`
                 "name": "Blub"
             }
         ]
+    }
+    
+# Favorites
+## Add Favorite
+### Resource
+POST `/favorites`
+
+### Body
+The request body must contain a valid Favorite json object
+
+    {
+        "userId":"09d31dae-51b1-45e5-a343-56a3462e4053",
+        "offerId": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90"
+    }
+
+### Response
+201 Created
+    
+    {
+        "userId":"09d31dae-51b1-45e5-a343-56a3462e4053",
+        "offerId": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90"
+    }
+
+## Get Favorites By User
+### Resource
+GET `/favorites/{userId}`
+
+### URL Parameters
+
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| userId | Mandatory | alphanumeric |
+
+### Response
+200 Ok
+
+    "favorites": [
+        {
+            "id":"9dfa3c90-85c8-46ce-b50c-3ecde596bc90",
+            "version": 1,
+            "user": {
+                "id":"09d31dae-51b1-45e5-a343-56a3462e4053",
+                "name":"Stefan"
+            },
+            "tags":["socken", "bekleidung", "wolle"],
+            "location":{
+                "lat":13.534212,
+                "lon":52.468562
+            },
+            "price":25.0
+        },
+        ...
+    ]
+
+## Remove Favorite
+### Resource
+DELETE `/favorites`
+
+### Body
+The request body must contain a valid Favorite json object
+
+    {
+        "userId":"09d31dae-51b1-45e5-a343-56a3462e4053",
+        "offerId": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90"
+    }
+
+### Response
+200 Ok
+    
+    {
+        "userId":"09d31dae-51b1-45e5-a343-56a3462e4053",
+        "offerId": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90"
     }
 
 # Demands
