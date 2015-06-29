@@ -2,15 +2,15 @@ package services
 
 import common.domain._
 import common.exceptions.{ElasticSearchIndexFailed, SphereIndexFailed}
-import model.{DemandId, Demand, OfferId, Offer}
+import model.{Offer, OfferId}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import services.es.EsOfferService
 import services.sphere.SphereOfferService
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 
 class OfferServiceSpec extends Specification with Mockito {

@@ -1,25 +1,23 @@
 package services
 
-import java.io.{FileOutputStream, File}
-import java.nio.charset.Charset
-import java.nio.file.Path
+import java.io.{File, FileOutputStream}
 import java.util.UUID
 
 import common.amazon.S3Client
 import common.domain.ImageId
-import common.exceptions.{WrongUploadType, UploadFileToLarge}
-import common.helper.ConfigLoader
+import common.exceptions.{UploadFileToLarge, WrongUploadType}
+import common.helper.{ConfigLoader, UUIDHelper}
+import play.api.Play.current
+import play.api.http.HeaderNames._
 import play.api.libs.Files.TemporaryFile
-import play.api.libs.iteratee.{Iteratee, Enumerator}
-import play.api.libs.ws.{WSResponseHeaders, WSRequestHolder, WS}
+import play.api.libs.iteratee.Iteratee
+import play.api.libs.ws.WS
 import play.api.mvc.MultipartFormData.FilePart
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import play.api.Play.current
-import play.api.http.HeaderNames._
 
-class ImageService(s3Client: S3Client, configLoader: ConfigLoader) {
+class ImageService(s3Client: S3Client, configLoader: ConfigLoader, uuid: UUIDHelper) {
 
   def getImageById(id: ImageId): Future[String] = {
     s3Client.getObject(id.value)
@@ -37,7 +35,7 @@ class ImageService(s3Client: S3Client, configLoader: ConfigLoader) {
         Future.failed(
           new WrongUploadType(s"Only Image files are allowed for upload."))
       case _ =>
-        val newFilename = UUID.randomUUID + getExtension(image.filename)
+        val newFilename = uuid.random + getExtension(image.filename)
         s3Client.putObject(newFilename, image.ref.file).map(_ => ImageId(newFilename))
     }
   }
