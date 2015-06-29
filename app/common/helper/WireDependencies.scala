@@ -18,6 +18,7 @@ trait WireDependencies {
   lazy val productTypes: ProductTypes = if (Play.current.mode == Mode.Test) wire[MockProductTypes] else wire[SphereProductTypes]
   lazy val securedAction = wire[SecuredAction]
   lazy val timeHelper = wire[TimeHelper]
+  lazy val uuidHelper =  wire[UUIDHelper]
 
   // Factories
   val esFactory: ElasticsearchClientFactory = wire[ElasticsearchClientFactory]
