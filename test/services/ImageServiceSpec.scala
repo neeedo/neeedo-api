@@ -5,8 +5,8 @@ import java.io.File
 import com.amazonaws.services.s3.model.PutObjectResult
 import common.amazon.S3Client
 import common.domain.ImageId
-import common.exceptions.{WrongUploadType, UploadFileToLarge}
-import common.helper.{UUIDHelper, ConfigLoader}
+import common.exceptions.{UploadFileToLarge, WrongUploadType}
+import common.helper.{ConfigLoader, UUIDHelper}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
@@ -14,9 +14,8 @@ import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.test.{FakeApplication, WithApplication}
 
-import scala.concurrent.{Future, Await}
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, Future}
 
 class ImageServiceSpec extends Specification with Mockito  {
 
@@ -54,6 +53,7 @@ class ImageServiceSpec extends Specification with Mockito  {
 
     "throw UploadFileToLarge exception" in new ImageServiceContext {
       file.length() returns Integer.MAX_VALUE
+
       Await.result(imageService.createImage(filePart), Duration(1, "second")) must throwA[UploadFileToLarge]
     }
 
