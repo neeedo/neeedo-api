@@ -56,7 +56,10 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
           .distance(d.distance.value, DistanceUnit.KILOMETERS)
           .point(d.location.lat.value, d.location.lon.value),
         FilterBuilders
-          .queryFilter(QueryBuilders.matchQuery("tags", d.mustTags.asJava).operator(MatchQueryBuilder.Operator.AND)),
+          .queryFilter(
+            d.mustTags.foldLeft(QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery())) {
+              case (acc, elem) => acc.must(QueryBuilders.matchQuery("tags", elem).operator(MatchQueryBuilder.Operator.AND))
+            }),
         FilterBuilders
           .rangeFilter("price").from(d.priceMin.value).to(d.priceMax.value)
       )
