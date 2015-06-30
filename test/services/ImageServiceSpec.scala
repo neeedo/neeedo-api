@@ -19,8 +19,6 @@ import scala.concurrent.{Await, Future}
 
 class ImageServiceSpec extends Specification with Mockito  {
 
-  implicit val fakeApplication = FakeApplication()
-
   trait ImageServiceContext extends WithApplication {
     val file = mock[File]
 

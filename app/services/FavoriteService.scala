@@ -9,8 +9,7 @@ import services.sphere.SphereOfferService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FavoriteService(esService: EsFavoriteService, sphereService: SphereOfferService,
-                            productTypes: ProductTypes) {
+class FavoriteService(esService: EsFavoriteService, sphereService: SphereOfferService) {
 
   def addFavorite(favorite: Favorite) = esService.addFavorite(favorite)
 
