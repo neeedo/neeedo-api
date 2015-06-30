@@ -41,8 +41,8 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
 
   private[es] def buildPhraseCompletionQuery(phrase: CompletionPhrase) = {
     QueryBuilders
-      .termsQuery(modelFieldName, phrase.value.asJava)
-      .minimumMatch(calcShouldMatch(phrase.value.length))
+      .matchQuery(modelFieldName, phrase.value.asJava)
+      .minimumShouldMatch(calcShouldMatch(phrase.value.length).toString)
   }
 
 

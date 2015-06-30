@@ -3,8 +3,8 @@
     "properties" : {
       "tag" : {
         "type" : "completion",
-        "index_analyzer" : "simple",
-        "search_analyzer" : "simple",
+        "index_analyzer" : "german",
+        "search_analyzer" : "german",
         "payloads" : true
       }
     }

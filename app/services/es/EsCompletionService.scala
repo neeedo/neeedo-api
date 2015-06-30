@@ -7,6 +7,7 @@ import common.helper.ConfigLoader
 import common.helper.ImplicitConversions._
 import org.elasticsearch.action.suggest.SuggestResponse
 import org.elasticsearch.action.update.UpdateResponse
+import org.elasticsearch.common.unit.Fuzziness
 import org.elasticsearch.script.ScriptService.ScriptType
 import org.elasticsearch.search.suggest.SuggestBuilders
 import org.elasticsearch.search.suggest.completion.CompletionSuggestion
@@ -21,9 +22,10 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient, config: Conf
 
   private[es] def buildSuggestions(tag: CompletionTag) =
     SuggestBuilders
-      .completionSuggestion(suggestionName)
+      .fuzzyCompletionSuggestion(suggestionName)
       .field("tag")
       .text(tag.value)
+      .setFuzziness(Fuzziness.AUTO)
 
   def getCompletions(tag: CompletionTag): Future[CompletionTagResult] = {
     val response: Future[SuggestResponse] = elasticsearchClient.client

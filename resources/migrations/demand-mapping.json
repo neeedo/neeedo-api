@@ -16,15 +16,21 @@
     },
     "mustTags": {
       "type": "string",
-      "index": "analyzed"
+      "index": "analyzed",
+      "index_analyzer" : "german",
+      "search_analyzer" : "german"
     },
     "shouldTags": {
       "type": "string",
-      "index": "analyzed"
+      "index": "analyzed",
+      "index_analyzer" : "german",
+      "search_analyzer" : "german"
     },
     "completionTags": {
       "type": "string",
-      "index": "not_analyzed"
+      "index": "analyzed",
+      "index_analyzer" : "tags-demand-offer",
+      "search_analyzer" : "tags-demand-offer"
     },
     "price": {
       "properties": {

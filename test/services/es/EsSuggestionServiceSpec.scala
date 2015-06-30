@@ -53,7 +53,7 @@ class EsSuggestionServiceSpec extends Specification with Mockito {
     val searchResponse = new SearchResponse(internalSearchResponse, "scrollId", 1, 1, 1000, shardFailures)
   }
 
-  "EsSuggestionServic" should {
+  "EsSuggestionService" should {
     "calcShouldMatch must calculate the correct should amount" in new EsSuggestionServiceContext {
       val shouldMatches = List(1, 2, 2, 3, 3, 3, 3, 4, 4)
       val calcShouldMatches = (1 until 10) map service.calcShouldMatch toList
@@ -63,11 +63,14 @@ class EsSuggestionServiceSpec extends Specification with Mockito {
 
     "buildPhraseCompletionQuery must return correct query" in new EsSuggestionServiceContext {
       val query = service.buildPhraseCompletionQuery(completionPhrase)
-
-      Json.parse(query.toString) must be equalTo Json.obj("terms" ->
+      Json.parse(query.toString) must be equalTo Json.obj("match" ->
         Json.obj(
-          "completionTags" -> completionPhrase.value,
-          "minimum_should_match" -> completionPhrase.value.length.toString)
+          "completionTags" -> Json.obj(
+            "query" -> completionPhrase.value,
+            "type" -> "boolean",
+            "minimum_should_match" -> completionPhrase.value.length.toString
+          )
+        )
       )
     }
 
