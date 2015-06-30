@@ -53,7 +53,7 @@ class ImageServiceSpec extends Specification with Mockito  {
 
   "ImageService.getImageById" should {
 
-    "call s3Client" in new ImageServiceContext {
+    "call s3Client.getObject" in new ImageServiceContext {
       imageService.getImageById(imageId)
 
       there was one (s3Client).getObject(imageId.value)
@@ -84,7 +84,7 @@ class ImageServiceSpec extends Specification with Mockito  {
 
   "ImageService.deleteFile" should {
 
-    "call s3Client" in new ImageServiceContext {
+    "call s3Client.deleteObject" in new ImageServiceContext {
       imageService.deleteFile(imageId)
 
       there was one (s3Client).deleteObject(imageId.value)
