@@ -7,13 +7,13 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
 import play.api.test.WithApplication
-import services.UserService
+import services.sphere.SphereUserService
 
 class EsMessageServiceSpec extends Specification with Mockito {
 
   trait EsMessageServiceContext extends WithApplication {
     val esMock = mock[ElasticsearchClient]
-    val userServiceMock = mock[UserService]
+    val userServiceMock = mock[SphereUserService]
     val config = mock[ConfigLoader]
     val service = new EsMessageService(esMock, config, userServiceMock, new TimeHelper)
 

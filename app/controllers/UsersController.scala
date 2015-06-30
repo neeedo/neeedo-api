@@ -4,13 +4,13 @@ import common.domain.{Email, Version, UserDraft, UserId}
 import common.helper.{ControllerUtils, SecuredAction}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-import services.UserService
+import services.sphere.SphereUserService
 import scala.concurrent.ExecutionContext.Implicits.global
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class UsersController(userService: UserService, securedAction: SecuredAction) extends Controller with ControllerUtils {
+class UsersController(userService: SphereUserService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
   def getUserByMail(mail: Email) = securedAction.async {
     userService.getUserByEmail(mail).map {

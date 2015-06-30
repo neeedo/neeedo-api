@@ -9,7 +9,8 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{AnyContent, AnyContentAsEmpty, Result}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeHeaders, FakeRequest, Helpers, WithApplication}
-import services.{UserService, MatchingService}
+import services.MatchingService
+import services.sphere.SphereUserService
 
 import scala.concurrent.Future
 
@@ -52,7 +53,7 @@ class MatchingControllerSpec extends Specification with Mockito {
 
   trait MatchingControllerContext extends WithApplication {
     val matchingService = mock[MatchingService]
-    val userService = mock[UserService]
+    val userService = mock[SphereUserService]
     userService.authorizeUser(any[UserCredentials]) returns Future(Some(UserId("abc")))
     val securedAction = new SecuredAction(userService)
     val ctrl = new MatchingController(matchingService, securedAction)

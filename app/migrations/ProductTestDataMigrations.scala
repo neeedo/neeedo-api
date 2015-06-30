@@ -11,7 +11,8 @@ import io.sphere.sdk.producttypes.queries.ProductTypeQuery
 import io.sphere.sdk.queries.PagedQueryResult
 import model.Offer
 import play.api.Configuration
-import services.{DemandService, OfferService, UserService}
+import services.sphere.SphereUserService
+import services.{DemandService, OfferService}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,7 +21,7 @@ import scala.util.Success
 
 class ProductTestDataMigrations(sphereClient: SphereClient, demandService: DemandService,
                                 offerService: OfferService, configloader: ConfigLoader,
-                                userService: UserService) extends Migration {
+                                userService: SphereUserService) extends Migration {
 
   override def run(): Future[Unit] = {
     MigrationsLogger.info("# Product Test Data Migrations started")

@@ -1,16 +1,20 @@
-package services
+package services.sphere
 
 import common.domain._
 import common.sphere.SphereClient
-import io.sphere.sdk.customers.{CustomerDraft, CustomerName, Customer, CustomerSignInResult}
 import io.sphere.sdk.customers.commands._
-import io.sphere.sdk.products.queries.ProductByIdFetch
+import io.sphere.sdk.customers.{CustomerDraft, CustomerName, CustomerSignInResult}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
+import play.api.test.WithApplication
 
 import scala.concurrent.Future
 
-class UserServiceSpec extends Specification with Mockito {
+class SphereUserServiceSpec extends Specification with Mockito {
+
+  trait UserServiceContext extends WithApplication {
+
+  }
 
   "UserService" should {
     "createUser successfully" in {
@@ -24,7 +28,7 @@ class UserServiceSpec extends Specification with Mockito {
       val customerDraft = CustomerDraft.of(customerName, email.value, pw)
       val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
       val sphere = mock[SphereClient]
-      val userService = new UserService(sphere)
+      val userService = new SphereUserService(sphere)
 
       sphere.execute(customerCreateCommand) returns Future.successful(any[CustomerSignInResult])
 

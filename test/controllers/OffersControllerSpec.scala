@@ -10,7 +10,8 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{AnyContent, AnyContentAsEmpty, AnyContentAsJson, Result}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeHeaders, FakeRequest, Helpers, WithApplication}
-import services.{OfferService, UserService}
+import services.OfferService
+import services.sphere.SphereUserService
 import test.TestData
 
 import scala.concurrent.Future
@@ -149,7 +150,7 @@ class OffersControllerSpec extends Specification with Mockito {
 
   trait OffersControllerContext extends WithApplication {
     val offerService = mock[OfferService]
-    val userService = mock[UserService]
+    val userService = mock[SphereUserService]
     userService.authorizeUser(any[UserCredentials]) returns Future(Some(UserId("abc")))
     val securedAction = new SecuredAction(userService)
     val ctrl = new OffersController(offerService, securedAction)

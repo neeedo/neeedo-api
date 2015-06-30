@@ -10,8 +10,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{Result, AnyContentAsEmpty, AnyContent}
 import play.api.test.{FakeHeaders, Helpers, FakeRequest, WithApplication}
 import play.api.test.Helpers.defaultAwaitTimeout
-import services.UserService
 import services.es.EsMessageService
+import services.sphere.SphereUserService
 import test.TestData
 
 import scala.concurrent.Future
@@ -19,7 +19,7 @@ import scala.concurrent.Future
 class MessagesControllerSpec extends Specification with Mockito {
 
   trait MessagesControllerContext extends WithApplication {
-    val userService = mock[UserService]
+    val userService = mock[SphereUserService]
     val esMessageService = mock[EsMessageService]
     val securedAction = new SecuredAction(userService)
     val controller = new MessagesController(esMessageService, securedAction)

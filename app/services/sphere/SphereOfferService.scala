@@ -15,7 +15,6 @@ import io.sphere.sdk.products.queries.{ProductByIdFetch, ProductQuery}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{CardId, Offer, OfferId}
 import play.api.libs.json.Json
-import services.UserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,7 +24,7 @@ import scala.concurrent.Future
 class SphereOfferService(sphereClient:      SphereClient,
                          productTypeDrafts: ProductTypeDrafts,
                          productTypes:      ProductTypes,
-                         userService:       UserService) {
+                         userService:       SphereUserService) {
 
   def getOfferById(id: OfferId): Future[Option[Offer]] = {
     getProductById(id) map {

@@ -7,9 +7,9 @@ import common.exceptions.{SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ConfigLoader
 import common.sphere.{MockProductTypes, ProductTypeDrafts, RemoteSphereClient}
 import io.sphere.sdk.attributes.Attribute
-import io.sphere.sdk.models.{Versioned, DefaultCurrencyUnits, LocalizedStrings}
+import io.sphere.sdk.models.{DefaultCurrencyUnits, LocalizedStrings, Versioned}
 import io.sphere.sdk.products
-import io.sphere.sdk.products.commands.{ProductDeleteCommand, ProductCreateCommand}
+import io.sphere.sdk.products.commands.{ProductCreateCommand, ProductDeleteCommand}
 import io.sphere.sdk.products.{ProductBuilder, ProductCatalogDataBuilder, ProductDataBuilder, ProductVariantBuilder}
 import io.sphere.sdk.utils.MoneyImpl
 import model.{Offer, OfferId}
@@ -17,7 +17,6 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
 import play.api.test.WithApplication
-import services.UserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
@@ -31,7 +30,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     val productTypeDrafts = new ProductTypeDrafts(configLoader)
     val productTypes = new MockProductTypes(productTypeDrafts)
     val sphereClientMock = mock[RemoteSphereClient]
-    val userService = mock[UserService]
+    val userService = mock[SphereUserService]
     val service = new SphereOfferService(sphereClientMock, productTypeDrafts, productTypes, userService)
 
     val userId = UserId("abc")

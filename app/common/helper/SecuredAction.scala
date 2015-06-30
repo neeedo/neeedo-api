@@ -7,13 +7,13 @@ import play.api.http.HeaderNames._
 import play.api.mvc._
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc.Results._
-import services.UserService
 import common.helper.ImplicitConversions.ExceptionToResultConverter
+import services.sphere.SphereUserService
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SecuredAction(userService: UserService) extends ActionBuilder[SecuredRequest] {
+class SecuredAction(userService: SphereUserService) extends ActionBuilder[SecuredRequest] {
 
   def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
     if (request.secure) authorize(request, block)

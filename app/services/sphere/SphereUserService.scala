@@ -1,9 +1,9 @@
-package services
+package services.sphere
 
 import java.util.concurrent.CompletionException
 
 import common.domain._
-import common.exceptions.{UserNotFound, NetworkProblem}
+import common.exceptions.{NetworkProblem, UserNotFound}
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
 import io.sphere.sdk.customers.commands._
@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class UserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
+class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHandler {
 
   def getUserByEmail(email: Email): Future[Option[User]] = {
     val query = CustomerQuery.of().byEmail(email.value)

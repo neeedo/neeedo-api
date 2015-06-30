@@ -7,7 +7,7 @@ import migrations._
 import play.api.{Mode, Play}
 import services._
 import services.es._
-import services.sphere.{SphereDemandService, SphereOfferService}
+import services.sphere.{SphereUserService, SphereDemandService, SphereOfferService}
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
@@ -33,7 +33,7 @@ trait WireDependencies {
   lazy val offerService = wire[OfferService]
   lazy val matchingService = wire[MatchingService]
   lazy val completionService = wire[CompletionService]
-  lazy val userService = wire[UserService]
+  lazy val userService = wire[SphereUserService]
   lazy val imageService = wire[ImageService]
   lazy val favoriteService = wire[FavoriteService]
 

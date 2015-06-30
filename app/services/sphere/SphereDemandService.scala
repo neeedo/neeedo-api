@@ -15,7 +15,6 @@ import io.sphere.sdk.products.{ProductDraftBuilder, ProductVariantDraftBuilder, 
 import io.sphere.sdk.utils.MoneyImpl
 import model.{CardId, Demand, DemandId}
 import play.api.libs.json.Json
-import services.UserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,7 +23,7 @@ import scala.concurrent.Future
 class SphereDemandService(sphereClient:      SphereClient,
                           productTypeDrafts: ProductTypeDrafts,
                           productTypes:      ProductTypes,
-                          userService:       UserService) {
+                          userService:       SphereUserService) {
 
   def getDemandById(id: DemandId): Future[Option[Demand]] = {
     getProductById(id) map {

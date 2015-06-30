@@ -8,7 +8,7 @@ import play.api.http.HeaderNames._
 import play.api.mvc.Results._
 import play.api.mvc.{AnyContentAsEmpty, AnyContent}
 import play.api.test.{FakeHeaders, Helpers, FakeRequest}
-import services.UserService
+import services.sphere.SphereUserService
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -22,7 +22,7 @@ class SecuredActionSpec extends Specification with Mockito {
       FakeHeaders(),
       AnyContentAsEmpty)
 
-    val userService = mock[UserService]
+    val userService = mock[SphereUserService]
     val securedAction = new SecuredAction(userService)
   }
 

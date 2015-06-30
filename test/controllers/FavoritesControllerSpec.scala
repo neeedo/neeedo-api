@@ -9,7 +9,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, AnyContentAsEmpty, Result}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeHeaders, FakeRequest, Helpers, WithApplication}
-import services.{FavoriteService, UserService}
+import services.FavoriteService
+import services.sphere.SphereUserService
 import test.TestData
 
 import scala.concurrent.Future
@@ -18,7 +19,7 @@ class FavoritesControllerSpec extends Specification with Mockito {
 
   trait FavoritesControllerContext extends WithApplication {
     val favoritesService = mock[FavoriteService]
-    val userService = mock[UserService]
+    val userService = mock[SphereUserService]
     val securedAction = new SecuredAction(userService)
     val controller = new FavoritesController(favoritesService, securedAction)
 

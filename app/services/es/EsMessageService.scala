@@ -17,13 +17,13 @@ import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.Json
-import services.UserService
+import services.sphere.SphereUserService
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader, userService: UserService, timeHelper: TimeHelper) {
+class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader, userService: SphereUserService, timeHelper: TimeHelper) {
 
   def alertDemandsFor(offerId: OfferId): Future[List[Message]] = {
     val usersFuture = getPercolatedDemandIds(offerId)
