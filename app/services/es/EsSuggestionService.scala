@@ -28,7 +28,7 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
       .setTypes(demandIndex.toTypeName.value, offerIndex.toTypeName.value)
       .setSize(0)
       .setQuery(buildPhraseCompletionQuery(phrase))
-      .addAggregation(buildAggregation)
+      .addAggregation(buildAggregation(phrase))
       .execute()
       .asScala.map {
         resp =>
@@ -49,18 +49,19 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
   private[es] def calcShouldMatch(tagsCount: Int): Int =
     (1.5 * Math.log(tagsCount) + 1).toInt
 
-  private[es] def buildAggregation = {
+  private[es] def buildAggregation(phrase: CompletionPhrase) = {
     AggregationBuilders
       .significantTerms(aggregationName)
       .field(modelFieldName)
       .minDocCount(1)
       .significanceHeuristic(new ChiSquareBuilder(false, false))
       .size(20)
+      .exclude(phrase.value.map(_.toLowerCase).toArray[String])
   }
 
   private[es] def getBucketsFromSearchresponse(res: SearchResponse, phrase: CompletionPhrase): List[String] = {
     res.getAggregations.get[SignificantTerms](aggregationName).asScala.toList
       .map { x: Bucket => x.getKey }
-      .filterNot(phrase.value.toSet)
+      .distinct
   }
 }
