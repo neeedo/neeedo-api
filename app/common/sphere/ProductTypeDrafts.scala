@@ -2,12 +2,11 @@ package common.sphere
 
 import java.util.Locale
 
-import common.domain.{DemandDraft}
 import common.helper.ConfigLoader
 import io.sphere.sdk.attributes._
 import io.sphere.sdk.models.LocalizedStrings
 import io.sphere.sdk.producttypes.ProductTypeDraft
-import io.sphere.sdk.utils.MoneyImpl
+
 import scala.collection.JavaConverters._
 
 class ProductTypeDrafts(configloader: ConfigLoader) {

@@ -5,16 +5,10 @@ import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
 case class User(id: UserId, version: Version, username: Username, email: Email)
-object User extends UserImplicits {
-  def fromCustomer(c: Customer): User =
-    User(UserId(c.getId), Version(c.getVersion), Username(c.getFirstName), Email(c.getEmail))
-}
+object User extends UserImplicits
 
 case class UserIdAndName(id: UserId, name: Username)
 object UserIdAndName {
-  def fromCustomer(c: Customer): UserIdAndName =
-    UserIdAndName(UserId(c.getId), Username(c.getFirstName))
-
   implicit val writes = new Writes[UserIdAndName] {
     def writes(u: UserIdAndName) = Json.obj(
       "id" -> u.id.value,

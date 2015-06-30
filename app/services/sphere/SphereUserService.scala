@@ -25,7 +25,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
 
     sphereClient.execute(query) map {
       case (res: PagedQueryResult[Customer]) => res.head.asScala map {
-        case (customer: Customer) => User.fromCustomer(customer)
+        case (customer: Customer) => UserFromCustomer(customer)
       }
     }
   }
@@ -35,7 +35,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
 
     sphereClient.execute(query) map {
       res => res.asScala match {
-        case Some(customer) => UserIdAndName.fromCustomer(customer)
+        case Some(customer) => UserIdAndNameFromCustomer(customer)
         case None => throw new UserNotFound(s"User with id ${id.value} does not exist")
       }
     }
@@ -47,7 +47,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
 
     sphereClient.execute(customerCreateCommand) map {
-      res => User.fromCustomer(res.getCustomer)
+      res => UserFromCustomer(res.getCustomer)
     } recover {
       case ex: Exception => parseSphereCustomerException(ex)
     }
@@ -63,7 +63,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
       customer <- sphereClient.execute(CustomerDeleteCommand.of(Versioned.of(id.value, version.value)))
     } yield  {
       Cache.remove(s"userCredentials.${customer.getEmail}")
-      Option(User.fromCustomer(customer))
+      Option(UserFromCustomer(customer))
     }
   }
 
@@ -93,4 +93,10 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
         None
     }
   }
+
+  def UserFromCustomer(c: Customer): User =
+    User(UserId(c.getId), Version(c.getVersion), Username(c.getFirstName), Email(c.getEmail))
+
+  def UserIdAndNameFromCustomer(c: Customer): UserIdAndName =
+    UserIdAndName(UserId(c.getId), Username(c.getFirstName))
 }
