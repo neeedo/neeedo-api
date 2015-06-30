@@ -10,7 +10,7 @@ import org.specs2.mutable.Specification
 
 import scala.concurrent.Future
 
-class UserServiceTest extends Specification with Mockito {
+class UserServiceSpec extends Specification with Mockito {
 
   "UserService" should {
     "createUser successfully" in {

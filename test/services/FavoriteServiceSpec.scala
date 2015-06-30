@@ -13,7 +13,7 @@ import services.sphere.SphereOfferService
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class FavoriteServiceTest extends Specification with Mockito {
+class FavoriteServiceSpec extends Specification with Mockito {
 
   trait FavoriteServiceContext extends WithApplication {
     val uuid = new UUIDHelper
