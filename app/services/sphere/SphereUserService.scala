@@ -51,11 +51,11 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     }
   }
 
-  def deleteUser(id: UserId, version: Version): Future[Option[User]] = {
+  def deleteUser(id: UserId, version: Version): Future[User] = {
     val deleteCommand = CustomerDeleteCommand.of(Versioned.of(id.value, version.value))
 
     sphereClient.execute(deleteCommand) map {
-      customer => Option(UserFromCustomer(customer))
+      customer => UserFromCustomer(customer)
     }
   }
 

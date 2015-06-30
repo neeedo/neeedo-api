@@ -44,8 +44,9 @@ class UsersController(userService: SphereUserService, securedAction: SecuredActi
 
   def deleteUser(id: UserId, version: Version) = securedAction.async {
     userService.deleteUser(id, version) map {
-      case Some(_) => Ok
-      case None => NotFound
+      case _ => Ok
+    } recover {
+      case e: Exception => e.asResult
     }
   }
 }
