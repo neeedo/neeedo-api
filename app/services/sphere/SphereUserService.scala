@@ -8,11 +8,9 @@ import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
 import io.sphere.sdk.customers.commands._
 import io.sphere.sdk.customers.queries.{CustomerByIdFetch, CustomerQuery}
-import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName, CustomerSignInResult}
+import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName}
 import io.sphere.sdk.models.Versioned
 import io.sphere.sdk.queries.PagedQueryResult
-import play.api.Play.current
-import play.api.cache.Cache
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -53,50 +51,29 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     }
   }
 
-  def updateUser(id: UserId, version: Version, userDraft: UserDraft): Future[User] = {
-    deleteUser(id, version)
-    createUser(userDraft)
-  }
-
   def deleteUser(id: UserId, version: Version): Future[Option[User]] = {
-    for {
-      customer <- sphereClient.execute(CustomerDeleteCommand.of(Versioned.of(id.value, version.value)))
-    } yield  {
-      Cache.remove(s"userCredentials.${customer.getEmail}")
-      Option(UserFromCustomer(customer))
+    val deleteCommand = CustomerDeleteCommand.of(Versioned.of(id.value, version.value))
+
+    sphereClient.execute(deleteCommand) map {
+      customer => Option(UserFromCustomer(customer))
     }
   }
 
   def authorizeUser(credentials: UserCredentials): Future[Option[UserId]] = {
-    val cachedUserCredentials: Option[EncryptedUserCredentials] =
-      Cache.getAs[EncryptedUserCredentials](credentials.cacheKey)
-
-    cachedUserCredentials match {
-      case Some(result) if result.md5 == PasswordHash(credentials.password) => Future.successful(Some(result.id))
-      case _ => sphereSignIn(credentials)
-    }
-  }
-
-  def sphereSignIn(credentials: UserCredentials): Future[Option[UserId]] = {
     val signInQuery = CustomerSignInCommand.of(credentials.email.value, credentials.password.value)
 
-    sphereClient.execute(signInQuery).map {
-      res: CustomerSignInResult => {
-        val userId = UserId(res.getCustomer.getId)
-        Cache.set(credentials.cacheKey, EncryptedUserCredentials(userId, credentials))
-        Some(userId)
-      }
+    sphereClient.execute(signInQuery) map {
+      res => Option(UserId(res.getCustomer.getId))
     } recover {
       case e: CompletionException if e.getMessage.startsWith("java.net.ConnectException") =>
         throw new NetworkProblem("Network is currently unreachable. Please try again later.")
-      case e: Exception =>
-        None
+      case _ => None
     }
   }
 
-  def UserFromCustomer(c: Customer): User =
+  private def UserFromCustomer(c: Customer): User =
     User(UserId(c.getId), Version(c.getVersion), Username(c.getFirstName), Email(c.getEmail))
 
-  def UserIdAndNameFromCustomer(c: Customer): UserIdAndName =
+  private def UserIdAndNameFromCustomer(c: Customer): UserIdAndName =
     UserIdAndName(UserId(c.getId), Username(c.getFirstName))
 }
