@@ -23,7 +23,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
 
     sphereClient.execute(query) map {
       case (res: PagedQueryResult[Customer]) => res.head.asScala map {
-        case (customer: Customer) => UserFromCustomer(customer)
+        case (customer: Customer) => userFromCustomer(customer)
       }
     }
   }
@@ -33,7 +33,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
 
     sphereClient.execute(query) map {
       res => res.asScala match {
-        case Some(customer) => UserIdAndNameFromCustomer(customer)
+        case Some(customer) => userIdAndNameFromCustomer(customer)
         case None => throw new UserNotFound(s"User with id ${id.value} does not exist")
       }
     }
@@ -45,7 +45,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
 
     sphereClient.execute(customerCreateCommand) map {
-      res => UserFromCustomer(res.getCustomer)
+      res => userFromCustomer(res.getCustomer)
     } recover {
       case ex: Exception => parseSphereCustomerException(ex)
     }
@@ -55,7 +55,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     val deleteCommand = CustomerDeleteCommand.of(Versioned.of(id.value, version.value))
 
     sphereClient.execute(deleteCommand) map {
-      customer => UserFromCustomer(customer)
+      customer => userFromCustomer(customer)
     }
   }
 
@@ -71,9 +71,9 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     }
   }
 
-  private def UserFromCustomer(c: Customer): User =
+  private def userFromCustomer(c: Customer): User =
     User(UserId(c.getId), Version(c.getVersion), Username(c.getFirstName), Email(c.getEmail))
 
-  private def UserIdAndNameFromCustomer(c: Customer): UserIdAndName =
+  private def userIdAndNameFromCustomer(c: Customer): UserIdAndName =
     UserIdAndName(UserId(c.getId), Username(c.getFirstName))
 }
