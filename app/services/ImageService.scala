@@ -23,8 +23,6 @@ class ImageService(s3Client: S3Client, configLoader: ConfigLoader, uuid: UUIDHel
     s3Client.getObject(id.value)
   }
 
-  private def getExtension(filename: String) = filename.substring(filename.lastIndexOf("."))
-
   def createImage(image: FilePart[TemporaryFile]): Future[ImageId] = {
 
     image.ref.file match {
@@ -66,5 +64,5 @@ class ImageService(s3Client: S3Client, configLoader: ConfigLoader, uuid: UUIDHel
 
   def deleteFile(id: ImageId) = s3Client.deleteObject(id.value)
 
-
+  private def getExtension(filename: String) = filename.substring(filename.lastIndexOf("."))
 }

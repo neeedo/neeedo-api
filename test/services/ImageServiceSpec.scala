@@ -32,19 +32,32 @@ class ImageServiceSpec extends Specification with Mockito  {
     val config = Map("upload.max.filesize" -> 1024 * 1024 * 2)
     val configLoader = new ConfigLoader(Configuration.from(config))
 
+    val imageId = ImageId("testUUID.png")
+
     val putObjRes = mock[PutObjectResult]
 
     val s3Client = mock[S3Client]
     s3Client.putObject("testUUID.png", file) returns Future(putObjRes)
+    s3Client.deleteObject(imageId.value) returns Future(Unit)
 
     val uuid = mock[UUIDHelper]
     uuid.random returns "testUUID"
+
 
     val imageService = new ImageService(s3Client, configLoader, uuid)
 
     val contentTypeImage = Option("image/png")
     val contentTypeNoImage = Option("application/json")
 
+  }
+
+  "ImageService.getImageById" should {
+
+    "call s3Client" in new ImageServiceContext {
+      imageService.getImageById(imageId)
+
+      there was one (s3Client).getObject(imageId.value)
+    }
   }
 
   "ImageService.createImage" should {
@@ -66,6 +79,15 @@ class ImageServiceSpec extends Specification with Mockito  {
       filePart.contentType returns contentTypeImage
 
       Await.result(imageService.createImage(filePart), Duration(1, "second")) mustEqual ImageId("testUUID.png")
+    }
+  }
+
+  "ImageService.deleteFile" should {
+
+    "call s3Client" in new ImageServiceContext {
+      imageService.deleteFile(imageId)
+
+      there was one (s3Client).deleteObject(imageId.value)
     }
   }
 
