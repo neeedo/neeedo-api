@@ -1,6 +1,5 @@
 package common.domain
 
-import io.sphere.sdk.customers.Customer
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.PathBindable
 
