@@ -9,12 +9,11 @@ import common.logger.DemandLogger
 import model.{Demand, DemandId}
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.common.unit.DistanceUnit
-import org.elasticsearch.common.xcontent.XContentFactory
 import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
 import org.elasticsearch.search.sort.SortOrder
 import play.api.libs.json.{JsObject, Json}
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -100,7 +99,7 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
   private[es] def processIndexResponse(indexResponse: IndexResponse, demand: Demand) = {
     if (indexResponse.isCreated) {
       for {
-        completion <- esCompletionService.upsertCompletions(demand.mustTags.map(CompletionTag(_)).toList)
+        completion <- esCompletionService.upsertCompletions(demand.mustTags.map(CompletionTag).toList)
         percolator <- createPercolatorDemand(demand)
       } yield demand
     } else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
@@ -120,14 +119,14 @@ class EsDemandService(elasticsearch: ElasticsearchClient,
   private[es] def buildPercolateQuery(demand: Demand) = {
     QueryBuilders.filteredQuery(
       if (demand.shouldTags.isEmpty) QueryBuilders.matchAllQuery()
-      else QueryBuilders.termsQuery("tags", demand.shouldTags.map(_.toLowerCase).asJava),
+      else QueryBuilders.termsQuery("tags", demand.shouldTags.map(_.trim).asJava),
       FilterBuilders.andFilter(
         FilterBuilders
           .geoDistanceFilter("location")
           .distance(demand.distance.value, DistanceUnit.KILOMETERS)
           .point(demand.location.lat.value, demand.location.lon.value),
         FilterBuilders
-          .termsFilter("tags", demand.mustTags.map(_.toLowerCase).asJava)
+          .termsFilter("tags", demand.mustTags.map(_.trim).asJava)
           .execution("and"),
         FilterBuilders
           .rangeFilter("price").from(demand.priceMin.value).to(demand.priceMax.value)

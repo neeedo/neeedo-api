@@ -100,6 +100,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient,
   }
 
   private[es] def buildEsOfferJson(offer: Offer) = {
+    val tags = offer.tags
     Json.obj("completionTags" -> offer.tags, "createdAt" -> timeHelper.now) ++ Json.toJson(offer).as[JsObject]
   }
 }

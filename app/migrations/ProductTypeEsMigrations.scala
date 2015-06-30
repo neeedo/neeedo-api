@@ -1,7 +1,7 @@
 package migrations
 
 import common.domain.IndexName
-import common.elasticsearch.{ElasticsearchClient, EsMapping}
+import common.elasticsearch.{EsSettings, ElasticsearchClient, EsMapping}
 import common.helper.ConfigLoader
 import common.logger.MigrationsLogger
 
@@ -16,12 +16,13 @@ class ProductTypeEsMigrations(elasticsearch: ElasticsearchClient, config: Config
     val offerIndex: IndexName = config.offerIndex
     elasticsearch.waitForGreenStatus.flatMap(green => {
       if (green) {
+
         MigrationsLogger.info("# Elasticsearch cluster status is green")
         for {
           demand <- elasticsearch.createIndex(demandIndex, elasticsearch.buildIndexRequest(
-            demandIndex, EsMapping(demandIndex.toTypeName, "migrations/demand-mapping.json")))
+            demandIndex, EsMapping(demandIndex.toTypeName, "migrations/demand-mapping.json"), EsSettings("migrations/offer-demand-settings.json")))
           offer <- elasticsearch.createIndex(offerIndex, elasticsearch.buildIndexRequest(
-            offerIndex, EsMapping(offerIndex.toTypeName, "migrations/offer-mapping.json")))
+            offerIndex, EsMapping(offerIndex.toTypeName, "migrations/offer-mapping.json"), EsSettings("migrations/offer-demand-settings.json")))
         } yield {
           (demand, offer)
         }

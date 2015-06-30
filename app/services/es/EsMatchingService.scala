@@ -56,8 +56,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
           .distance(d.distance.value, DistanceUnit.KILOMETERS)
           .point(d.location.lat.value, d.location.lon.value),
         FilterBuilders
-          .termsFilter("tags", d.mustTags.map(_.toLowerCase).asJava)
-          .execution("and"),
+          .queryFilter(QueryBuilders.matchQuery("tags", d.mustTags.asJava).operator(MatchQueryBuilder.Operator.AND)),
         FilterBuilders
           .rangeFilter("price").from(d.priceMin.value).to(d.priceMax.value)
       )
@@ -66,8 +65,10 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
 
   private[es] def buildMatchingScoreQuery(d: Demand) = {
     QueryBuilders.functionScoreQuery(
-      if (d.shouldTags.isEmpty) QueryBuilders.matchAllQuery()
-      else QueryBuilders.termsQuery("tags", d.shouldTags.map(_.toLowerCase).asJava),
+      d.shouldTags.foldLeft(QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery())) {
+        case (acc, elem) => acc.should(QueryBuilders.matchQuery("tags", elem))
+      }
+    ).add(
       ScoreFunctionBuilders
         .gaussDecayFunction("createdAt", timeHelper.now, "8h")
         .setDecay(0.75)

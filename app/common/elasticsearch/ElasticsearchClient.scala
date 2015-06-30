@@ -94,16 +94,15 @@ sealed trait ElasticsearchClient {
       .map(res => !res.isTimedOut)
 
   def buildIndexRequest(index: IndexName, mapping: EsMapping): CreateIndexRequestBuilder = {
+    buildIndexRequest(index, mapping, StandardSettings)
+  }
+
+  def buildIndexRequest(index: IndexName, mapping: EsMapping, settings: EsSettings): CreateIndexRequestBuilder = {
     client
       .admin()
       .indices()
       .prepareCreate(index.value)
-      .setSettings(
-        ImmutableSettings.settingsBuilder()
-          .put("number_of_shards", 1)
-          .put("number_of_replicas", 0)
-          .build()
-      )
+      .setSettings(settings.value)
       .addMapping(mapping.name.value, mapping.value)
   }
 }

@@ -33,7 +33,6 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
         Future.sequence {
           users.map {
             user =>
-              println(user)
               val draft = MessageDraft(
                 UserId("Neeedo"),
                 user,
@@ -43,7 +42,6 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
         }
     } recover {
       case e: Exception =>
-        e.printStackTrace()
         List.empty
     }
   }
