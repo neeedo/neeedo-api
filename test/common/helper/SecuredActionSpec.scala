@@ -24,6 +24,11 @@ class SecuredActionSpec extends Specification with Mockito {
 
     val userService = mock[SphereUserService]
     val securedAction = new SecuredAction(userService)
+
+    val validHeader = "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+    val invalidHeader = "QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+
+    val credentials = UserCredentials(Email("Aladdin"), Password("open sesame"))
   }
 
   "SecuredAction" should {
@@ -33,13 +38,11 @@ class SecuredActionSpec extends Specification with Mockito {
     }
 
     "getCredentialsFromAuthHeader must return correct UserCredentials" in new SecuredActionContext {
-      securedAction.getCredentialsFromAuthHeader("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==") must
-        beEqualTo(Option(UserCredentials(Email("Aladdin"), Password("open sesame"))))
+      securedAction.getCredentialsFromAuthHeader(validHeader) mustEqual Option(credentials)
     }
 
     "getCredentialsFromAuthHeader must return none for invalid header" in new SecuredActionContext {
-      securedAction.getCredentialsFromAuthHeader("QWxhZGRpbjpvcGVuIHNlc2FtZQ==") must
-        beEqualTo(None)
+      securedAction.getCredentialsFromAuthHeader(invalidHeader) mustEqual Option.empty[UserCredentials]
     }
 
     "requestAuthorization must return result with WWW_Authenticat header" in new SecuredActionContext {
