@@ -9,7 +9,7 @@ import common.exceptions.{CustomerAlreadyExists, UserNotFound}
 import common.helper.UUIDHelper
 import common.sphere.SphereClient
 import io.sphere.sdk.client.ErrorResponseException
-import io.sphere.sdk.customers.commands.{CustomerCreateCommand, CustomerDeleteCommand}
+import io.sphere.sdk.customers.commands.{CustomerCreateCommand, CustomerDeleteCommand, CustomerSignInCommand}
 import io.sphere.sdk.customers.queries.{CustomerByIdFetch, CustomerQuery}
 import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName, CustomerSignInResult}
 import io.sphere.sdk.models.{SphereError, Versioned}
@@ -33,10 +33,10 @@ class SphereUserServiceSpec extends Specification with Mockito {
     val userId = UserId(uuid.random)
     val email = Email("test@test.com")
     val username = Username("test")
-    val password = "test"
+    val password = Password("test")
     val version = Version(1L)
 
-    val userDraft = UserDraft(username, email, password)
+    val userDraft = UserDraft(username, email, password.value)
     val user = User(userId, version, username, email)
     val userIdAndName = UserIdAndName(userId, username)
 
@@ -50,26 +50,27 @@ class SphereUserServiceSpec extends Specification with Mockito {
     customer.getEmail returns email.value
 
     val customerName = CustomerName.ofFirstAndLastName(username.value, "NonEmpty")
-    val customerDraft = CustomerDraft.of(customerName, email.value, password)
+    val customerDraft = CustomerDraft.of(customerName, email.value, password.value)
 
     val customerByEmailQuery = CustomerQuery.of().byEmail(email.value)
     val customerByIdFetch = CustomerByIdFetch.of(userId.value)
     val customerCreateCommand = CustomerCreateCommand.of(customerDraft)
     val customerDeleteCommand = CustomerDeleteCommand.of(Versioned.of(userId.value, version.value))
+    val customerSignInCommand = CustomerSignInCommand.of(email.value, password.value)
 
     val duplicateFieldException = SphereError.of("DuplicateField", "")
     val customerExistsException = mock[ErrorResponseException]
     val completionException = mock[CompletionException]
     val userNotFound = mock[UserNotFound]
+    val errorResponse = mock[ErrorResponseException]
 
-    completionException.getCause returns userNotFound
   }
 
   "SphereUserService.getUserByEmail" should {
 
     "return Option[User], " +
       "if user with given email exists" in new UserServiceContext {
-      sphereClient.execute(any[CustomerQuery]) returns Future(pagedQueryResult)
+      sphereClient.execute(customerByEmailQuery) returns Future(pagedQueryResult)
       pagedQueryResult.head() returns Optional.of(customer)
 
       Await.result(sphereUserService.getUserByEmail(email),
@@ -80,7 +81,7 @@ class SphereUserServiceSpec extends Specification with Mockito {
 
     "return Option.empty[User], " +
       "if no user with given email exists" in new UserServiceContext {
-      sphereClient.execute(any[CustomerQuery]) returns Future(pagedQueryResult)
+      sphereClient.execute(customerByEmailQuery) returns Future(pagedQueryResult)
       pagedQueryResult.head() returns Optional.empty()
 
       Await.result(sphereUserService.getUserByEmail(email),
@@ -94,7 +95,7 @@ class SphereUserServiceSpec extends Specification with Mockito {
 
     "return UserIdAndName, " +
       "if user with given UserId exists" in new UserServiceContext {
-      sphereClient.execute(any[CustomerByIdFetch]) returns Future(Optional.of(customer))
+      sphereClient.execute(customerByIdFetch) returns Future(Optional.of(customer))
 
       Await.result(sphereUserService.getUserById(userId),
         Duration(1, "second")) mustEqual userIdAndName
@@ -104,7 +105,7 @@ class SphereUserServiceSpec extends Specification with Mockito {
 
     "throw UserNotFound exception, " +
       "if no user with given UserId exists" in new UserServiceContext {
-      sphereClient.execute(any[CustomerByIdFetch]) returns Future(Optional.empty())
+      sphereClient.execute(customerByIdFetch) returns Future(Optional.empty())
 
       Await.result(sphereUserService.getUserById(userId),
         Duration(1, "second")) must throwA[UserNotFound]
@@ -115,7 +116,8 @@ class SphereUserServiceSpec extends Specification with Mockito {
 
   "SphereUserService.createUser" should {
 
-    "return User" in new UserServiceContext {
+    "return User, " +
+      "if sphere can create the user" in new UserServiceContext {
       sphereClient.execute(customerCreateCommand) returns Future(customerSignInResult)
       customerSignInResult.getCustomer returns customer
 
@@ -125,7 +127,8 @@ class SphereUserServiceSpec extends Specification with Mockito {
       there was one (sphereClient).execute(customerCreateCommand)
     }
 
-    "throw CustomerAlreadyExists" in new UserServiceContext {
+    "throw CustomerAlreadyExists, " +
+      "if user already exists" in new UserServiceContext {
       sphereClient.execute(customerCreateCommand) returns Future.failed(customerExistsException)
       customerExistsException.getErrors returns List(duplicateFieldException).asJava
 
@@ -138,7 +141,8 @@ class SphereUserServiceSpec extends Specification with Mockito {
 
   "SphereUserService.deleteUser" should {
 
-    "return User" in new UserServiceContext {
+    "return User, " +
+      "if user was successfully deleted" in new UserServiceContext {
       sphereClient.execute(customerDeleteCommand) returns Future(customer)
 
       Await.result(sphereUserService.deleteUser(userId, version),
@@ -147,13 +151,40 @@ class SphereUserServiceSpec extends Specification with Mockito {
       there was one (sphereClient).execute(customerDeleteCommand)
     }
 
-    "throw UserNotFound exception" in new UserServiceContext {
+    "throw UserNotFound exception, " +
+      "if user was not found" in new UserServiceContext {
       sphereClient.execute(customerDeleteCommand) returns Future.failed(completionException)
+      completionException.getCause returns userNotFound
 
       Await.result(sphereUserService.deleteUser(userId, version),
         Duration(1, "second")) must throwA[UserNotFound]
 
       there was one (sphereClient).execute(customerDeleteCommand)
+    }
+  }
+
+  "SphereUserService.authorizeUser" should {
+
+    "return Option[UserId], " +
+      "if credentials are correct" in new UserServiceContext {
+      sphereClient.execute(customerSignInCommand) returns Future(customerSignInResult)
+      customerSignInResult.getCustomer returns customer
+
+      Await.result(sphereUserService.authorizeUser(UserCredentials(email, password)),
+        Duration(1, "second")) mustEqual Some(userId)
+
+      there was one (sphereClient).execute(customerSignInCommand)
+    }
+
+    "return Option.empty, " +
+      "if credentials are not correct" in new UserServiceContext {
+      sphereClient.execute(customerSignInCommand) returns Future.failed(completionException)
+      completionException.getCause returns errorResponse
+
+      Await.result(sphereUserService.authorizeUser(UserCredentials(email, password)),
+        Duration(1, "second")) mustEqual None
+
+      there was one (sphereClient).execute(customerSignInCommand)
     }
   }
 
