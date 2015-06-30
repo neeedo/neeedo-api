@@ -3,7 +3,7 @@ package services.sphere
 import java.util.concurrent.CompletionException
 
 import common.domain._
-import common.exceptions.{NetworkProblem, UserNotFound}
+import common.exceptions.{CustomerAlreadyExists, NetworkProblem, UserNotFound}
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
 import io.sphere.sdk.customers.commands._
@@ -56,6 +56,9 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
 
     sphereClient.execute(deleteCommand) map {
       customer => userFromCustomer(customer)
+    } recover {
+      case e: CompletionException =>
+        throw new UserNotFound(s"No User with id=${id.value} found")
     }
   }
 

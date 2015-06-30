@@ -1,12 +1,13 @@
 package controllers
 
-import common.domain.{Email, Version, UserDraft, UserId}
+import common.domain.{Email, UserDraft, UserId, Version}
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.sphere.SphereUserService
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import common.helper.ImplicitConversions.ExceptionToResultConverter
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
