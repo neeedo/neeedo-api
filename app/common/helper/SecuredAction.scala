@@ -1,17 +1,15 @@
 package common.helper
 
 import common.domain._
-import common.exceptions.NetworkProblem
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 import org.apache.commons.codec.binary.Base64
 import play.api.http.HeaderNames._
+import play.api.mvc.Results.{Unauthorized, _}
 import play.api.mvc._
-import play.api.mvc.Results.Unauthorized
-import play.api.mvc.Results._
-import common.helper.ImplicitConversions.ExceptionToResultConverter
 import services.sphere.SphereUserService
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SecuredAction(userService: SphereUserService) extends ActionBuilder[SecuredRequest] {
 
@@ -33,7 +31,7 @@ class SecuredAction(userService: SphereUserService) extends ActionBuilder[Secure
           case Some(userId) => block(new SecuredRequest[A](userId, request))
           case None => Future.successful(Forbidden)
         } recover {
-          case e: NetworkProblem => e.asResult
+          case e: Exception => e.asResult
         }
       case _ => requestAuthorization
     }

@@ -3,9 +3,10 @@ package services.sphere
 import java.util.concurrent.CompletionException
 
 import common.domain._
-import common.exceptions.{CustomerAlreadyExists, NetworkProblem, UserNotFound}
+import common.exceptions.UserNotFound
 import common.helper.ImplicitConversions._
 import common.sphere.{CustomerExceptionHandler, SphereClient}
+import io.sphere.sdk.client.ErrorResponseException
 import io.sphere.sdk.customers.commands._
 import io.sphere.sdk.customers.queries.{CustomerByIdFetch, CustomerQuery}
 import io.sphere.sdk.customers.{Customer, CustomerDraft, CustomerName}
@@ -68,9 +69,7 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     sphereClient.execute(signInQuery) map {
       res => Option(UserId(res.getCustomer.getId))
     } recover {
-      case e: CompletionException if e.getMessage.startsWith("java.net.ConnectException") =>
-        throw new NetworkProblem("Network is currently unreachable. Please try again later.")
-      case _ => None
+      case e: CompletionException if e.getCause.isInstanceOf[ErrorResponseException] => None
     }
   }
 
