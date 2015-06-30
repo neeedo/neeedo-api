@@ -34,7 +34,13 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient, config: Conf
       .execute()
       .asScala
 
-    getCompletionsFromSuggestResponse(response) map(CompletionTagResult(_))
+    response
+      .map(res => CompletionTagResult(getCompletionsFromSuggestResponse(res)))
+      .recover {
+        case e: Exception =>
+          e.printStackTrace()
+          throw new ElasticSearchQueryFailed("Failed to get receive tag completions from Elasticsearch")
+      }
   }
 
   private[es] def buildTagCompletionJson(tag: CompletionTag) = {
@@ -61,15 +67,9 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient, config: Conf
     }
   }
 
-  def getCompletionsFromSuggestResponse(resp: Future[SuggestResponse]): Future[List[String]] = {
-    resp.map {
-      res =>
-        val completion: CompletionSuggestion = res.getSuggest.getSuggestion(suggestionName)
-        val entries = completion.getEntries.get(0).getOptions.iterator().asScala.toList
-        entries.map(_.getText.string())
-    } recover {
-      case e: Exception =>
-        throw new ElasticSearchQueryFailed("Failed to get receive tag completions from Elasticsearch")
-    }
+  private[es] def getCompletionsFromSuggestResponse(resp: SuggestResponse): List[String] = {
+    val completion: CompletionSuggestion = resp.getSuggest.getSuggestion(suggestionName)
+    val entries = completion.getEntries.get(0).getOptions.iterator().asScala.toList
+    entries.map(_.getText.string())
   }
 }

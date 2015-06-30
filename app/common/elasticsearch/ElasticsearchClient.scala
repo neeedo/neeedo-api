@@ -1,5 +1,6 @@
 package common.elasticsearch
 
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import common.domain.{IndexName, TypeName}
@@ -121,6 +122,25 @@ class LocalEsClient extends ElasticsearchClient {
   override def createElasticsearchClient(): Client = node.client()
   override def close() = node.close()
 }
+
+class TestEsClient extends ElasticsearchClient {
+  val nodeSettings = ImmutableSettings.settingsBuilder()
+    .classLoader(classOf[Settings].getClassLoader)
+    .put("path.data", "target/es-data/")
+    .build()
+
+  lazy val node: Node = {
+    NodeBuilder
+      .nodeBuilder()
+      .local(true)
+      .clusterName(UUID.randomUUID().toString)
+      .settings(nodeSettings)
+      .node()
+  }
+  override def createElasticsearchClient(): Client = node.client()
+  override def close() = node.close()
+}
+
 
 class RemoteEsClient(configloader: ConfigLoader) extends ElasticsearchClient {
   val clustername = configloader.getStringOpt("elasticsearch.clustername").getOrElse("elasticsearch")

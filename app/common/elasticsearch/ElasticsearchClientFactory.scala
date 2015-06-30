@@ -15,7 +15,7 @@ class ElasticsearchClientFactory(configloader: ConfigLoader) {
       else
         new LocalEsClient
     case Mode.Prod => new RemoteEsClient(configloader)
-    case Mode.Test => new LocalEsClient
+    case Mode.Test => new TestEsClient
   }
 
   private def getInstance = returnClientForMode(Play.current.mode)
