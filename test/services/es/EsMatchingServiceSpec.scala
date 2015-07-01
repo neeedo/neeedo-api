@@ -24,7 +24,7 @@ class EsMatchingServiceSpec extends Specification with Mockito {
     val configLoader = new ConfigLoader(Configuration.from(config))
     val timeStamp = 1434272348084L
     val timeHelperMock = mock[TimeHelper]
-    timeHelperMock.now returns new DateTime(timeStamp)
+    timeHelperMock.now returns new DateTime(DateTimeZone.forID("Europe/Berlin")).withMillis(timeStamp)
     val service = new EsMatchingService(esMock, configLoader, timeHelperMock)
     val demand = Demand(
       DemandId("123-demand"),
