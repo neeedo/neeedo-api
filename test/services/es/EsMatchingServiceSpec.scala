@@ -5,7 +5,7 @@ import common.elasticsearch.{EsSettings, EsMapping, TestEsClient, ElasticsearchC
 import common.helper.{TimeHelper, ConfigLoader}
 import model.{OfferId, Offer, DemandId, Demand}
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeZone, DateTime}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
