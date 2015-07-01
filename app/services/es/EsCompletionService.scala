@@ -38,7 +38,6 @@ class EsCompletionService(elasticsearchClient: ElasticsearchClient, config: Conf
       .map(res => CompletionTagResult(getCompletionsFromSuggestResponse(res)))
       .recover {
         case e: Exception =>
-          e.printStackTrace()
           throw new ElasticSearchQueryFailed("Failed to get receive tag completions from Elasticsearch")
       }
   }

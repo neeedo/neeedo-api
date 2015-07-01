@@ -94,7 +94,7 @@ class EsOfferService(elasticsearch: ElasticsearchClient,
 
   private[es] def parseIndexResponse(indexResponse: IndexResponse, offer: Offer) = {
     if (indexResponse.isCreated) {
-      esCompletionService.upsertCompletions(offer.tags.map(CompletionTag(_)).toList)
+      esCompletionService.upsertCompletions(offer.tags.map(CompletionTag).toList)
       offer
     } else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
   }

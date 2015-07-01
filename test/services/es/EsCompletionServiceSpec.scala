@@ -2,6 +2,7 @@ package services.es
 
 import common.domain.{CompletionTagResult, CompletionTag}
 import common.elasticsearch.{EsMapping, TestEsClient, ElasticsearchClient}
+import common.exceptions.ElasticSearchQueryFailed
 import common.helper.ConfigLoader
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.common.xcontent.{ToXContent, XContentBuilder, XContentFactory}
@@ -22,7 +23,7 @@ class EsCompletionServiceSpec extends Specification with Mockito {
     val completionTag = CompletionTag("Meri")
   }
 
-  trait EsCompletionerviceIntegrationContext extends WithApplication with EsCompletionServiceContext {
+  trait EsCompletionServiceIntegrationContext extends WithApplication with EsCompletionServiceContext {
     val esClient = new TestEsClient()
     val integrationService = new EsCompletionService(esClient, configLoader)
   }
@@ -40,17 +41,17 @@ class EsCompletionServiceSpec extends Specification with Mockito {
       Json.obj("tag" -> Json.obj("input" -> "Meri", "output" -> "Meri", "weight" -> 1))
     }
 
-    "service must add and get completion correctly" in new EsCompletionerviceIntegrationContext {
+    "service must add and get completion correctly" in new EsCompletionServiceIntegrationContext {
       val indexRequest = esClient.buildIndexRequest(
         configLoader.completionsIndex,
         EsMapping(configLoader.completionsIndex.toTypeName, "migrations/completions-mapping.json"))
 
       Await.result(esClient.createIndex(configLoader.completionsIndex, indexRequest), Duration.Inf) must be equalTo
         true
+      Await.result(integrationService.getCompletions(CompletionTag("Mer")), Duration.Inf) must throwA[ElasticSearchQueryFailed]
       Await.result(integrationService.upsertCompletions(List(CompletionTag("Merida"))), Duration.Inf).map {
         resp => resp.isCreated must be equalTo true
       }
-
       esClient.client.admin().indices()
         .refresh(new RefreshRequest(configLoader.completionsIndex.value)).actionGet()
       Await.result(integrationService.getCompletions(CompletionTag("Mer")), Duration.Inf) must be equalTo
