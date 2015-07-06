@@ -16,22 +16,6 @@ import scala.concurrent.Future
 
 class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader, timeHelper: TimeHelper) {
 
-  def matchOffer(pager: Pager, offer: Offer): Future[List[Demand]] = {
-//    val query = buildMatchOfferQuery(offer)
-//
-//    elasticsearch.client
-//      .prepareSearch(config.demandIndex.value)
-//      .setQuery(query)
-//      .setSize(pager.limit)
-//      .setFrom(pager.offset)
-//      .execute()
-//      .asScala
-//      .map {
-//        response => elasticsearch.searchresponseAs[Demand](response)
-//      }
-    ???
-  }
-
   def matchDemand(pager: Pager, demand: Demand): Future[List[Offer]] = {
     val query = buildMatchDemandQuery(demand)
 
@@ -47,7 +31,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
       }
   }
 
-  def buildMatchDemandQuery(d: Demand): QueryBuilder = {
+  private[es] def buildMatchDemandQuery(d: Demand): QueryBuilder = {
     QueryBuilders.filteredQuery(
       buildMatchingScoreQuery(d),
       FilterBuilders.andFilter(
