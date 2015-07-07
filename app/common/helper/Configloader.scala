@@ -25,14 +25,7 @@ class ConfigLoader(config: Configuration) {
     throwIllegalConfigException(key)
   }
 
-  def readIndexFromConfig(key: String): IndexName = {
-    Try {
-      getString(key)
-    } match {
-      case Success(i) => IndexName(i)
-      case Failure(e) => throw e
-    }
-  }
+  def readIndexFromConfig(key: String): IndexName = IndexName(getString(key))
 
   lazy val demandIndex = readIndexFromConfig("demand.typeName")
   lazy val offerIndex = readIndexFromConfig("offer.typeName")
@@ -44,6 +37,7 @@ class ConfigLoader(config: Configuration) {
     val ex = new InvalidConfiguration(s"Missing Config Key: '$key'! " +
       s"Please check your Neeedo API Configuartion. " +
       s"Does your custom-application.conf file exist?")
+
     ConfigLogger.error("Missing Config Key", ex)
     throw ex
   }
