@@ -381,15 +381,14 @@ GET `/favorites/{userId}`
 
 ## Remove Favorite
 ### Resource
-DELETE `/favorites`
+DELETE `/favorites/:userId/:offerId`
 
-### Body
-The request body must contain a valid Favorite json object
+### URL Parameters
 
-    {
-        "userId":"09d31dae-51b1-45e5-a343-56a3462e4053",
-        "offerId": "9dfa3c90-85c8-46ce-b50c-3ecde596bc90"
-    }
+| Name | Mandatory | Value Type |
+| ---- | --------- | ---------- |
+| userId | Mandatory | alphanumeric |
+| offerId | Mandatory | alphanumeric |
 
 ### Response
 200 Ok
