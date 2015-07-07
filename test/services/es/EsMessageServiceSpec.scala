@@ -19,35 +19,38 @@ class EsMessageServiceSpec extends Specification with Mockito {
 
     val u1 = UserId("u1")
     val u2 = UserId("u2")
+
+    val getMessageQueryJson = Json.obj(
+      "filtered" -> Json.obj(
+        "filter" -> Json.obj(
+          "or" -> Json.obj(
+            "filters" -> Json.arr(
+              Json.obj(
+                "and" -> Json.obj(
+                  "filters" -> Json.arr(
+                    Json.obj("term" -> Json.obj("sender.id" -> u1.value)),
+                    Json.obj("term" -> Json.obj("recipient.id" -> u2.value))
+                  )
+                )
+              ),
+              Json.obj(
+                "and" -> Json.obj(
+                  "filters" -> Json.arr(
+                    Json.obj("term" -> Json.obj("sender.id" -> u2.value)),
+                    Json.obj("term" -> Json.obj("recipient.id" -> u1.value))
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
   }
   
   "EsMessageService" should {
-
     "buildQuery should return valid query for userIds" in new EsMessageServiceContext {
-      Json.parse(service.buildGetMessagesQuery(u1, u2).toString) must beEqualTo(
-
-        Json.obj("filtered" -> Json.obj( "filter" -> Json.obj(
-            "or" -> Json.obj(
-              "filters" -> Json.arr(
-                Json.obj(
-                  "and" -> Json.obj(
-                    "filters" -> Json.arr(
-                      Json.obj("term" -> Json.obj("sender.id" -> u1.value)),
-                      Json.obj("term" -> Json.obj("recipient.id" -> u2.value))
-                    )
-                )),
-                Json.obj(
-                  "and" -> Json.obj(
-                    "filters" -> Json.arr(
-                      Json.obj("term" -> Json.obj("sender.id" -> u2.value)),
-                      Json.obj("term" -> Json.obj("recipient.id" -> u1.value))
-                    )
-                ))
-              )
-            )
-        )))
-      )
+      Json.parse(service.buildGetMessagesQuery(u1, u2).toString) mustEqual getMessageQueryJson
     }
-
   }
 }
