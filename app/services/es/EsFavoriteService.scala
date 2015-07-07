@@ -13,11 +13,10 @@ import scala.concurrent.Future
 
 class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader, uuid: UUIDHelper) {
 
-  val index = config.favoritesIndex
-  val typeName = config.favoritesIndex.toTypeName
-
   def addFavorite(favorite: Favorite): Future[Favorite] = {
-    elasticsearch.indexDocument(uuid.random, index, typeName, Json.toJson(favorite)) map {
+    val index = config.favoritesIndex
+
+    elasticsearch.indexDocument(uuid.random, index, index.toTypeName, Json.toJson(favorite)) map {
       result =>
         if(result.isCreated) favorite
         else throw new ElasticSearchIndexFailed("Error while saving favorite in elasticsearch")
@@ -26,7 +25,7 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
 
   def getFavoritesByUser(userId: UserId): Future[List[Favorite]] = {
     elasticsearch.client
-      .prepareSearch(index.value)
+      .prepareSearch(config.favoritesIndex.value)
       .setQuery(QueryBuilders.termQuery("userId", userId.value))
       .execute()
       .asScala
@@ -35,7 +34,7 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
 
   def removeFavorite(favorite: Favorite): Future[Favorite] = {
     elasticsearch.client
-      .prepareDeleteByQuery(index.value)
+      .prepareDeleteByQuery(config.favoritesIndex.value)
       .setQuery(buildDeleteFavoriteQuery(favorite))
       .execute()
       .asScala
