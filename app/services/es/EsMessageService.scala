@@ -7,9 +7,11 @@ import common.elasticsearch.ElasticsearchClient
 import common.exceptions.ElasticSearchIndexFailed
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import common.helper.{ConfigLoader, TimeHelper}
-import model.{OfferId, Message, MessageId}
-import org.elasticsearch.action.get.GetRequest
+import model.{Message, MessageId, OfferId}
+import org.elasticsearch.action.get.{GetRequest, GetResponse}
 import org.elasticsearch.action.index.IndexResponse
+import org.elasticsearch.action.percolate.PercolateResponse
+import org.elasticsearch.action.percolate.PercolateResponse.Match
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.index.engine.DocumentMissingException
 import org.elasticsearch.index.query._
@@ -26,7 +28,7 @@ import scala.concurrent.Future
 class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader, userService: SphereUserService, timeHelper: TimeHelper) {
 
   def alertDemandsFor(offerId: OfferId): Future[List[Message]] = {
-    val usersFuture = getPercolatedDemandIds(offerId)
+    val usersFuture = getPercolatedUserIds(offerId)
     usersFuture flatMap {
       users => Future.sequence {
         users map {
@@ -53,7 +55,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     }
   }
 
-  def getMessagesByUsers(u1: UserId, u2: UserId) = {
+  def getMessagesByUsers(u1: UserId, u2: UserId): Future[List[Message]] = {
     elasticsearch.client
       .prepareSearch(config.messagesIndex.value)
       .setQuery(buildGetMessagesQuery(u1, u2))
@@ -94,34 +96,37 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     }
   }
 
-  private[es] def getPercolatedDemandIds(offerId: OfferId): Future[List[UserId]] = {
-      elasticsearch.client.preparePercolate()
-        .setIndices(config.offerIndex.value)
-        .setGetRequest(
-          new GetRequest(
-            config.offerIndex.value,
-            config.offerIndex.toTypeName.value,
-            offerId.value))
-        .setDocumentType(config.offerIndex.toTypeName.value)
-        .execute()
-        .asScala
-        .flatMap {
-          res => Future.sequence {
-            res.getMatches.toList map {
-              matchedDemand => elasticsearch.client
-                  .prepareGet(
-                    config.demandIndex.value,
-                    config.demandIndex.toTypeName.value,
-                    matchedDemand.getId.string()
-                  )
-                  .execute()
-                  .asScala
-                  .map {
-                    resp => UserId((Json.parse(resp.getSourceAsString) \ "user" \ "id").as[String])
-                  }
-            }
+  private[es] def getPercolatedUserIds(offerId: OfferId): Future[List[UserId]] = {
+      percolate(offerId) flatMap {
+        result => Future.sequence {
+          result.getMatches.toList map {
+            m => getMatchedDemand(m) map parseUserId
           }
+        }
       }
+  }
+
+  private[es] def parseUserId(response: GetResponse) = {
+    UserId((Json.parse(response.getSourceAsString) \ "user" \ "id").as[String])
+  }
+
+  private[es] def getMatchedDemand(matchedDemand: Match): Future[GetResponse] = {
+    elasticsearch.client.prepareGet(
+        config.demandIndex.value,
+        config.demandIndex.toTypeName.value,
+        matchedDemand.getId.string()).execute().asScala
+  }
+
+  private[es] def percolate(offerId: OfferId): Future[PercolateResponse] = {
+    elasticsearch.client.preparePercolate()
+      .setIndices(config.offerIndex.value)
+      .setGetRequest(
+        new GetRequest(
+          config.offerIndex.value,
+          config.offerIndex.toTypeName.value,
+          offerId.value))
+      .setDocumentType(config.offerIndex.toTypeName.value)
+      .execute().asScala
   }
 
   private[es] def getUser(userId: UserId) = {
