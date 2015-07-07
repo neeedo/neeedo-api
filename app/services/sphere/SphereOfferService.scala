@@ -2,8 +2,8 @@ package services.sphere
 
 import java.util.Locale
 
-import common.domain.{OfferDraft, Username, Version}
-import common.exceptions.{MalformedOffer, SphereDeleteFailed, SphereIndexFailed}
+import common.domain._
+import common.exceptions.{UserNotFound, MalformedOffer, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
 import common.logger.OfferLogger
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
@@ -58,14 +58,16 @@ class SphereOfferService(sphereClient:      SphereClient,
       throw new SphereIndexFailed("Error while saving offer in sphere")
     }
 
-    userService.getUserById(draft.uid).flatMap {
-      user =>
+    userService.getUserById(draft.uid) flatMap {
+      userOpt => {
+        val user = userOpt.getOrElse(throw new UserNotFound(s"User with id ${draft.uid} doesn't exist"))
         val productCreateCommand = ProductCreateCommand.of(buildProductDraft(user.name, draft))
         sphereClient.execute(productCreateCommand) map {
-            product => Offer.fromProduct(product).get
+          product => Offer.fromProduct(product).get
+        } recover {
+          case e: Exception => throwAndReportSphereIndexFailed(e)
         }
-    } recover {
-      case e: Exception => throwAndReportSphereIndexFailed(e)
+      }
     }
   }
 

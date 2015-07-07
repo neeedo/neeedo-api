@@ -23,7 +23,8 @@ class UsersController(userService: SphereUserService, securedAction: SecuredActi
 
   def getUserById(id: UserId) = securedAction.async {
     userService.getUserById(id) map {
-      userIdAndName => Ok(Json.toJson(userIdAndName))
+      case Some(userIdAndName) => Ok(Json.toJson(userIdAndName))
+      case None => NotFound
     } recover {
       case e: Exception => e.asResult
     }

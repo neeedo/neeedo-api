@@ -95,7 +95,7 @@ class SphereDemandServiceSpec extends Specification with Mockito {
 
   "SphereDemandService" should {
     "createDemand must throw SphereIndexFailed when SphereClient fails" in new SphereDemandServiceContext {
-      userService.getUserById(any[UserId]) returns Future(user)
+      userService.getUserById(any[UserId]) returns Future(Some(user))
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future.failed(new Exception)
 
       Await.result(service.createDemand(draft), Duration.Inf) must throwA[SphereIndexFailed]
@@ -103,7 +103,7 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     }
 
     "createDemand must return demand when SphereClient succeeds" in new SphereDemandServiceContext {
-      userService.getUserById(any[UserId]) returns Future(user)
+      userService.getUserById(any[UserId]) returns Future(Some(user))
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future(demandProduct)
 
       Await.result(service.createDemand(draft), Duration.Inf) must beEqualTo(demand)
@@ -111,7 +111,7 @@ class SphereDemandServiceSpec extends Specification with Mockito {
     }
 
     "createDemand must throw SphereIndexFailed when SphereClient returns invalid product" in new SphereDemandServiceContext {
-      userService.getUserById(any[UserId]) returns Future(user)
+      userService.getUserById(any[UserId]) returns Future(Some(user))
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future(mockProduct)
 
       Await.result(service.createDemand(draft), Duration.Inf) must throwA[SphereIndexFailed]

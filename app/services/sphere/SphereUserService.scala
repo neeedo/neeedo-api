@@ -29,13 +29,12 @@ class SphereUserService(sphereClient: SphereClient) extends CustomerExceptionHan
     }
   }
 
-  def getUserById(id: UserId): Future[UserIdAndName] = {
+  def getUserById(id: UserId): Future[Option[UserIdAndName]] = {
     val query = CustomerByIdFetch.of(id.value)
 
     sphereClient.execute(query) map {
-      res => res.asScala match {
-        case Some(customer) => userIdAndNameFromCustomer(customer)
-        case None => throw new UserNotFound(s"User with id ${id.value} does not exist")
+      result => result.asScala map {
+        customer => userIdAndNameFromCustomer(customer)
       }
     }
   }

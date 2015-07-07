@@ -3,7 +3,7 @@ package services.sphere
 import java.util.Locale
 
 import common.domain.{DemandDraft, Username, Version}
-import common.exceptions.{MalformedDemand, SphereDeleteFailed, SphereIndexFailed}
+import common.exceptions.{UserNotFound, MalformedDemand, SphereDeleteFailed, SphereIndexFailed}
 import common.helper.ImplicitConversions.OptionConverter
 import common.logger.DemandLogger
 import common.sphere.{ProductTypeDrafts, ProductTypes, SphereClient}
@@ -47,15 +47,16 @@ class SphereDemandService(sphereClient:      SphereClient,
       throw new SphereIndexFailed("Error while saving demand in sphere")
     }
 
-    userService.getUserById(draft.uid).flatMap {
-      user =>
+    userService.getUserById(draft.uid) flatMap {
+      userOpt => {
+        val user = userOpt.getOrElse(throw new UserNotFound(s"User with id ${draft.uid} doesn't exist"))
         val productCreateCommand = ProductCreateCommand.of(buildProductDraft(user.name, draft))
-
         sphereClient.execute(productCreateCommand) map {
           product => Demand.fromProduct(product).get
+        } recover {
+          case e: Exception => throwAndReportSphereIndexFailed(e)
         }
-    } recover {
-      case e: Exception => throwAndReportSphereIndexFailed(e)
+      }
     }
   }
 

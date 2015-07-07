@@ -91,7 +91,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
 
   "SphereOfferService" should {
     "createOffer must throw SphereIndexFailed when SphereClient fails" in new SphereOfferServiceContext {
-      userService.getUserById(any[UserId]) returns Future(user)
+      userService.getUserById(any[UserId]) returns Future(Some(user))
       sphereClientMock.execute(any[ProductCreateCommand]) returns
         Future.failed(new Exception)
 
@@ -100,7 +100,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     }
 
     "createOffer must return offer when SphereClient succeeds" in new SphereOfferServiceContext {
-      userService.getUserById(any[UserId]) returns Future(user)
+      userService.getUserById(any[UserId]) returns Future(Some(user))
       sphereClientMock.execute(any[ProductCreateCommand]) returns Future(offerProduct)
 
       Await.result(service.createOffer(draft), Duration.Inf) must beEqualTo(offer)
@@ -108,7 +108,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
     }
 
     "createOffer must throw SphereIndexFailed when SphereClient returns invalid product" in new SphereOfferServiceContext {
-      userService.getUserById(any[UserId]) returns Future(user)
+      userService.getUserById(any[UserId]) returns Future(Some(user))
       sphereClientMock.execute(any[ProductCreateCommand]) returns
         Future(mockProduct)
 

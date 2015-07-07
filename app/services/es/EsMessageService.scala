@@ -27,22 +27,70 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
 
   def alertDemandsFor(offerId: OfferId): Future[List[Message]] = {
     val usersFuture = getPercolatedDemandIds(offerId)
-    usersFuture.flatMap {
-      users =>
-        users.toString()
-        Future.sequence {
-          users.map {
-            user =>
-              val draft = MessageDraft(
-                UserId("Neeedo"),
-                user,
-                offerId.value)
-              createMessage(draft)
-          }
+    usersFuture flatMap {
+      users => Future.sequence {
+        users map {
+          user => createMessage(MessageDraft(UserId("Neeedo"), user, offerId.value))
         }
+      }
     } recover {
-      case e: Exception =>
-        List.empty
+      case e: Exception => List.empty
+    }
+  }
+
+  def createMessage(draft: MessageDraft): Future[Message] = {
+    val messageFuture = for {
+      recipient <- getUser(draft.recipientId)
+      sender <- getUser(draft.senderId)
+    } yield buildMessage(recipient, sender, draft)
+
+    messageFuture flatMap {
+      message => elasticsearch
+        .indexDocument(message.id.value, config.messagesIndex, config.messagesIndex.toTypeName, Json.toJson(message))
+        .map(parseIndexResponse(_, message))
+    } recover {
+      case e: Exception => throw new ElasticSearchIndexFailed("Could not index Message")
+    }
+  }
+
+  def getMessagesByUsers(u1: UserId, u2: UserId) = {
+    elasticsearch.client
+      .prepareSearch(config.messagesIndex.value)
+      .setQuery(buildGetMessagesQuery(u1, u2))
+      .addSort("_timestamp", SortOrder.DESC)
+      .execute()
+      .asScala
+      .map { response =>
+        elasticsearch.searchresponseAs[Message](response)
+      }
+  }
+
+  def markMessageRead(id: MessageId): Future[Option[MessageId]] = {
+    val index = config.messagesIndex
+    val typeName = config.messagesIndex.toTypeName
+
+    elasticsearch.updateDocument(id.value, index, typeName) map {
+      _ => Option(id)
+    } recover {
+      case e: DocumentMissingException => Option.empty
+    }
+  }
+
+  def getConversationsByUser(id: UserId, read: Boolean): Future[Set[UserIdAndName]] = {
+    val query = elasticsearch.client
+      .prepareSearch(config.messagesIndex.value)
+      .setQuery(buildConversationsQuery(id, read))
+      .addAggregation(AggregationBuilders.terms("sender").field("sender.id").exclude(id.value))
+      .addAggregation(AggregationBuilders.terms("recipient").field("recipient.id").exclude(id.value))
+
+    query.execute()
+      .asScala
+      .flatMap {
+      response => Future.sequence {
+        getUserIdsSearchresponse(response) map {
+          id => getUser(UserId(id))
+        }
+      }
     }
   }
 
@@ -58,69 +106,36 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
         .execute()
         .asScala
         .flatMap {
-          res =>
-            Future.sequence {
-              res.getMatches.toList.map {
-                matchedDemand =>
-                  elasticsearch.client
-                    .prepareGet(
-                      config.demandIndex.value,
-                      config.demandIndex.toTypeName.value,
-                      matchedDemand.getId.string()
-                    )
-                    .execute()
-                    .asScala
-                    .map {
-                      resp =>
-                        UserId((Json.parse(resp.getSourceAsString) \ "user" \ "id").as[String])
-                    }
-              }
+          res => Future.sequence {
+            res.getMatches.toList map {
+              matchedDemand => elasticsearch.client
+                  .prepareGet(
+                    config.demandIndex.value,
+                    config.demandIndex.toTypeName.value,
+                    matchedDemand.getId.string()
+                  )
+                  .execute()
+                  .asScala
+                  .map {
+                    resp => UserId((Json.parse(resp.getSourceAsString) \ "user" \ "id").as[String])
+                  }
             }
+          }
       }
   }
 
-  def createMessage(draft: MessageDraft): Future[Message] = {
-    val index = config.messagesIndex
-    val typeName = config.messagesIndex.toTypeName
-    val message: Future[Message] = for {
-      recipient <- userService.getUserById(draft.recipientId)
-      sender <- if (draft.senderId.value == "Neeedo") Future(UserIdAndName(draft.senderId, Username("Neeedo")))
-        else userService.getUserById(draft.senderId)
-    } yield buildMessage(recipient, sender, draft)
-
-    message.flatMap {
-      mes =>
-        elasticsearch
-          .indexDocument(mes.id.value, index, typeName, Json.toJson(mes))
-          .map(parseIndexResponse(_, mes))
-    } recover {
-      case e: Exception => throw new ElasticSearchIndexFailed("Could not index Message")
+  private[es] def getUser(userId: UserId) = {
+    if (userId.value == "Neeedo") Future(UserIdAndName(userId, Username("Neeedo")))
+    else userService.getUserById(userId) map {
+      senderOpt => senderOpt.getOrElse(UserIdAndName(userId, Username("User deleted")))
     }
   }
 
-  def buildMessage(recipient: UserIdAndName, sender: UserIdAndName, draft: MessageDraft) = {
-    Message(
-      MessageId(UUID.randomUUID.toString),
-      sender,
-      recipient,
-      draft.body,
-      timeHelper.now.getMillis,
-      read = false)
+  private[es] def buildMessage(recipient: UserIdAndName, sender: UserIdAndName, draft: MessageDraft) = {
+    Message(MessageId(UUID.randomUUID.toString), sender, recipient, draft.body, timeHelper.now.getMillis, read = false)
   }
 
-  def getMessagesByUsers(u1: UserId, u2: UserId) = {
-    elasticsearch.client
-      .prepareSearch(config.messagesIndex.value)
-      .setQuery(buildGetMessagesQuery(u1, u2))
-      .addSort("_timestamp", SortOrder.DESC)
-      .execute()
-      .asScala
-      .map { response =>
-        elasticsearch.searchresponseAs[Message](response)
-      }
-  }
-
-  def buildConversationsQuery(id: UserId, read: Boolean) = {
+  private[es] def buildConversationsQuery(id: UserId, read: Boolean) = {
     val filter = FilterBuilders.andFilter(
       FilterBuilders.termFilter("read", read),
       FilterBuilders.orFilter(
@@ -130,30 +145,6 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     )
 
     QueryBuilders.filteredQuery(null, filter)
-  }
-
-  def getConversationsByUser(id: UserId, read: Boolean): Future[Set[UserIdAndName]] = {
-    val query = elasticsearch.client
-      .prepareSearch(config.messagesIndex.value)
-      .setQuery(buildConversationsQuery(id, read))
-      .addAggregation(AggregationBuilders.terms("sender").field("sender.id").exclude(id.value))
-      .addAggregation(AggregationBuilders.terms("recipient").field("recipient.id").exclude(id.value))
-
-    query
-      .execute()
-      .asScala
-      .flatMap {
-        response =>
-          val ids = getUserIdsSearchresponse(response)
-
-          Future.sequence {
-            ids.map {
-              id =>
-                if (id == "Neeedo") Future(UserIdAndName(UserId(id), Username("Neeedo")))
-                else userService.getUserById(UserId(id)).map(u => UserIdAndName(u.id, u.name))
-            }
-          }
-      }
   }
 
   private[es] def getUserIdsSearchresponse(res: SearchResponse): Set[String] = {
@@ -167,22 +158,9 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
   private[es] def getStringListFromAggregation(res: SearchResponse, name: String) =
     res.getAggregations.get[StringTerms](name).getBuckets.asScala.toList.map(_.getKey)
 
-  def markMessageRead(id: MessageId): Future[Option[MessageId]] = {
-    val index = config.messagesIndex
-    val typeName = config.messagesIndex.toTypeName
-
-    elasticsearch.updateDocument(id.value, index, typeName)
-      .map(_ => Option(id))
-      .recover {
-        case e: DocumentMissingException => Option.empty
-      }
-  }
-
   private[es] def parseIndexResponse(indexResponse: IndexResponse, message: Message): Message = {
-      if (indexResponse.isCreated)
-        message
-      else
-        throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
+      if (indexResponse.isCreated) message
+      else throw new ElasticSearchIndexFailed("Elasticsearch IndexResponse is negative")
   }
 
   private[es] def buildGetMessagesQuery(u1: UserId, u2: UserId) = {
@@ -197,5 +175,4 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     val or = new OrFilterBuilder(and1, and2)
     new FilteredQueryBuilder(null, or)
   }
-
 }

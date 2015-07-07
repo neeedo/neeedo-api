@@ -93,22 +93,22 @@ class SphereUserServiceSpec extends Specification with Mockito {
 
   "SphereUserService.getUserById" should {
 
-    "return UserIdAndName, " +
+    "return Some(UserIdAndName), " +
       "if user with given UserId exists" in new UserServiceContext {
       sphereClient.execute(customerByIdFetch) returns Future(Optional.of(customer))
 
       Await.result(sphereUserService.getUserById(userId),
-        Duration(1, "second")) mustEqual userIdAndName
+        Duration(1, "second")) mustEqual Some(userIdAndName)
 
       there was one (sphereClient).execute(customerByIdFetch)
     }
 
-    "throw UserNotFound exception, " +
+    "return None, " +
       "if no user with given UserId exists" in new UserServiceContext {
       sphereClient.execute(customerByIdFetch) returns Future(Optional.empty())
 
       Await.result(sphereUserService.getUserById(userId),
-        Duration(1, "second")) must throwA[UserNotFound]
+        Duration(1, "second")) mustEqual None
 
       there was one (sphereClient).execute(customerByIdFetch)
     }
