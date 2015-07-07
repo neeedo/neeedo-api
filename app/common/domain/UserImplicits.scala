@@ -1,7 +1,6 @@
 package common.domain
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{Json, Writes, JsPath, Reads}
+import play.api.libs.json.{Json, Writes}
 
 trait UserImplicits {
 
