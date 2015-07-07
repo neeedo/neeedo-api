@@ -16,7 +16,7 @@ class UsersController(userService: SphereUserService, securedAction: SecuredActi
 
   def getUserByMail(mail: Email) = securedAction.async {
     userService.getUserByEmail(mail) map {
-      case Some(user) => Ok(Json.toJson(user))
+      case Some(user) => Ok(Json.obj("user" -> Json.toJson(user)))
       case None => NotFound
     }
   }
@@ -35,7 +35,7 @@ class UsersController(userService: SphereUserService, securedAction: SecuredActi
     userDraft match {
       case Success(u) =>
         userService.createUser(u) map {
-          user => Created(Json.toJson(user))
+          user => Created(Json.obj("user" -> Json.toJson(user)))
         } recover {
           case e: Exception => e.asResult
         }
