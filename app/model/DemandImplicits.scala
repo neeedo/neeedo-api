@@ -27,8 +27,8 @@ trait DemandImplicits {
           UserId(uid),
           Username(username)
         ),
-        mustTags.map(x => x.trim).filter(_ != ""),
-        shouldTags.map(x => x.trim).filter(_ != ""),
+        mustTags.filter(_.trim.nonEmpty),
+        shouldTags.filter(_.trim.nonEmpty),
         Location( Longitude(lon), Latitude(lat) ),
         Distance(distance),
         Price(priceMin),

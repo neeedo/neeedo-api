@@ -25,13 +25,13 @@ trait OfferImplicits {
           UserId(uid),
           Username(uname)
         ),
-        tags.map(x => x.trim).filter(_ != ""),
+        tags.filter(_.trim.nonEmpty),
         Location(
           Longitude(lon),
           Latitude(lat)
         ),
         Price(price),
-        images.map(x => x.trim).filter(_ != "")
+        images.filter(_.trim.nonEmpty)
       )
   }
 
