@@ -60,7 +60,7 @@ PUT             /messages/:id               @controllers.MessagesController.mark
 # Favorites
 GET             /favorites/:uid             @controllers.FavoritesController.getFavoritesByUser(uid: common.domain.UserId)
 POST            /favorites                  @controllers.FavoritesController.addFavorite()
-DELETE          /favorites                  @controllers.FavoritesController.removeFavorite()
+DELETE          /favorites/:uid/:oid        @controllers.FavoritesController.removeFavorite(uid: common.domain.UserId, oid: model.OfferId)
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                controllers.Assets.at(path="/public", file)

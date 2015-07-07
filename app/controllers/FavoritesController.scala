@@ -3,6 +3,7 @@ package controllers
 import common.domain.{Favorite, UserId}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import common.helper.{ControllerUtils, SecuredAction}
+import model.OfferId
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import services.FavoriteService
@@ -35,16 +36,12 @@ class FavoritesController(favoritesService: FavoriteService, securedAction: Secu
     }
   }
 
-  def removeFavorite() = securedAction.async { implicit request =>
-    val tryFavorite = bindRequestJsonBody(request)(Favorite.reads)
-
-    tryFavorite match {
-      case Success(favorite) => favoritesService.removeFavorite(favorite) map {
-        fav => Ok(Json.obj("favorite" -> Json.toJson(fav)))
-      } recover {
-        case e: Exception => e.asResult
-      }
-      case Failure(e) => Future(e.asResult)
+  def removeFavorite(userId: UserId, offerId: OfferId) = securedAction.async { implicit request =>
+    val favorite = Favorite(userId, offerId)
+    favoritesService.removeFavorite(favorite) map {
+      fav => Ok(Json.obj("favorite" -> Json.toJson(fav)))
+    } recover {
+      case e: Exception => e.asResult
     }
   }
 
