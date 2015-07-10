@@ -39,7 +39,9 @@ class FavoritesController(favoritesService: FavoriteService, securedAction: Secu
   def removeFavorite(userId: UserId, offerId: OfferId) = securedAction.async { implicit request =>
     val favorite = Favorite(userId, offerId)
     favoritesService.removeFavorite(favorite) map {
-      fav => Ok(Json.obj("favorite" -> Json.toJson(fav)))
+      removed =>
+        if (removed) Ok
+        else NotFound
     } recover {
       case e: Exception => e.asResult
     }

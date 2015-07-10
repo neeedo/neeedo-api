@@ -16,10 +16,12 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
   def addFavorite(favorite: Favorite): Future[Favorite] = {
     val index = config.favoritesIndex
 
-    elasticsearch.indexDocument(uuid.random, index, index.toTypeName, Json.toJson(favorite)) map {
+    elasticsearch.indexDocument(s"${favorite.userId.value}${favorite.offerId}", index, index.toTypeName, Json.toJson(favorite)) map {
       result =>
         if(result.isCreated) favorite
-        else throw new ElasticSearchIndexFailed("Error while saving favorite in elasticsearch")
+        else favorite
+    } recover {
+      case e: Exception => throw new ElasticSearchIndexFailed("Error while saving favorite in elasticsearch")
     }
   }
 
@@ -32,13 +34,11 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
       .map (elasticsearch.searchresponseAs[Favorite])
   }
 
-  def removeFavorite(favorite: Favorite): Future[Favorite] = {
-    elasticsearch.client
-      .prepareDeleteByQuery(config.favoritesIndex.value)
-      .setQuery(buildDeleteFavoriteQuery(favorite))
-      .execute()
-      .asScala
-      .map (_ => favorite)
+  def removeFavorite(favorite: Favorite): Future[Boolean] = {
+    elasticsearch.deleteDocument(
+      s"${favorite.userId.value}${favorite.offerId}",
+      config.favoritesIndex,
+      config.favoritesIndex.toTypeName)
   }
 
   private[es] def buildDeleteFavoriteQuery(favorite: Favorite): BoolQueryBuilder = QueryBuilders.boolQuery()

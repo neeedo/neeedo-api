@@ -106,13 +106,20 @@ class FavoritesControllerSpec extends Specification with Mockito {
       Helpers.contentAsString(res) must equalTo(Json.obj("favorite" -> Json.toJson(favorite)).toString())
     }
 
-    "removeFavorites should return 200 and given favorite as json" in new FavoritesControllerContext {
-      favoritesService.removeFavorite(any[Favorite]) returns Future(favorite)
+    "removeFavorites should return 200 and given a valid favorite id" in new FavoritesControllerContext {
+      favoritesService.removeFavorite(any[Favorite]) returns Future(true)
 
       val res: Future[Result] = controller.removeFavorite(uid, offer1.id)(removeFavoriteFakeRequest)
 
       Helpers.status(res) must equalTo(200)
-      Helpers.contentAsString(res) must equalTo(Json.obj("favorite" -> Json.toJson(favorite)).toString())
+    }
+
+    "removeFavorites should return 404 and given a wrong favorite id" in new FavoritesControllerContext {
+      favoritesService.removeFavorite(any[Favorite]) returns Future(false)
+
+      val res: Future[Result] = controller.removeFavorite(uid, offer1.id)(removeFavoriteFakeRequest)
+
+      Helpers.status(res) must equalTo(404)
     }
 
   }
