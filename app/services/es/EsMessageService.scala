@@ -141,12 +141,15 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
   }
 
   private[es] def buildConversationsQuery(id: UserId, read: Boolean) = {
+    val userFilter =
+      if (read) FilterBuilders.orFilter(
+        FilterBuilders.termFilter("recipient.id", id.value),
+        FilterBuilders.termFilter("sender.id", id.value))
+      else FilterBuilders.termFilter("recipient.id", id.value)
+
     val filter = FilterBuilders.andFilter(
       FilterBuilders.termFilter("read", read),
-      FilterBuilders.orFilter(
-        FilterBuilders.termFilter("recipient.id", id.value),
-        FilterBuilders.termFilter("sender.id", id.value)
-      )
+      userFilter
     )
 
     QueryBuilders.filteredQuery(null, filter)

@@ -2,13 +2,14 @@ package services.es
 
 import common.domain._
 import common.elasticsearch.{EsSettings, EsMapping, TestEsClient, ElasticsearchClient}
+import common.exceptions.ElasticSearchIndexFailed
 import common.helper.{TimeHelper, ConfigLoader}
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.joda.time.{DateTimeZone, DateTime}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import play.api.Configuration
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.WithApplication
 import services.sphere.SphereUserService
 
@@ -76,6 +77,12 @@ class EsMessageServiceSpec extends Specification with Mockito {
       Json.parse(service.buildGetMessagesQuery(u1, u2).toString) mustEqual getMessageQueryJson
     }
 
+    "createMessage should return exception when es fails" in new EsMessageServiceContext {
+      esMock.indexDocument(any[String], any[IndexName], any[TypeName], any[JsValue]) returns Future.failed(new Exception("bla"))
+
+      Await.result(service.createMessage(messageDraft1), Duration.Inf) must throwA[ElasticSearchIndexFailed]
+    }
+
     "createMessage should index message in elasticsearch" in new EsMessageServiceIntegrationContext {
       val indexRequest = esClient.buildIndexRequest(configLoader.messagesIndex, EsMapping(configLoader.messagesIndex.toTypeName, "migrations/messages-mapping.json"))
       Await.result(esClient.createIndex(configLoader.messagesIndex, indexRequest), Duration.Inf) must be equalTo true
@@ -93,6 +100,22 @@ class EsMessageServiceSpec extends Specification with Mockito {
       esClient.client.admin().indices()
         .refresh(new RefreshRequest(configLoader.messagesIndex.value)).actionGet()
       Await.result(integrationService.getMessagesByUsers(u1, u2), Duration.Inf) must be equalTo List(message2, message1)
+    }
+
+    "markMessageRead should mark messages as read in elasticsearch" in new EsMessageServiceIntegrationContext {
+      val indexRequest = esClient.buildIndexRequest(configLoader.messagesIndex, EsMapping(configLoader.messagesIndex.toTypeName, "migrations/messages-mapping.json"))
+      Await.result(esClient.createIndex(configLoader.messagesIndex, indexRequest), Duration.Inf) must be equalTo true
+
+      val message1 = Await.result(integrationService.createMessage(messageDraft1), Duration.Inf)
+      message1.recipient must be equalTo user2
+      message1.sender must be equalTo user1
+      message1.body must be equalTo messageDraft1.body
+      message1.read must beFalse
+
+      Await.result(integrationService.markMessageRead(message1.id), Duration.Inf) must be equalTo Some(message1.id)
+      esClient.client.admin().indices()
+        .refresh(new RefreshRequest(configLoader.messagesIndex.value)).actionGet()
+      Await.result(integrationService.getMessagesByUsers(u1, u2), Duration.Inf) must be equalTo List(message1.copy(read = true))
     }
   }
 }
