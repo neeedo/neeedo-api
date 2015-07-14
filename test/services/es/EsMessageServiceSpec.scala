@@ -4,7 +4,10 @@ import common.domain._
 import common.elasticsearch.{EsSettings, EsMapping, TestEsClient, ElasticsearchClient}
 import common.exceptions.ElasticSearchIndexFailed
 import common.helper.{TimeHelper, ConfigLoader}
+import model.MessageId
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.elasticsearch.index.engine.DocumentMissingException
+import org.elasticsearch.index.shard.ShardId
 import org.joda.time.{DateTimeZone, DateTime}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
@@ -21,12 +24,12 @@ class EsMessageServiceSpec extends Specification with Mockito {
   trait EsMessageServiceContext extends WithApplication {
     val esMock = mock[ElasticsearchClient]
     val userServiceMock = mock[SphereUserService]
-    val config = mock[ConfigLoader]
+    val configLoader = new ConfigLoader(Configuration.from(Map("messagesIndexName" -> "messages")))
     val timeStamp1 = 1434272348072L
     val timeStamp2 = 1434272348084L
     val timeHelperMock = mock[TimeHelper]
     timeHelperMock.now returns new DateTime(DateTimeZone.forID("Europe/Berlin")).withMillis(timeStamp1) thenReturn new DateTime(DateTimeZone.forID("Europe/Berlin")).withMillis(timeStamp2)
-    val service = new EsMessageService(esMock, config, userServiceMock, new TimeHelper)
+    val service = new EsMessageService(esMock, configLoader, userServiceMock, new TimeHelper)
     val u1 = UserId("u1")
     val u2 = UserId("u2")
     val user1 = UserIdAndName(u1, Username("user1"))
@@ -60,7 +63,6 @@ class EsMessageServiceSpec extends Specification with Mockito {
         )
       )
     )
-
     val messageDraft1 = MessageDraft(u1, u2, "Testmessage")
     val messageDraft2 = MessageDraft(u2, u1, "Zweite Message")
   }
@@ -68,7 +70,6 @@ class EsMessageServiceSpec extends Specification with Mockito {
 
   trait EsMessageServiceIntegrationContext extends WithApplication with EsMessageServiceContext {
     val esClient = new TestEsClient()
-    val configLoader = new ConfigLoader(Configuration.from(Map("messagesIndexName" -> "messages")))
     val integrationService = new EsMessageService(esClient, configLoader, userServiceMock, timeHelperMock)
   }
   
@@ -116,6 +117,35 @@ class EsMessageServiceSpec extends Specification with Mockito {
       esClient.client.admin().indices()
         .refresh(new RefreshRequest(configLoader.messagesIndex.value)).actionGet()
       Await.result(integrationService.getMessagesByUsers(u1, u2), Duration.Inf) must be equalTo List(message1.copy(read = true))
+    }
+
+    "markMessageRead should return none when es fails" in new EsMessageServiceContext {
+      esMock.updateDocument(any[String], any[IndexName], any[TypeName]) returns Future.failed(new DocumentMissingException(new ShardId("index", 1), "type", "id"))
+
+      Await.result(service.markMessageRead(MessageId("123")), Duration.Inf) must be equalTo None
+    }
+
+    "getConversationsByUser must return correct conversations" in new EsMessageServiceIntegrationContext {
+      val indexRequest = esClient.buildIndexRequest(configLoader.messagesIndex, EsMapping(configLoader.messagesIndex.toTypeName, "migrations/messages-mapping.json"))
+      Await.result(esClient.createIndex(configLoader.messagesIndex, indexRequest), Duration.Inf) must be equalTo true
+
+      val message = Await.result(integrationService.createMessage(messageDraft1), Duration.Inf)
+      esClient.client.admin().indices()
+        .refresh(new RefreshRequest(configLoader.messagesIndex.value)).actionGet()
+
+      Await.result(integrationService.getConversationsByUser(u1, read = false), Duration.Inf) must be equalTo Set()
+      Await.result(integrationService.getConversationsByUser(u2, read = false), Duration.Inf) must be equalTo Set(user1)
+      Await.result(integrationService.getConversationsByUser(u1, read = true), Duration.Inf) must be equalTo Set(user2)
+      Await.result(integrationService.getConversationsByUser(u2, read = true), Duration.Inf) must be equalTo Set()
+
+      Await.result(integrationService.markMessageRead(message.id), Duration.Inf) must be equalTo Some(message.id)
+      esClient.client.admin().indices().refresh(new RefreshRequest(configLoader.messagesIndex.value)).actionGet()
+
+      Await.result(integrationService.getConversationsByUser(u1, read = false), Duration.Inf) must be equalTo Set()
+      Await.result(integrationService.getConversationsByUser(u2, read = false), Duration.Inf) must be equalTo Set()
+      Await.result(integrationService.getConversationsByUser(u1, read = true), Duration.Inf) must be equalTo Set(user2)
+      Await.result(integrationService.getConversationsByUser(u2, read = true), Duration.Inf) must be equalTo Set(user1)
+
     }
   }
 }
