@@ -59,7 +59,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     elasticsearch.client
       .prepareSearch(config.messagesIndex.value)
       .setQuery(buildGetMessagesQuery(u1, u2))
-      .addSort("_timestamp", SortOrder.DESC)
+      .addSort("timestamp", SortOrder.DESC)
       .execute()
       .asScala
       .map { response =>
