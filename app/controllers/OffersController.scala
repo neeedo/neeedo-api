@@ -2,16 +2,17 @@ package controllers
 
 import common.domain._
 import common.helper.{ControllerUtils, SecuredAction}
+import common.helper.ImplicitConversions.ExceptionToResultConverter
 import model.{Offer, OfferId}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-import services.OfferService
+import services.{ImageService, OfferService}
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.util.{Random, Success, Failure}
-import common.helper.ImplicitConversions.ExceptionToResultConverter
 
-class OffersController(service: OfferService, securedAction: SecuredAction) extends Controller with ControllerUtils {
+class OffersController(service: OfferService, imageService: ImageService, securedAction: SecuredAction) extends Controller with ControllerUtils {
 
   val pagerOffsetDefault = 0
   val pagerLimitDefault = 20
@@ -31,18 +32,21 @@ class OffersController(service: OfferService, securedAction: SecuredAction) exte
 
   def createTestOffer = Action.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
+    val berlinHTW = Location(Longitude(13.525885), Latitude(52.456540))
+    val berlinCenter = Location(Longitude(13.404880), Latitude(52.519242))
 
     offerDraft match {
       case Success(draft) =>
-        val latitude = Random.nextDouble() * (52.675499 - 52.338120) + 52.338120
-        val longitude = Random.nextDouble() * (13.761340 - 13.088400) + 13.088400
-        val location = Location(Longitude(longitude), Latitude(latitude))
-        val testDraft = draft.copy(uid = UserId("e4d755ed-1f95-4b67-8589-ee5001ae1759"), location = location)
+        val location = service.randomLocation(berlinCenter, Distance(15))
+        val images = draft.images.map(url => Await.result(imageService.createImage(url), 10 seconds).value)
+
+        val testDraft = draft.copy(location = location, images = images)
+
         service.createOffer(testDraft) map {
-        offer => Created(Json.obj("offer" -> Json.toJson(offer)))
-      } recover {
-        case e: Exception => e.asResult
-      }
+          offer => Created(Json.obj("offer" -> Json.toJson(offer)))
+        } recover {
+          case e: Exception => e.asResult
+        }
       case Failure(e) => Future(e.asResult)
     }
   }
