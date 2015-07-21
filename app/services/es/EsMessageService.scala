@@ -160,7 +160,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     val sender: List[String] = getStringListFromAggregation(res, "sender")
     val recipient: List[String] = getStringListFromAggregation(res, "recipient")
 
-    sender.union(recipient).toSet
+    sender union recipient toSet
   }
 
 

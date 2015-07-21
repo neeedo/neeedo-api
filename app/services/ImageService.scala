@@ -46,7 +46,7 @@ class ImageService(s3Client: S3Client, configLoader: ConfigLoader, uuid: UUIDHel
         throw new WrongUploadType(s"Only Image files are allowed for upload.")
       case (headers, stream) =>
         val newFilename = UUID.randomUUID + getExtension(url)
-        val tempFile = File.createTempFile(newFilename, null, new File("/Users/Stefan/"))
+        val tempFile = File.createTempFile(newFilename, null, null)
 
         val outputStream = new FileOutputStream(tempFile)
 

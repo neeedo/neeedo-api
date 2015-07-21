@@ -71,6 +71,9 @@ class EsMessageServiceSpec extends Specification with Mockito {
   trait EsMessageServiceIntegrationContext extends WithApplication with EsMessageServiceContext {
     val esClient = new TestEsClient()
     val integrationService = new EsMessageService(esClient, configLoader, userServiceMock, timeHelperMock)
+    val esCompletionServiceMock = mock[EsCompletionService]
+    val offerSerivce = new EsOfferService(esClient, configLoader, esCompletionServiceMock, timeHelperMock)
+    val demandService = new EsDemandService(esClient, configLoader, esCompletionServiceMock, timeHelperMock)
   }
   
   "EsMessageService" should {
@@ -145,6 +148,10 @@ class EsMessageServiceSpec extends Specification with Mockito {
       Await.result(integrationService.getConversationsByUser(u2, read = false), Duration.Inf) must be equalTo Set()
       Await.result(integrationService.getConversationsByUser(u1, read = true), Duration.Inf) must be equalTo Set(user2)
       Await.result(integrationService.getConversationsByUser(u2, read = true), Duration.Inf) must be equalTo Set(user1)
+
+    }
+
+    "alertDemandsFor must return send messages to users with matching demands for one offer" in new EsMessageServiceContext {
 
     }
   }
