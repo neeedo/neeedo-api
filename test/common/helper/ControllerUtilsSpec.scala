@@ -59,10 +59,10 @@ class ControllerUtilsSpec extends Specification {
 
     val draft = OfferDraft(
       userId,
-      Set("Socken"),
+      List("Socken"),
       Location(Longitude(12.2), Latitude(15.5)),
       Price(50.00),
-      Set.empty
+      List.empty
     )
 
     val jsonWithUserId = Json.toJson(draft)

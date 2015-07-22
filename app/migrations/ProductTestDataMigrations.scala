@@ -68,7 +68,7 @@ class ProductTestDataMigrations(sphereClient: SphereClient, demandService: Deman
     Future.sequence(offers.map {
       offer =>
         offerService.createOffer(
-          OfferDraft(user.id, offer.tags, offer.location, offer.price, offer.images))
+          OfferDraft(user.id, offer.tags.toList, offer.location, offer.price, offer.images.toList))
     })
   }
 

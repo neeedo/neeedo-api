@@ -218,10 +218,10 @@ object TestData {
 
   val offerDraft = OfferDraft(
     userId,
-    tags,
+    tags.toList,
     location,
     price,
-    images)
+    images.toList)
 
   val offerDraftJson: JsObject = Json.obj(
     "userId" -> userId.value,

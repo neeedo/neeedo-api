@@ -10,7 +10,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{AnyContent, AnyContentAsEmpty, AnyContentAsJson, Result}
 import play.api.test.Helpers.defaultAwaitTimeout
 import play.api.test.{FakeHeaders, FakeRequest, Helpers, WithApplication}
-import services.OfferService
+import services.{ImageService, OfferService}
 import services.sphere.SphereUserService
 import test.TestData
 
@@ -149,11 +149,12 @@ class OffersControllerSpec extends Specification with Mockito {
   }
 
   trait OffersControllerContext extends WithApplication {
+    val imageService = mock[ImageService]
     val offerService = mock[OfferService]
     val userService = mock[SphereUserService]
     userService.authorizeUser(any[UserCredentials]) returns Future(Some(UserId("abc")))
     val securedAction = new SecuredAction(userService)
-    val ctrl = new OffersController(offerService, securedAction)
+    val ctrl = new OffersController(offerService, imageService, securedAction)
 
     val emptyBodyRequestWithWrongCredentials = new FakeRequest[AnyContent](
       Helpers.POST,
@@ -200,10 +201,10 @@ class OffersControllerSpec extends Specification with Mockito {
 
   val offerDraft = OfferDraft(
     UserId("abc"),
-    Set("Socken Wolle"),
+    List("Socken Wolle"),
     Location(Longitude(12.2), Latitude(15.5)),
     Price(50.00),
-    Set.empty
+    List.empty
   )
 
   val offer = Offer(

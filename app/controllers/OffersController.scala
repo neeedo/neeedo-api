@@ -1,7 +1,7 @@
 package controllers
 
 import common.domain._
-import common.helper.{ControllerUtils, SecuredAction}
+import common.helper.{Locations, ControllerUtils, SecuredAction}
 import common.helper.ImplicitConversions.ExceptionToResultConverter
 import model.{Offer, OfferId}
 import play.api.libs.json.Json
@@ -32,12 +32,10 @@ class OffersController(service: OfferService, imageService: ImageService, secure
 
   def createTestOffer = Action.async { implicit request =>
     val offerDraft = bindRequestJsonBody(request)(OfferDraft.offerDraftReads)
-    val berlinHTW = Location(Longitude(13.525885), Latitude(52.456540))
-    val berlinCenter = Location(Longitude(13.404880), Latitude(52.519242))
 
     offerDraft match {
       case Success(draft) =>
-        val location = service.randomLocation(berlinCenter, Distance(15))
+        val location = service.randomLocation(Locations.berlinCenter, Distance(10))
         val images = draft.images.map(url => Await.result(imageService.createImage(url), 10 seconds).value)
 
         val testDraft = draft.copy(location = location, images = images)

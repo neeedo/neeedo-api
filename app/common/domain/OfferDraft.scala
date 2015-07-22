@@ -7,10 +7,10 @@ import play.api.libs.json._
 
 case class OfferDraft(
   uid: UserId,
-  tags: Set[String],
+  tags: List[String],
   location: Location,
   price: Price,
-  images: Set[String])
+  images: List[String])
 
 object OfferDraft {
 
@@ -18,11 +18,11 @@ object OfferDraft {
 
   implicit val offerDraftReads: Reads[OfferDraft] = (
     (JsPath \ "userId").read[String] and
-    (JsPath \ "tags").read[Set[String]] and
+    (JsPath \ "tags").read[List[String]] and
     (JsPath \ "location" \ "lat").read[Double] and
     (JsPath \ "location" \ "lon").read[Double] and
     (JsPath \ "price").read[Double] and
-    (JsPath \ "images").read[Set[String]]
+    (JsPath \ "images").read[List[String]]
   ) {
     (uid, tags, lat, lon, price, images) =>
       OfferDraft(

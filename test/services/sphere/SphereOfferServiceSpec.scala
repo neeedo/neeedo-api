@@ -39,10 +39,10 @@ class SphereOfferServiceSpec extends Specification with Mockito {
 
     val draft = OfferDraft(
       UserId("abc"),
-      Set("Socken Wolle"),
+      List("Socken Wolle"),
       Location(Longitude(12.2), Latitude(15.5)),
       Price(50.00),
-      Set.empty
+      List.empty
     )
 
     val offer = Offer(
@@ -52,7 +52,7 @@ class SphereOfferServiceSpec extends Specification with Mockito {
         draft.uid,
         username
       ),
-      draft.tags,
+      draft.tags.toSet,
       draft.location,
       draft.price,
       Set("xyz.jpg")
