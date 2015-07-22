@@ -59,7 +59,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     elasticsearch.client
       .prepareSearch(config.messagesIndex.value)
       .setQuery(buildGetMessagesQuery(u1, u2))
-      .addSort("_timestamp", SortOrder.DESC)
+      .addSort("timestamp", SortOrder.DESC)
       .execute()
       .asScala
       .map { response =>
@@ -141,13 +141,17 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
   }
 
   private[es] def buildConversationsQuery(id: UserId, read: Boolean) = {
-    val filter = FilterBuilders.andFilter(
-      FilterBuilders.termFilter("read", read),
-      FilterBuilders.orFilter(
+    val filter =
+      if (read) FilterBuilders.orFilter(
+        FilterBuilders.andFilter(
+          FilterBuilders.termFilter("recipient.id", id.value),
+          FilterBuilders.termFilter("read", read)
+        ),
+        FilterBuilders.termFilter("sender.id", id.value))
+      else FilterBuilders.andFilter(
         FilterBuilders.termFilter("recipient.id", id.value),
-        FilterBuilders.termFilter("sender.id", id.value)
+        FilterBuilders.termFilter("read", read)
       )
-    )
 
     QueryBuilders.filteredQuery(null, filter)
   }
@@ -156,7 +160,7 @@ class EsMessageService(elasticsearch: ElasticsearchClient, config: ConfigLoader,
     val sender: List[String] = getStringListFromAggregation(res, "sender")
     val recipient: List[String] = getStringListFromAggregation(res, "recipient")
 
-    sender.union(recipient).toSet
+    sender union recipient toSet
   }
 
 
