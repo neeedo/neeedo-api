@@ -1,9 +1,12 @@
 package common
 
+import java.util.concurrent.TimeUnit
+
 import com.softwaremill.macwire.MacwireMacros._
 import common.amazon.S3ClientFactory
 import common.elasticsearch.{ElasticsearchClient, ElasticsearchClientFactory}
 import common.helper.{UUIDHelper, TimeHelper, SecuredAction, ConfigLoader}
+import common.logger.MigrationsLogger
 import common.sphere._
 import controllers._
 import migrations._
@@ -11,6 +14,9 @@ import play.api.{Mode, Play}
 import services.es._
 import services.sphere.{SphereDemandService, SphereOfferService, SphereUserService}
 import services._
+
+import scala.concurrent.Await
+import scala.concurrent.duration.FiniteDuration
 
 trait NeeedoModule {
 
@@ -57,18 +63,30 @@ trait NeeedoModule {
   lazy val offerController = wire[OffersController]
   lazy val matchingController = wire[MatchingController]
   lazy val completionController = wire[CompletionController]
-  lazy val staticController = wire[StaticController]
   lazy val userController = wire[UsersController]
   lazy val imagesController = wire[ImagesController]
   lazy val messageController = wire[MessagesController]
   lazy val favoriteController = wire[FavoritesController]
 
   // Migrations
-  lazy val productTypeMigration = wire[ProductTypeMigrations]
+  lazy val productTypeMigration: ProductTypeMigrations = wire[ProductTypeMigrations]
   lazy val productTypeEsMigration = wire[ProductTypeEsMigrations]
   lazy val completionsEsMigration = wire[CompletionsEsMigrations]
   lazy val messagesEsMigration = wire[MessagesEsMigrations]
   lazy val productTestDataMigration = wire[ProductTestDataMigrations]
   lazy val amazons3Migration = wire[AmazonS3Migrations]
   lazy val favoritesEsMigration = wire[FavoritesEsMigrations]
+
+  def onStart() = {
+    MigrationsLogger.info("### Migrations started ###")
+
+    Await.result(productTypeMigration.run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    //    Await.result(wired.lookupSingleOrThrow(classOf[ProductTypeEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    //    Await.result(wired.lookupSingleOrThrow(classOf[CompletionsEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    //    Await.result(wired.lookupSingleOrThrow(classOf[MessagesEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    //    Await.result(wired.lookupSingleOrThrow(classOf[ProductTestDataMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    //    Await.result(wired.lookupSingleOrThrow(classOf[AmazonS3Migrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    //    Await.result(wired.lookupSingleOrThrow(classOf[FavoritesEsMigrations]).run(), new FiniteDuration(30, TimeUnit.SECONDS))
+    MigrationsLogger.info("### Migrations done ###\n")
+  }
 }

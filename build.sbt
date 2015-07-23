@@ -1,6 +1,6 @@
 import com.typesafe.sbt.packager.archetypes.ServerLoader.SystemV
 import com.typesafe.sbt.packager.debian.DebianPlugin
-import play.PlayImport.PlayKeys._
+//import play.PlayImport.PlayKeys._
 
 name := """neeedo-api"""
 
