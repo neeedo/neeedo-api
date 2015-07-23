@@ -1,9 +1,12 @@
 package common.helper
+
+import common.GlobalSettingsOnStart
 import common.amazon.S3ClientFactory
 import common.elasticsearch.{ElasticsearchClient, ElasticsearchClientFactory}
 import common.sphere._
 import controllers._
 import migrations._
+import play.GlobalSettings
 import play.api.{Mode, Play}
 import services._
 import services.es._
@@ -11,6 +14,10 @@ import services.sphere.{SphereUserService, SphereDemandService, SphereOfferServi
 
 trait WireDependencies {
   import com.softwaremill.macwire.MacwireMacros._
+
+
+  // Migration
+  lazy val globalSettingsOnStart = wire[GlobalSettingsOnStart]
 
   // Common
   lazy val configLoader = new ConfigLoader(Play.current.configuration)
