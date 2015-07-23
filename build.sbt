@@ -24,6 +24,10 @@ excludeFilter in (Compile, unmanagedResources) := "es-data"
 
 unmanagedResourceDirectories in Test += baseDirectory.value / "test"
 
+
+routesGenerator := play.routes.compiler.InjectedRoutesGenerator
+
+
 libraryDependencies ++= Seq(
   "org.elasticsearch" % "elasticsearch" % "1.5.0",
   "com.softwaremill.macwire" %% "macros" % "0.7.3",

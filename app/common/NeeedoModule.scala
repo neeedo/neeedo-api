@@ -1,23 +1,18 @@
-package common.helper
+package common
 
-import common.NeeedoApplicationLoader
+import com.softwaremill.macwire.MacwireMacros._
 import common.amazon.S3ClientFactory
 import common.elasticsearch.{ElasticsearchClient, ElasticsearchClientFactory}
+import common.helper.{UUIDHelper, TimeHelper, SecuredAction, ConfigLoader}
 import common.sphere._
 import controllers._
 import migrations._
-import play.GlobalSettings
 import play.api.{Mode, Play}
-import services._
 import services.es._
-import services.sphere.{SphereUserService, SphereDemandService, SphereOfferService}
+import services.sphere.{SphereDemandService, SphereOfferService, SphereUserService}
+import services._
 
-trait WireDependencies {
-  import com.softwaremill.macwire.MacwireMacros._
-
-
-  // Migration
-  lazy val globalSettingsOnStart = wire[NeeedoApplicationLoader]
+trait NeeedoModule {
 
   // Common
   lazy val configLoader = new ConfigLoader(Play.current.configuration)
