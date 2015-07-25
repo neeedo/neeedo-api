@@ -6,11 +6,13 @@ import common.exceptions.ElasticSearchQueryFailed
 import common.helper.ConfigLoader
 import common.helper.ImplicitConversions.ActionListenableFutureConverter
 import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms
 import org.elasticsearch.search.aggregations.bucket.significant.SignificantTerms.Bucket
 import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ChiSquare.ChiSquareBuilder
+import org.elasticsearch.search.aggregations.bucket.significant.heuristics.GND.GNDBuilder
+import org.elasticsearch.search.aggregations.bucket.significant.heuristics.MutualInformation.MutualInformationBuilder
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,11 +42,11 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
   }
 
   private[es] def buildPhraseCompletionQuery(phrase: CompletionPhrase) = {
-    QueryBuilders
-      .matchQuery(modelFieldName, phrase.value.asJava)
-      .minimumShouldMatch(calcShouldMatch(phrase.value.length).toString)
-  }
 
+    phrase.value.foldLeft(QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery())) {
+      (acc, elem) => acc.should(QueryBuilders.matchQuery(modelFieldName, elem))
+    }.minimumNumberShouldMatch(calcShouldMatch(phrase.value.size))
+  }
 
   private[es] def calcShouldMatch(tagsCount: Int): Int =
     (1.5 * Math.log(tagsCount) + 1).toInt

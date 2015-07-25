@@ -63,15 +63,7 @@ class EsSuggestionServiceSpec extends Specification with Mockito {
 
     "buildPhraseCompletionQuery must return correct query" in new EsSuggestionServiceContext {
       val query = service.buildPhraseCompletionQuery(completionPhrase)
-      Json.parse(query.toString) must be equalTo Json.obj("match" ->
-        Json.obj(
-          "completionTags" -> Json.obj(
-            "query" -> completionPhrase.value,
-            "type" -> "boolean",
-            "minimum_should_match" -> completionPhrase.value.length.toString
-          )
-        )
-      )
+      Json.parse(query.toString) must be equalTo Json.parse("{\"bool\":{\"must\":{\"match_all\":{}},\"should\":[{\"match\":{\"completionTags\":{\"query\":\"bla\",\"type\":\"boolean\"}}},{\"match\":{\"completionTags\":{\"query\":\"blub\",\"type\":\"boolean\"}}}],\"minimum_should_match\":\"2\"}}")
     }
 
     "buildAggregation must return correct aggregation" in new EsSuggestionServiceContext {
