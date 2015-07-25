@@ -70,7 +70,7 @@ class EsSuggestionServiceSpec extends Specification with Mockito {
       val builder: XContentBuilder = XContentFactory.jsonBuilder.prettyPrint()
       service.buildAggregation(completionPhrase).toXContent(builder, ToXContent.EMPTY_PARAMS)
 
-      builder.string must be equalTo "\n\"tags\"{\n  \"significant_terms\" : {\n    \"field\" : \"completionTags\",\n    \"size\" : 20,\n    \"min_doc_count\" : 1,\n    \"exclude\" : [ \"bla\", \"blub\" ],\n    \"chi_square\" : {\n      \"include_negatives\" : false,\n      \"background_is_superset\" : false\n    }\n  }\n}"
+      builder.string must be equalTo "\n\"tags\"{\n  \"significant_terms\" : {\n    \"field\" : \"completionTags\",\n    \"size\" : 5,\n    \"min_doc_count\" : 1,\n    \"exclude\" : [ \"bla\", \"blub\" ],\n    \"chi_square\" : {\n      \"include_negatives\" : false,\n      \"background_is_superset\" : false\n    }\n  }\n}"
     }
 
     "getBucketsFromSearchresponse must return correct result" in new EsSuggestionServiceContext {

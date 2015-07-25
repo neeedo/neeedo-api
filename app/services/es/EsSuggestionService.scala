@@ -57,7 +57,7 @@ class EsSuggestionService(elasticsearchClient: ElasticsearchClient, config: Conf
       .field(modelFieldName)
       .minDocCount(1)
       .significanceHeuristic(new ChiSquareBuilder(false, false))
-      .size(20)
+      .size(5)
       .exclude(phrase.value.map(_.toLowerCase).toArray[String])
   }
 
