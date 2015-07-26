@@ -41,7 +41,7 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
           .point(d.location.lat.value, d.location.lon.value),
         FilterBuilders
           .queryFilter(
-            d.mustTags.foldLeft(QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery())) {
+            d.mustTags.foldLeft(QueryBuilders.boolQuery().mustNot(QueryBuilders.termQuery("user.id", d.user.id.value))) {
               case (acc, elem) => acc.must(QueryBuilders.matchQuery("tags", elem).operator(MatchQueryBuilder.Operator.AND))
             }),
         FilterBuilders

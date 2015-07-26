@@ -37,11 +37,21 @@ class EsMatchingServiceSpec extends Specification with Mockito {
       Price(100),
       Price(800))
 
-    val fittingOffer = Offer(
+    val fittingOffer1 = Offer(
       OfferId("123-offer"),
       Version(1L),
-      UserIdAndName(UserId("123-user"), Username("Blub")),
+      UserIdAndName(UserId("1234-user"), Username("Blubbablase")),
       Set("Fahrrad", "Merida"),
+      Location(Longitude(13.37222), Latitude(52.5438)),
+      Price(600),
+      Set()
+    )
+
+    val fittingOffer2 = Offer(
+      OfferId("12345-offer"),
+      Version(1L),
+      UserIdAndName(UserId("meepmeep"), Username("roadrunner")),
+      Set("Fahrrad", "Giant"),
       Location(Longitude(13.37222), Latitude(52.5438)),
       Price(600),
       Set()
@@ -76,6 +86,16 @@ class EsMatchingServiceSpec extends Specification with Mockito {
       Price(650),
       Set()
     )
+
+    val nonFittingOffer4 = Offer(
+      OfferId("1237-offer"),
+      Version(1L),
+      UserIdAndName(UserId("123-user"), Username("Blub")),
+      Set("Fahrrad", "Merida"),
+      Location(Longitude(13.37222), Latitude(52.5438)),
+      Price(600),
+      Set()
+    )
   }
 
   trait EsMatchingServiceIntegrationContext extends WithApplication with EsMatchingServiceContext {
@@ -89,7 +109,7 @@ class EsMatchingServiceSpec extends Specification with Mockito {
 
   "EsMatchingService" should {
 
-    "matchDemand must find fitting offers" in new EsMatchingServiceIntegrationContext {
+    "matchDemand must find fitting offers from all other users except me" in new EsMatchingServiceIntegrationContext {
       Await.result(esClient.createIndex(configLoader.demandIndex, esClient.buildIndexRequest(
         configLoader.demandIndex, EsMapping(configLoader.demandIndex.toTypeName, "migrations/demand-mapping.json"),
         EsSettings("migrations/offer-demand-settings.json"))), Duration.Inf) must be equalTo true
@@ -99,13 +119,15 @@ class EsMatchingServiceSpec extends Specification with Mockito {
 
       Await.result(demandService.createDemand(demand), Duration.Inf) must be equalTo demand
       Await.result(integrationService.matchDemand(Pager(10, 0), demand), Duration.Inf) must be equalTo List()
-      Await.result(offerService.createOffer(fittingOffer), Duration.Inf) must be equalTo fittingOffer
+      Await.result(offerService.createOffer(fittingOffer1), Duration.Inf) must be equalTo fittingOffer1
+      Await.result(offerService.createOffer(fittingOffer2), Duration.Inf) must be equalTo fittingOffer2
       Await.result(offerService.createOffer(nonFittingOffer1), Duration.Inf) must be equalTo nonFittingOffer1
       Await.result(offerService.createOffer(nonFittingOffer2), Duration.Inf) must be equalTo nonFittingOffer2
       Await.result(offerService.createOffer(nonFittingOffer3), Duration.Inf) must be equalTo nonFittingOffer3
+      Await.result(offerService.createOffer(nonFittingOffer4), Duration.Inf) must be equalTo nonFittingOffer4
       esClient.client.admin().indices()
         .refresh(new RefreshRequest(configLoader.demandIndex.value, configLoader.offerIndex.value)).actionGet()
-      Await.result(integrationService.matchDemand(Pager(10, 0), demand), Duration.Inf) must be equalTo List(fittingOffer)
+      Await.result(integrationService.matchDemand(Pager(10, 0), demand), Duration.Inf) must be equalTo List(fittingOffer1, fittingOffer2)
     }
 
     "buildMatchDemandQuery must return correct matchingQuery" in new EsMatchingServiceContext {
@@ -169,16 +191,16 @@ class EsMatchingServiceSpec extends Specification with Mockito {
                   Json.obj(
                     "query" -> Json.obj(
                       "bool" -> Json.obj(
-                        "must" -> Json.arr(
-                          Json.obj("match_all" -> Json.obj()),
-                          Json.obj("match" -> Json.obj(
+                        "must" -> Json.obj("match" -> Json.obj(
                             "tags" -> Json.obj(
                               "query" -> "Fahrrad",
                               "type" -> "boolean",
                               "operator" -> "AND"
                             )
                           )
-                          )
+                        ),
+                        "must_not" -> Json.obj(
+                          "term" -> Json.obj("user.id" -> "123-user")
                         )
                       )
                     )
