@@ -34,13 +34,19 @@ class SphereOfferService(sphereClient:      SphereClient,
   }
 
   def getOffersByIds(ids: List[OfferId]): Future[List[Offer]] = {
-    val predicate = ProductQuery.model().id().isIn(ids.map(_.value).asJava)
-    val query = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
-
-    sphereClient.execute(query) map {
-      result =>
-        result.getResults.asScala.toList.flatMap(o => Offer.fromProduct(o).toOption)
-    }
+//     Currently not working https://github.com/sphereio/sphere-jvm-sdk/issues/620
+//    val predicate = ProductQuery.model().id().isIn(ids.map(_.value).asJava)
+//    val query = ProductQuery.of().byProductType(productTypes.offer).withPredicate(predicate)
+//
+//    sphereClient.execute(query) map {
+//      result =>
+//        result.getResults.asScala.toList.flatMap(o => Offer.fromProduct(o).toOption)
+//    }
+    Future.sequence {
+      ids.map {
+        id => getOfferById(id)
+      }
+    } map(_.flatten)
   }
 
   def getAllOffers: Future[List[Product]] = {

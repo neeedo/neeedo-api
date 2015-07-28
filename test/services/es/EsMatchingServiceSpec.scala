@@ -169,9 +169,9 @@ class EsMatchingServiceSpec extends Specification with Mockito {
                           "lat" -> 52.50838,
                           "lon" -> 13.37722
                         ),
-                        "scale" -> "75.0km",
-                        "decay" -> 0.5,
-                        "offset" -> "1km"
+                        "scale" -> "37.5km",
+                        "decay" -> 0.75,
+                        "offset" -> "15.0km"
                       )
                     )
                   )

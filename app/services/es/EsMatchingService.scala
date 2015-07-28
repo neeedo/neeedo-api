@@ -62,9 +62,9 @@ class EsMatchingService(elasticsearch: ElasticsearchClient, config: ConfigLoader
         .setOffset("4h")
     ).add(
         ScoreFunctionBuilders
-          .gaussDecayFunction("location", new GeoPoint(d.location.lat.value, d.location.lon.value), s"${d.distance.value / 2.0}km")
-          .setDecay(0.5)
-          .setOffset("1km")
+          .gaussDecayFunction("location", new GeoPoint(d.location.lat.value, d.location.lon.value), s"${d.distance.value / 4.0}km")
+          .setDecay(0.75)
+          .setOffset(s"${d.distance.value / 10.0}km")
     ).scoreMode("avg")
   }
 }

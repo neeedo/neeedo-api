@@ -18,8 +18,7 @@ class FavoriteService(esService: EsFavoriteService, sphereService: SphereOfferSe
       favorites =>
         if(favorites.isEmpty)
           Future(List.empty[Offer])
-        else
-          sphereService.getOffersByIds(favorites map (f => f.offerId))
+        else sphereService.getOffersByIds(favorites map (f => f.offerId))
     }
   }
 

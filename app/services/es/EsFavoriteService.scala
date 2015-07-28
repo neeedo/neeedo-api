@@ -16,7 +16,7 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
   def addFavorite(favorite: Favorite): Future[Favorite] = {
     val index = config.favoritesIndex
 
-    elasticsearch.indexDocument(s"${favorite.userId.value}${favorite.offerId}", index, index.toTypeName, Json.toJson(favorite)) map {
+    elasticsearch.indexDocument(s"${favorite.userId.value}${favorite.offerId.value}", index, index.toTypeName, Json.toJson(favorite)) map {
       result =>
         if(result.isCreated) favorite
         else favorite
@@ -36,7 +36,7 @@ class EsFavoriteService(elasticsearch: ElasticsearchClient, config: ConfigLoader
 
   def removeFavorite(favorite: Favorite): Future[Boolean] = {
     elasticsearch.deleteDocument(
-      s"${favorite.userId.value}${favorite.offerId}",
+      s"${favorite.userId.value}${favorite.offerId.value}",
       config.favoritesIndex,
       config.favoritesIndex.toTypeName)
   }

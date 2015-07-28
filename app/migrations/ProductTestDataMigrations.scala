@@ -16,7 +16,8 @@ import services.{DemandService, OfferService}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.util.Success
 
 class ProductTestDataMigrations(sphereClient: SphereClient, demandService: DemandService,
@@ -67,8 +68,13 @@ class ProductTestDataMigrations(sphereClient: SphereClient, demandService: Deman
   def importOffers(offers: List[Offer], user: User): Future[List[Offer]] = {
     Future.sequence(offers.map {
       offer =>
-        offerService.createOffer(
-          OfferDraft(user.id, offer.tags, offer.location, offer.price, offer.images))
+        Future.successful(
+          Await.result(
+            offerService
+              .createOffer(OfferDraft(user.id, offer.tags, offer.location, offer.price, offer.images)),
+            Duration.Inf
+          )
+        )
     })
   }
 
