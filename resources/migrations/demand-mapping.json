@@ -17,14 +17,14 @@
     "mustTags": {
       "type": "string",
       "index": "analyzed",
-      "index_analyzer" : "german",
-      "search_analyzer" : "german"
+      "index_analyzer" : "german-custom",
+      "search_analyzer" : "german-custom"
     },
     "shouldTags": {
       "type": "string",
       "index": "analyzed",
-      "index_analyzer" : "german",
-      "search_analyzer" : "german"
+      "index_analyzer" : "german-custom",
+      "search_analyzer" : "german-custom"
     },
     "completionTags": {
       "type": "string",

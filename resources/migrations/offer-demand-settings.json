@@ -7,7 +7,31 @@
         "tags-demand-offer": {
           "type" : "custom",
           "tokenizer": "keyword",
-          "filter": "lowercase"
+          "filter": ["lowercase"]
+        },
+        "german-custom": {
+          "tokenizer":  "standard",
+          "filter": [
+            "lowercase",
+            "synonym",
+            "german_stop",
+            "german_normalization",
+            "german_stemmer"
+          ]
+        }
+      },
+      "filter" : {
+        "synonym" : {
+          "type" : "synonym",
+          "synonyms_path" : "analysis/synonym.txt"
+        },
+        "german_stop": {
+          "type":       "stop",
+          "stopwords":  "_german_"
+        },
+        "german_stemmer": {
+          "type":       "stemmer",
+          "language":   "light_german"
         }
       }
     }
